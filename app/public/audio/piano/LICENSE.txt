@@ -1,0 +1,1 @@
+Salamander Grand Piano V3 samples by Alexander Holm, CC-BY 3.0 (via Tonejs/audio). Trimmed to 7 s, mono.

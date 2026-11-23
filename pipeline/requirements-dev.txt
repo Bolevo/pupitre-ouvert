@@ -1,0 +1,3 @@
+# The tests (python -m pytest pipeline/tests): what the tools need, and pytest.
+-r requirements.txt
+pytest

@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a2c31" />
+    <meta name="description" content="Comment se servir de Pupitre Ouvert pour apprendre sa partie de chœur : écouter, apprendre, chanter, vérifier une note." />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title>Aide de Pupitre Ouvert</title>
+    <link rel="stylesheet" href="./src/aide/aide.css" />
+  </head>
+  <body>
+    <!-- The help page, offline once the app has been opened (precached). The pictures show the
+         example work, two Bach chorales (public domain). Pictures: tools/help/ (README there).
+         Icons: the app's own (src/ui/Icon.tsx), drawn the same way. -->
+    <svg class="sprite" aria-hidden="true">
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5l13 7.5-13 7.5z" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-speaker-off" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-solo" viewBox="0 0 24 24"><path d="M12 3.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 20.5c0-4 3.1-6.8 7-6.8s7 2.8 7 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-support" viewBox="0 0 24 24"><path d="M2.5 12h.01M6.5 12h.01M10.5 12c1.4-6 3.6-6 5 0s3.6 6 5 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mixer" viewBox="0 0 24 24"><path d="M5 4v16M12 4v16M19 4v16M3 15h4M10 8h4M17 13h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.4 9.4a2.6 2.6 0 1 1 3.7 2.4c-.7.3-1.1.9-1.1 1.6v.5M12 16.9v.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5C10.3 5 7.8 4.5 4 4.5v13c3.8 0 6.3.5 8 2 1.7-1.5 4.2-2 8-2v-13c-3.8 0-6.3.5-8 2zM12 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M6.5 21h11L14.5 3.5h-5zM12 15.5l5.5-9M8.6 15.5h6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mv-prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5L9 12l10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mv-next" viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-stop" viewBox="0 0 24 24"><path d="M5 6l8 6-8 6zM18 6v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-loop" viewBox="0 0 24 24"><path d="M17 3l3 3-3 3M4 12v-1a5 5 0 0 1 5-5h11M7 21l-3-3 3-3M20 12v1a5 5 0 0 1-5 5H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-next" viewBox="0 0 24 24"><path d="M3.5 6l7 6-7 6zM13 6l7 6-7 6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24"><path d="M5 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM12 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM19 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5z" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18.5h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M5 5.5h14a1 1 0 0 1 1 1V15H4V6.5a1 1 0 0 1 1-1zM2 18.5h20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+    </svg>
+
+    <header class="masthead">
+      <a class="brand" href="./" title="Ouvrir Pupitre Ouvert">
+        <img src="./icon.svg" alt="" width="32" height="32" />
+        <span>Pupitre Ouvert</span>
+      </a>
+      <a class="open-app" href="./">Ouvrir l’app</a>
+    </header>
+
+    <section class="hero" aria-labelledby="titre">
+      <div class="hero-text">
+        <h1 id="titre">Apprendre sa partie avec Pupitre Ouvert</h1>
+        <p class="lead">
+          Pupitre Ouvert joue votre partition, voix par voix. Votre ligne défile pendant que la musique avance ; vous pouvez l’écouter seule,
+          ou la couper et chanter à sa place.
+        </p>
+        <p class="hero-links">
+          <a href="#repetition">L’essentiel, en 6 étapes</a>
+          <a href="#partitions">Ajouter vos partitions</a>
+          <a href="#ecran">L’écran en un coup d’œil</a>
+          <a href="#fonctions">Toutes les fonctions</a>
+          <a href="#contact">Nous écrire</a>
+        </p>
+        <p class="platforms">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-phone" /></svg> Android, iPhone</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-laptop" /></svg> Windows, Mac, Linux</span>
+          <span>Dans le navigateur, de préférence Chrome</span>
+        </p>
+      </div>
+      <figure class="hero-video">
+        <div class="phone">
+          <video
+            id="demo-video"
+            src="./src/aide/img/lecture.mp4"
+            poster="./src/aide/img/lecture.webp"
+            width="360"
+            height="780"
+            autoplay
+            muted
+            loop
+            playsinline
+            aria-label="Pupitre Ouvert en lecture sur un téléphone : la mesure jouée s’allume sur la page, la ligne du bas défile"
+          ></video>
+        </div>
+        <figcaption>La mesure jouée s’allume sur la page. En bas, votre voix défile sous le trait orange.</figcaption>
+      </figure>
+    </section>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Sommaire">
+        <p class="toc-title">Sommaire</p>
+        <ol class="toc-list">
+          <li><a href="#repetition">L’essentiel</a></li>
+          <li><a href="#partitions">Vos partitions</a></li>
+          <li><a href="#ecran">L’écran</a></li>
+          <li><a href="#naviguer">Se déplacer</a></li>
+          <li><a href="#ma-voix">Ma voix</a></li>
+          <li><a href="#reglages">Réglages avancés</a></li>
+          <li><a href="#tempo">Tempo</a></li>
+          <li><a href="#metronome">Métronome, fin</a></li>
+          <li><a href="#texte">Apprendre le texte</a></li>
+          <li><a href="#enregistrer">Enregistrer ma voix</a></li>
+          <li><a href="#casque">Casque</a></li>
+          <li><a href="#ordinateur">Ordinateur</a></li>
+          <li><a href="#hors-ligne">Hors ligne</a></li>
+          <li><a href="#questions">Questions</a></li>
+          <li><a href="#droits">Droits d’auteur</a></li>
+          <li><a href="#donnees">Vos données</a></li>
+          <li><a href="#licences">Auteur et licences</a></li>
+          <li><a href="#contact">Nous écrire</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <!-- ===== The typical rehearsal: what most singers need, first ===== -->
+        <section id="repetition" class="block">
+          <h2>L’essentiel, en 6 étapes</h2>
+          <p class="intro">
+            Ces six étapes montrent l’essentiel de Pupitre Ouvert. Les autres fonctions sont décrites plus bas, par thème.
+          </p>
+
+          <ol class="steps">
+            <li class="step">
+              <div class="step-text">
+                <h3>La première fois, choisissez votre voix</h3>
+                <p>
+                  Pupitre Ouvert s’ouvre sur une œuvre d’exemple : deux chorals de Bach. En haut de la ligne du bas, touchez le nom de la voix
+                  suivie, <span class="ctl">Ténor</span> au départ, et choisissez la vôtre. C’est elle que Pupitre Ouvert suivra et mettra en avant,
+                  dans toutes vos partitions.
+                </p>
+                <p>Pour travailler <b>votre</b> partition, ajoutez-la : voir <a href="#partitions">Vos partitions</a>.</p>
+              </div>
+              <figure class="shot phone-shot">
+                <img src="./src/aide/img/voice.webp" width="360" height="780" alt="La ligne du bas avec le menu de la voix suivie ouvert : Soprano, Alto, Ténor, Basse" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Écoutez tout, en suivant votre ligne</h3>
+                <p>
+                  Touchez <span class="ctl icon-only" role="img" aria-label="Lecture"><svg class="ic" aria-hidden="true"><use href="#i-play" /></svg></span>, ou directement une mesure de la page : la musique part de là.
+                </p>
+                <p>
+                  En haut, la <b>partition complète</b> : ce sont les pages de votre partition papier, numérisées telles quelles, avec ses
+                  éventuelles annotations à la main. Ses numéros de page sont ceux du papier : la page 12 dont parle le chef est la page 12 de
+                  Pupitre Ouvert. Elle suit la lecture ; la mesure jouée s’allume, votre portée y est en bleu.
+                </p>
+                <p>
+                  En bas, la <b>ligne de ma voix</b> montre votre partie seule, en grand, avec le texte. Elle défile sous un trait fixe et la note
+                  chantée s’allume en orange. Cette ligne, et la musique que l’on entend, viennent d’une transcription numérique de la partition
+                  (au format MusicXML) : une erreur de note a pu s’y glisser. En cas de doute, la partition papier fait foi
+                  (voir <a href="#partitions">Vos partitions</a> pour corriger l’archive).
+                </p>
+                <p>
+                  Votre voix sonne en clarinette, devant les autres voix en chœur « ah » et le piano : elle ressort sans couvrir l’harmonie.
+                </p>
+              </div>
+              <figure class="shot phone-shot">
+                <img src="./src/aide/img/hero.webp" width="360" height="780" alt="Pupitre Ouvert en lecture : la mesure 6 allumée sur la page, la ligne de la soprano en bas avec les paroles" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Votre voix seule : « Seul »</h3>
+                <p>
+                  Dans la barre du bas, <b>Ma voix</b> a quatre modes. Touchez <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg>Seul</span> : vous n’entendez plus que votre partie.
+                </p>
+                <p>
+                  Trop rapide ? Touchez le tempo <span class="ctl">♩ = 120</span> puis <span class="ctl">−</span> pour ralentir. <span class="ctl icon-only" role="img" aria-label="Réécouter"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> fait réentendre la mesure
+                  précédente avec votre voix seule, puis la musique reprend.
+                </p>
+              </div>
+              <figure class="shot phone-crop-fig">
+                <img class="crop phone-crop" src="./src/aide/img/tempo.webp" width="360" height="310" alt="Le réglage du tempo : moins, plus, et « Revenir au tempo de la partition »" loading="lazy" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Tout sauf votre voix : « Muet »</h3>
+                <p>
+                  Touchez <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg>Muet</span> : tout le chœur joue, sauf votre voix. La ligne du bas continue de défiler.
+                </p>
+                <p>
+                  Entre les deux, <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg>Soutien</span> ne fait sonner que la seconde moitié de chaque note de votre voix : la note
+                  arrive après son début. <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg>Entendre</span> fait tout réentendre.
+                </p>
+                <p class="tip">Sur téléphone, ces quatre boutons n’ont que leur icône : ils sont en bas, entre le tempo et <span class="ctl icon-only" role="img" aria-label="Réglages"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span>.</p>
+              </div>
+              <div class="modes" role="list">
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg><span class="mode-name">Entendre</span><span class="mode-what">tout, votre voix devant</span></div>
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg><span class="mode-name">Seul</span><span class="mode-what">votre voix seulement</span></div>
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg><span class="mode-name">Soutien</span><span class="mode-what">chaque note, à sa seconde moitié</span></div>
+                <div class="mode on" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg><span class="mode-name">Muet</span><span class="mode-what">tout sauf votre voix</span></div>
+              </div>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Entendre une note</h3>
+                <p>
+                  Un doute sur une note ? <b>Appuyez longuement</b> dessus dans la ligne du bas : la musique se met en pause, la note sonne tant que
+                  vous appuyez et son nom s’affiche (ici <b>si♭3</b>). Au lâcher, la lecture reprend là où elle était.
+                </p>
+                <p>Un appui bref fait seulement entendre la note.</p>
+              </div>
+              <figure class="shot phone-crop-fig">
+                <img class="crop phone-crop" src="./src/aide/img/hold.webp" width="360" height="205" alt="Appui long sur une note de la ligne : son nom, si bémol 3, s’affiche au-dessus" loading="lazy" />
+              </figure>
+            </li>
+
+            <li class="step no-shot" id="installer">
+              <div class="step-text">
+                <h3>Installez Pupitre Ouvert sur votre téléphone</h3>
+                <p>
+                  Ajouté à l’écran d’accueil, Pupitre Ouvert s’ouvre comme une application : en plein écran, d’un geste, et sans réseau. Rien n’est
+                  téléchargé d’un magasin d’applications : c’est le navigateur qui le fait.
+                </p>
+                <div class="two">
+                  <div class="card">
+                    <h4>Android (Chrome)</h4>
+                    <ol class="seq">
+                      <li>Ouvrez Pupitre Ouvert dans Chrome.</li>
+                      <li>Touchez le menu <span class="ctl">⋮</span> en haut à droite.</li>
+                      <li>Choisissez « Ajouter à l’écran d’accueil » (ou « Installer l’application »).</li>
+                    </ol>
+                  </div>
+                  <div class="card">
+                    <h4>iPhone (Safari)</h4>
+                    <ol class="seq">
+                      <li>Ouvrez Pupitre Ouvert dans Safari.</li>
+                      <li>Touchez le bouton Partager (le carré avec une flèche vers le haut).</li>
+                      <li>Choisissez « Sur l’écran d’accueil ».</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section id="partitions" class="block">
+          <h2>Vos partitions</h2>
+          <p class="intro">
+            Pupitre Ouvert est livré avec un exemple. Les autres partitions, c’est vous qui les apportez : une <b>archive .zip</b> par œuvre.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h4>Ajouter une partition</h4>
+              <ol class="seq">
+                <li>Touchez la liste des œuvres, en haut à gauche.</li>
+                <li>Choisissez <span class="ctl">Ajouter une partition (.zip)…</span> et désignez le fichier.</li>
+                <li>L’œuvre s’ouvre, et reste dans la liste : inutile de la recharger la prochaine fois, même sans réseau.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h4>Obtenir l’archive de votre partition</h4>
+              <p>
+                L’archive réunit les pages numérisées de votre partition et leur transcription. Une intelligence artificielle qui sait exécuter du
+                code (Claude, ChatGPT…) peut la fabriquer à partir de votre PDF ou de vos photos, en suivant la méthode publiée avec Pupitre
+                Ouvert.
+              </p>
+              <p><a class="open-app" href="./creer.html">Créer l’archive de ma partition</a></p>
+            </div>
+          </div>
+          <ul class="facts">
+            <li>
+              <b>Où est-elle gardée ?</b> Dans le navigateur de cet appareil, et nulle part ailleurs. Sur un autre appareil, ou dans un autre
+              navigateur, ajoutez-la de nouveau. <b>Gardez votre fichier .zip</b> : effacer les données du site, ou désinstaller l’app, retire
+              aussi vos partitions.
+            </li>
+            <li><b>Une version corrigée</b> : ajoutez la nouvelle archive, elle remplace l’ancienne.</li>
+            <li>
+              <b>Retirer une œuvre</b> : ouvrez-la, puis, dans la liste des œuvres, <span class="ctl">Retirer « … »…</span>. Ses enregistrements et la
+              progression de son texte sont effacés avec elle. L’exemple, lui, fait partie de l’app.
+            </li>
+            <li><b>L’archive est refusée ?</b> Pupitre Ouvert dit ce qu’il y manque : transmettez le message à celui, ou à l’IA, qui l’a faite.</li>
+          </ul>
+        </section>
+
+        <!-- ===== Map of the screen ===== -->
+        <section id="ecran" class="block">
+          <h2>L’écran en un coup d’œil</h2>
+          <p class="intro">Tout est sur un seul écran, sans menu. Chaque lettre renvoie à la légende.</p>
+          <div class="map">
+            <figure class="map-figure">
+              <div class="phone pinned">
+                <img src="./src/aide/img/hero.webp" width="360" height="780" alt="L’écran de Pupitre Ouvert sur un téléphone, avec ses zones repérées par des lettres" loading="lazy" />
+                <span class="pin" style="left: 36.4%; top: 1%">A</span>
+                <span class="pin" style="left: 96%; top: 1%">B</span>
+                <span class="pin" style="left: 13.9%; top: 7%">C</span>
+                <span class="pin" style="left: 57%; top: 7.3%">D</span>
+                <span class="pin" style="left: 96%; top: 14.5%">E</span>
+                <span class="pin" style="left: 63.3%; top: 67.8%">F</span>
+                <span class="pin" style="left: 26.7%; top: 75.8%">G</span>
+                <span class="pin" style="left: 96%; top: 79.5%">H</span>
+                <span class="pin" style="left: 26.9%; top: 93.3%">I</span>
+                <span class="pin" style="left: 85.3%; top: 93.5%">J</span>
+                <span class="pin" style="left: 97.8%; top: 93.6%">K</span>
+              </div>
+            </figure>
+            <dl class="legend">
+              <div><dt>A</dt><dd><b>Œuvre</b> : la partition ouverte ; en choisir une autre.</dd></div>
+              <div><dt>B</dt><dd><span class="ctl icon-only" role="img" aria-label="Métronome"><svg class="ic" aria-hidden="true"><use href="#i-metronome" /></svg></span> <b>Métronome</b> et <b>fin du mouvement</b> : arrêter, boucler ou enchaîner.</dd></div>
+              <div><dt>C</dt><dd><span class="ctl icon-only" role="img" aria-label="Fiche"><svg class="ic" aria-hidden="true"><use href="#i-book" /></svg></span> <b>Fiche de l’œuvre</b> : le texte, sa traduction, « Apprendre le texte ».</dd></div>
+              <div><dt>D</dt><dd><b>Mouvements</b> : touchez-en un pour l’ouvrir.</dd></div>
+              <div><dt>E</dt><dd><b>La page</b> : touchez une mesure pour jouer depuis là ; balayez pour tourner la page, pincez pour zoomer.</dd></div>
+              <div><dt>F</dt><dd><b>Navigateur</b> : page et mesure ; touchez le centre pour aller à une mesure.</dd></div>
+              <div><dt>G</dt><dd><b>Voix suivie</b> : touchez pour suivre une autre voix. À côté : la clé, l’armure, la mesure, le ton, et le diapason des sons (la 440 Hz).</dd></div>
+              <div><dt>H</dt><dd><b>Ligne de ma voix</b> : votre partie seule, avec le texte ; touchez une note pour l’entendre.</dd></div>
+              <div><dt>I</dt><dd><span class="ctl icon-only" role="img" aria-label="Réécouter"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> réécouter, <span class="ctl icon-only" role="img" aria-label="Lecture"><svg class="ic" aria-hidden="true"><use href="#i-play" /></svg></span> lecture et pause, <span class="ctl">♩ = 120</span> le tempo.</dd></div>
+              <div><dt>J</dt><dd><b>Ma voix</b> : <svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg> Entendre, <svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg> Muet, <svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg> Seul, <svg class="ic" aria-hidden="true"><use href="#i-support" /></svg> Soutien.</dd></div>
+              <div><dt>K</dt><dd><span class="ctl icon-only" role="img" aria-label="Réglages"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> <b>Réglages</b> : chaque voix et le piano (suivre, solo, muet, volume, instrument), l’affichage, et l’aide.</dd></div>
+            </dl>
+          </div>
+          <figure class="shot wide">
+            <img src="./src/aide/img/desk.webp" width="1366" height="820" alt="Pupitre Ouvert sur un ordinateur : deux pages côte à côte, les réglages dépliés en bas à gauche au-dessus des commandes, la ligne de ma voix à droite des commandes" loading="lazy" />
+            <figcaption>
+              Sur un ordinateur ou une tablette, les pages prennent toute la hauteur. En bas à gauche, les commandes du téléphone (lecture, tempo,
+              Ma voix), avec les réglages dépliés au-dessus ; à droite, la ligne de ma voix. L’aide est le bouton <span class="ctl icon-only" role="img" aria-label="Aide"><svg class="ic" aria-hidden="true"><use href="#i-help" /></svg></span> en
+              haut à droite des pages, au-dessus du curseur de zoom.
+            </figcaption>
+          </figure>
+          <p class="tip">
+            Téléphone tourné sur le côté : la barre du bas propose <b>Ligne</b>, <b>Page</b> ou <b>Les deux</b>, pour afficher la ligne de ma
+            voix seule, la page seule, ou les deux côte à côte.
+          </p>
+        </section>
+
+        <!-- ===== Reference: every function, by topic ===== -->
+        <div id="fonctions" class="ref-head">
+          <h2>Toutes les fonctions</h2>
+          <p class="intro">Par thème, pour retrouver vite ce que l’on cherche.</p>
+        </div>
+
+        <section id="naviguer" class="block ref">
+          <h3>Se déplacer dans la partition</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li><b>Une mesure de la page</b> : la toucher lance la musique depuis cette mesure.</li>
+              <li><b>Tourner les pages</b> : balayer la page du doigt, ou <span class="ctl icon-only" role="img" aria-label="Page précédente"><svg class="ic" aria-hidden="true"><use href="#i-chevron-left" /></svg></span> <span class="ctl icon-only" role="img" aria-label="Page suivante"><svg class="ic" aria-hidden="true"><use href="#i-chevron-right" /></svg></span> dans le navigateur. Pendant la lecture, la page suit toute seule.</li>
+              <li><b>Aller à une mesure</b> : toucher le centre du navigateur (« p. 1 · mes. 6 »), puis taper un numéro de <b>page</b> (celui de la partition papier) ou de <b>mesure</b>. La musique y va sans s’arrêter.</li>
+              <li><span class="ctl icon-only" role="img" aria-label="Début du mouvement"><svg class="ic" aria-hidden="true"><use href="#i-mv-prev" /></svg></span> revient au début du mouvement (déjà au début : au mouvement précédent) ; <span class="ctl icon-only" role="img" aria-label="Mouvement suivant"><svg class="ic" aria-hidden="true"><use href="#i-mv-next" /></svg></span> passe au mouvement suivant.</li>
+              <li><b>Zoomer</b> : pincer la page à deux doigts, puis la déplacer au doigt. Sur ordinateur : le curseur à droite des pages, ou Ctrl + molette là où pointe la souris ; la page agrandie se déplace en la faisant glisser. « Page entière » revient à la taille normale.</li>
+              <li><b>Entrée de votre voix</b> : pendant un long silence, l’en-tête de la ligne annonce « Entrée mesure 17 (dans 3 mesures) ». Le toucher amène la musique une mesure avant.</li>
+            </ul>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/goto.webp" width="360" height="250" alt="La fenêtre « Aller à » : un champ Page, un champ Mesure" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="ma-voix" class="block ref">
+          <h3>Ma voix : les quatre modes</h3>
+          <div class="ref-body single">
+            <table class="table">
+              <thead>
+                <tr><th scope="col">Mode</th><th scope="col">Ce que vous entendez</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg>Entendre</span></th><td>Tout le chœur, votre voix devant.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg>Muet</span></th><td>Tout, sauf votre voix.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg>Seul</span></th><td>Votre voix seulement.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg>Soutien</span></th><td>Chaque note de votre voix, à sa seconde moitié seulement.</td></tr>
+              </tbody>
+            </table>
+            <p class="tip">Sur téléphone, seules les icônes sont affichées.</p>
+          </div>
+        </section>
+
+        <section id="reglages" class="block ref">
+          <h3>Réglages avancés : chaque voix, les sons, l’affichage</h3>
+          <div class="ref-body">
+            <div>
+              <p>
+                Sur téléphone, le bouton <span class="ctl icon-only" role="img" aria-label="Réglages"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> (en bas à droite) les ouvre. Sur ordinateur, ils sont dépliés en bas
+                à gauche, au-dessus des commandes ; <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Réglages</span> les replie. Une ligne par voix, et une pour le piano :
+              </p>
+              <ul class="facts">
+                <li><span class="ctl icon-only" role="img" aria-label="L’œil"><svg class="ic" aria-hidden="true"><use href="#i-eye" /></svg></span> choisit la voix suivie, celle de la ligne du bas. Le piano peut l’être aussi.</li>
+                <li><span class="ctl">S</span> (solo) : n’entendre que cette voix. Plusieurs solos sont possibles : votre voix + le piano, votre voix + l’alto…</li>
+                <li><span class="ctl">M</span> (muet) : couper cette voix.</li>
+                <li><b>Le curseur</b> règle le volume ; un témoin s’allume quand la voix chante. Sur ordinateur, <b>Volume</b>, à côté de <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Réglages</span>, règle le tout.</li>
+                <li><b>L’instrument</b> de chaque voix (voir ci-dessous).</li>
+                <li><b>Tout entendre</b> enlève les solos et les muets ; <b>Réglages par défaut</b> remet aussi les instruments, les volumes, le tempo et l’affichage.</li>
+                <li><b>A A A</b> : la taille de la ligne du bas. <b>Paroles</b> : quel texte afficher, quand l’œuvre en a plusieurs.</li>
+                <li>Sur téléphone, c’est aussi là qu’est l’<span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-help" /></svg>Aide</span>.</li>
+              </ul>
+            </div>
+            <figure class="shot phone-shot">
+              <img src="./src/aide/img/tracks.webp" width="360" height="780" alt="Les réglages ouverts : Soprano suivie (œil), Alto, Ténor, Basse, chacune avec S, M, volume et instrument" loading="lazy" />
+            </figure>
+          </div>
+          <h4 id="instruments">Les instruments</h4>
+          <dl class="instruments">
+            <div><dt>Clarinette</dt><dd>Nette et ronde, elle ressort du chœur : la voix suivie, par défaut.</dd></div>
+            <div><dt>Chœur « ah »</dt><dd>Des voix sur « ah » : les autres voix, par défaut.</dd></div>
+            <div><dt>Nom des notes</dt><dd>Une voix chante le nom de chaque note (do, ré, mi…) à sa hauteur.</dd></div>
+            <div><dt>Marimba</dt><dd>Chaque note frappée puis qui s’éteint : on entend exactement où elle commence.</dd></div>
+            <div><dt>Cordes</dt><dd>Un son tenu et doux.</dd></div>
+            <div><dt>Piano</dt><dd>L’accompagnement, par défaut ; possible aussi pour une voix.</dd></div>
+          </dl>
+          <p class="tip">Les réglages sont gardés par voix et par appareil. Suivre une autre voix la passe en clarinette et remet les autres en « ah ».</p>
+        </section>
+
+        <section id="tempo" class="block ref">
+          <h3>Ralentir ou accélérer</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li>Le tempo de la barre du bas <span class="ctl">♩ = 120</span> est celui de l’endroit joué. Il se colore quand il n’est plus celui de la partition.</li>
+              <li>Le toucher : <span class="ctl">−</span> et <span class="ctl">+</span> par crans de métronome, de 40 % à 200 % du tempo écrit.</li>
+              <li>« Revenir au tempo de la partition » annule le changement. Si la partition change de tempo, l’écart choisi est gardé.</li>
+              <li><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg>Réécouter</span> : rejoue depuis le début de la mesure précédente avec votre voix seule, puis la musique continue normalement.</li>
+            </ul>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/tempo.webp" width="360" height="310" alt="Le réglage du tempo" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="metronome" class="block ref">
+          <h3>Métronome et fin du mouvement</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-metronome" /></svg>Métronome</span> (en haut) : le bouton l’allume ou le coupe. La flèche <span class="ctl icon-only" role="img" aria-label="Flèche"><svg class="ic" aria-hidden="true"><use href="#i-chevron" /></svg></span> choisit ce qu’il bat : les temps de la mesure, le 1er temps seulement, les blanches, les noires ou les croches.</li>
+              <li><b>À la fin du mouvement</b> : <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-stop" /></svg>Arrêt</span>, <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-loop" /></svg>Boucle</span> (le rejouer depuis le début) ou <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-next" /></svg>Enchaîner</span> (passer au suivant). Sur téléphone, ce sont les trois icônes ; une bulle confirme le choix.</li>
+            </ul>
+            <figure class="shot">
+              <img class="crop" src="./src/aide/img/metro.webp" width="526" height="315" alt="Le menu du métronome ouvert, à côté des boutons Arrêt, Boucle, Enchaîner" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="texte" class="block ref">
+          <h3>Le texte : la fiche et « Apprendre le texte »</h3>
+          <p>
+            Le bouton <span class="ctl icon-only" role="img" aria-label="Fiche"><svg class="ic" aria-hidden="true"><use href="#i-book" /></svg></span>, à gauche des mouvements, ouvre la <b>fiche de l’œuvre</b> : pour chaque mouvement, le tempo, le ton, le texte
+            chanté et sa traduction. La musique continue pendant ce temps. « Jouer ce mouvement » l’ouvre et le joue.
+          </p>
+          <figure class="shot wide">
+            <img src="./src/aide/img/memo.webp" width="1366" height="820" alt="« Apprendre le texte » : le texte à trous, la ligne en cours surlignée avec sa traduction" loading="lazy" />
+            <figcaption>« Apprendre le texte » : les mots déjà tapés en noir, ceux qui restent en gris.</figcaption>
+          </figure>
+          <p><b>Apprendre le texte</b> (en haut de la fiche) fait retrouver le texte de mémoire, au clavier, dans l’ordre :</p>
+          <ul class="facts">
+            <li><b>Initiales</b> : tapez la première lettre de chaque mot. <b>Mots</b> : tapez le mot entier.</li>
+            <li><b>Apprendre</b> : une aide par mouvement, de « texte visible » à « aucune ». Elle diminue quand vous réussissez et revient quand vous trébuchez.</li>
+            <li><b>Épreuve</b> : tout est caché ; un score (précision, erreurs, temps) et les mots à revoir.</li>
+            <li>Accents, majuscules et ponctuation ne comptent pas. Entrée ou « ? » montre le mot qui vous échappe.</li>
+            <li>Toucher le titre d’un mouvement y reprend ; <span class="ctl icon-only" role="img" aria-label="Réécouter"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> recommence depuis le début.</li>
+          </ul>
+        </section>
+
+        <section id="enregistrer" class="block ref">
+          <h3>Enregistrer ma voix</h3>
+          <p class="note">
+            <b>Fonction expérimentale.</b> Selon le téléphone, le micro et le casque, le son enregistré peut être de qualité médiocre, ou
+            légèrement décalé par rapport à la musique.
+          </p>
+          <div class="ref-body">
+            <div>
+              <p>
+                Pour vous entendre chanter avec la musique. À activer dans les <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Réglages</span> : « Enregistrer ma voix ». Tant que c’est
+                éteint, le micro n’est jamais demandé.
+              </p>
+              <ul class="facts">
+                <li><span class="ctl icon-only" role="img" aria-label="Enregistrer"><span class="rec-dot" aria-hidden="true"></span></span> lance la musique et enregistre. Tout ce qui arrête ou déplace la musique arrête l’enregistrement et le garde.</li>
+                <li>Une prise par mouvement : la nouvelle remplace l’ancienne. Elle reste sur l’appareil.</li>
+                <li>« Ma voix enregistrée » se réécoute avec la musique, comme une voix de plus, dans tous les modes.</li>
+                <li>Au même tempo seulement : à un autre tempo elle se tait (la toucher remet le tempo de l’enregistrement).</li>
+                <li>Le menu <span class="ctl icon-only" role="img" aria-label="Plus"><svg class="ic" aria-hidden="true"><use href="#i-more" /></svg></span> : volume, choix du micro, décalage (si votre voix est en retard sur la musique), exporter ou importer un fichier .wav, supprimer.</li>
+              </ul>
+            </div>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/rec.webp" width="360" height="205" alt="Le panneau « Enregistrer ma voix » sous la barre de lecture : le bouton rond rouge, « Pas d’enregistrement »" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="casque" class="block ref">
+          <h3>Casque, écran verrouillé, notification</h3>
+          <ul class="facts">
+            <li>Le bouton <b>lecture / pause</b> du casque (filaire ou Bluetooth) arrête et relance Pupitre Ouvert, comme une application de musique.</li>
+            <li>« Suivant » et « précédent » (souvent un double ou un triple appui) : mouvement suivant, début du mouvement.</li>
+            <li>La notification et l’écran verrouillé montrent le mouvement et une barre de progression ; la faire glisser déplace la musique.</li>
+            <li>L’écran reste allumé pendant la répétition.</li>
+            <li>Sur iPhone, Pupitre Ouvert sonne même quand l’interrupteur est sur « silencieux ».</li>
+          </ul>
+        </section>
+
+        <section id="ordinateur" class="block ref">
+          <h3>Sur ordinateur : le clavier</h3>
+          <table class="table keys">
+            <tbody>
+              <tr><th scope="row"><kbd>Espace</kbd></th><td>Lecture / pause</td></tr>
+              <tr><th scope="row"><kbd>←</kbd> <kbd>→</kbd></th><td>Mesure précédente / suivante</td></tr>
+              <tr><th scope="row"><kbd>Page préc.</kbd> <kbd>Page suiv.</kbd></th><td>Tourner les pages</td></tr>
+              <tr><th scope="row"><kbd>Origine</kbd></th><td>Début du mouvement</td></tr>
+              <tr><th scope="row"><kbd>R</kbd></th><td>Réécouter</td></tr>
+              <tr><th scope="row"><kbd>Échap</kbd></th><td>Fermer la fiche ou une fenêtre</td></tr>
+            </tbody>
+          </table>
+          <p class="tip">Dans « Apprendre le texte » : <kbd>Alt</kbd>+<kbd>1</kbd> Initiales, <kbd>Alt</kbd>+<kbd>2</kbd> Mots, <kbd>Alt</kbd>+<kbd>3</kbd> Apprendre ou Épreuve, <kbd>Alt</kbd>+<kbd>↑</kbd> <kbd>↓</kbd> ligne précédente ou suivante, <kbd>Alt</kbd>+<kbd>R</kbd> recommencer.</p>
+        </section>
+
+        <section id="hors-ligne" class="block ref">
+          <h3>Hors ligne et mises à jour</h3>
+          <ul class="facts">
+            <li><b>Sans réseau</b> : une fois ouvert, Pupitre Ouvert marche hors ligne. Un instrument est gardé après sa première écoute : essayez-les une fois avec du réseau.</li>
+            <li><b>Mises à jour</b> : elles arrivent seules, au lancement suivant. La version installée est écrite en bas des Réglages.</li>
+            <li>Pour l’installer sur l’écran d’accueil : <a href="#installer">étape 6 de « L’essentiel »</a>.</li>
+          </ul>
+        </section>
+
+        <section id="questions" class="block ref">
+          <h3>Questions fréquentes</h3>
+          <details>
+            <summary>Je n’entends rien.</summary>
+            <p>
+              Vérifiez le volume du téléphone, puis dans les Réglages qu’aucune voix n’est en muet ou en solo par erreur : <b>Tout entendre</b> remet
+              tout le monde. Au tout premier lancement, les sons se chargent quelques secondes.
+            </p>
+          </details>
+          <details>
+            <summary>Avec mon casque Bluetooth, le son est en retard.</summary>
+            <p>
+              Le Bluetooth ajoute toujours un retard. L’affichage tient compte de celui que le téléphone annonce : la note allumée suit ce que
+              vous entendez. Pour chanter en même temps que la musique, un casque filaire ou le haut-parleur du téléphone donnent le moins de
+              retard. Pour un enregistrement, le réglage « Décalage » du menu <span class="ctl icon-only" role="img" aria-label="Plus"><svg class="ic" aria-hidden="true"><use href="#i-more" /></svg></span> recale votre voix.
+            </p>
+          </details>
+          <details>
+            <summary>Comment suivre une autre voix, ou le piano ?</summary>
+            <p>Touchez le nom de la voix suivie en haut de la ligne du bas, ou l’<span class="ctl icon-only" role="img" aria-label="L’œil"><svg class="ic" aria-hidden="true"><use href="#i-eye" /></svg></span> d’une autre voix, dans les Réglages.</p>
+          </details>
+          <details>
+            <summary>J’ai changé trop de réglages.</summary>
+            <p>En bas des Réglages, <b>Réglages par défaut</b> (confirmez d’un second appui) remet tout comme au premier jour, sauf la voix suivie.</p>
+          </details>
+          <details>
+            <summary>Ai-je la dernière version ?</summary>
+            <p>
+              La version est écrite en bas des Réglages, avec sa date. Pupitre Ouvert se met à jour seul : fermez-le et rouvrez-le pour prendre la plus
+              récente.
+            </p>
+          </details>
+          <details>
+            <summary>Comment travailler ma propre partition ?</summary>
+            <p>
+              En l’ajoutant sous la forme d’une archive .zip : voir <a href="#partitions">Vos partitions</a>. Les images de cette aide montrent
+              l’œuvre d’exemple, deux chorals de Bach, libres de droits.
+            </p>
+          </details>
+          <details>
+            <summary>Une note jouée ne correspond pas à ma partition.</summary>
+            <p>
+              La musique vient de la transcription contenue dans l’archive, et une erreur a pu s’y glisser : la partition papier fait foi. Notez
+              le mouvement, la mesure et la voix, et faites corriger l’archive par celui, ou par l’IA, qui l’a faite ; la nouvelle archive remplace
+              l’ancienne (<a href="#partitions">Vos partitions</a>).
+            </p>
+          </details>
+          <details>
+            <summary>J’ai trouvé un bug.</summary>
+            <p>Merci de le signaler (<a href="#contact">Nous écrire</a>) ; une capture d’écran et le numéro de version, en bas des Réglages, aident beaucoup.</p>
+          </details>
+        </section>
+
+        <!-- ===== About: copyright, data, licences, contact ===== -->
+        <section id="droits" class="block ref">
+          <h3>Droits d’auteur</h3>
+          <p>
+            Une œuvre ancienne est libre, mais son édition (la gravure des pages, la réduction pour piano, une traduction) est souvent
+            protégée. Pupitre Ouvert est fait pour que cela reste simple :
+          </p>
+          <ul class="facts">
+            <li>Vos partitions <b>restent sur votre appareil</b> : l’archive que vous ajoutez n’est envoyée à personne, ni à ce site, ni ailleurs.</li>
+            <li>Une archive contient les images de votre partition : elle est faite pour <b>votre usage personnel</b>, répéter votre partie. Ne la diffusez pas si l’édition est protégée.</li>
+            <li>L’œuvre d’exemple et les images de cette aide sont libres de droits (chorals de Bach, pages gravées pour l’occasion).</li>
+          </ul>
+        </section>
+
+        <section id="donnees" class="block ref">
+          <h3>Vos données</h3>
+          <ul class="facts">
+            <li><b>Pas de compte, pas de publicité, pas de mesure d’audience.</b> Pupitre Ouvert ne collecte rien sur vous.</li>
+            <li>
+              <b>Ce qui se télécharge</b> : uniquement depuis le site de Pupitre Ouvert (hébergé par GitHub Pages) : l’application, l’œuvre
+              d’exemple, les sons des instruments. Aucun autre site n’est contacté. Comme pour tout site, l’hébergeur voit ces téléchargements
+              (votre adresse IP).
+            </li>
+            <li>
+              <b>Ce qui reste sur l’appareil</b> : vos réglages, les partitions que vous avez ajoutées, votre progression dans « Apprendre le
+              texte » et vos enregistrements. Rien de cela n’est envoyé. Effacer les données du
+              site dans le navigateur, ou retirer l’application, les supprime.
+            </li>
+            <li><b>Le micro</b> ne sert qu’à « Enregistrer ma voix », si vous l’activez, et seulement pendant un enregistrement.</li>
+            <li><b>Rien n’est installé d’ailleurs</b> : l’installation sur l’écran d’accueil est une fonction du navigateur, et les mises à jour viennent du même site.</li>
+          </ul>
+        </section>
+
+        <section id="licences" class="block ref">
+          <h3>Auteur et licences</h3>
+          <p>
+            Pupitre Ouvert a été créé par Alexis Michenaud-Rague. Il a été développé avec Claude, l’intelligence artificielle d’Anthropic, et ses agents :
+            ils ont écrit le code de l’app et les scripts qui transcrivent les partitions, mené les vérifications et les tests, et suivi le
+            développement. L’app elle-même ne fait appel à aucune intelligence artificielle : tout se passe sur votre appareil.
+          </p>
+          <p>
+            Pupitre Ouvert est gratuit et sans but commercial. C’est la version ouverte de Pupitre, l’app d’un chœur : la même app, où chacun
+            apporte ses partitions. Son code et ses outils sont publics :
+            <a href="https://github.com/Bolevo/pupitre-ouvert">github.com/Bolevo/pupitre-ouvert</a>.
+          </p>
+          <h4>Comment c’est fait</h4>
+          <p>
+            Chaque œuvre réunit deux choses : les pages numérisées de la partition papier, affichées telles quelles, et leur transcription
+            au format MusicXML (les notes, les rythmes et le texte de chaque voix). Pupitre Ouvert joue la transcription, en dessine la ligne de
+            votre voix et la relie, mesure par mesure, aux pages. Le tout forme un fichier par œuvre : l’archive .zip
+            (<a href="./creer.html">comment la créer</a>).
+          </p>
+          <p>
+            Pour le reste, Pupitre Ouvert s’appuie sur des bibliothèques de code libres et sur des sons et des polices sous licence libre. Ce sont des
+            fichiers livrés avec l’app et utilisés sur votre appareil, pas des services en ligne :
+          </p>
+          <table class="table credits">
+            <thead>
+              <tr><th scope="col">Bibliothèque ou fichier</th><th scope="col">Sert à</th><th scope="col">Licence</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Verovio</th><td>Dessiner la ligne de ma voix</td><td>LGPL 3.0 ou ultérieure</td></tr>
+              <tr><th scope="row">Preact, Preact Signals</th><td>L’interface</td><td>MIT</td></tr>
+              <tr><th scope="row">fflate</th><td>Ouvrir les fichiers .zip</td><td>MIT</td></tr>
+              <tr><th scope="row">idb-keyval</th><td>Garder les données sur l’appareil</td><td>Apache 2.0</td></tr>
+              <tr><th scope="row">Workbox (vite-plugin-pwa)</th><td>Le fonctionnement hors ligne</td><td>MIT</td></tr>
+              <tr><th scope="row">Atkinson Hyperlegible, Tinos</th><td>Les polices de caractères</td><td>SIL OFL 1.1</td></tr>
+              <tr><th scope="row">Salamander Grand Piano V3 (Alexander Holm)</th><td>Le piano</td><td>CC BY 3.0</td></tr>
+              <tr><th scope="row">MuseScore General (S. Christian Collins, d’après FluidR3 de Frank Wen)</th><td>Le chœur « ah », les cordes</td><td>MIT</td></tr>
+              <tr><th scope="row">Voix MBROLA fr1 (Faculté polytechnique de Mons) et fr4 (Babel Technologies)</th><td>Le nom des notes (sons produits avec MBROLA et le vocodeur WORLD)</td><td>Usage non commercial</td></tr>
+              <tr><th scope="row">Corpus music21</th><td>Les chorals de Bach de cette aide</td><td>Domaine public</td></tr>
+            </tbody>
+          </table>
+          <p class="tip">Le site est hébergé par GitHub Pages (GitHub, Inc.).</p>
+        </section>
+
+        <section id="contact" class="block ref">
+          <h3>Nous écrire</h3>
+          <p>Un bug, une idée de fonction, une question : écrivez à</p>
+          <p class="mail-line"><a href="mailto:bolevo.contact@gmail.com">bolevo.contact@gmail.com</a></p>
+          <p class="tip">
+            Pour un bug : ce qui s’est passé, une capture d’écran, et la version de Pupitre Ouvert (en bas des Réglages). Le code est public :
+            un défaut peut aussi être signalé, ou corrigé, sur
+            <a href="https://github.com/Bolevo/pupitre-ouvert/issues">GitHub</a>.
+          </p>
+        </section>
+
+        <footer class="end">
+          <a class="open-app big" href="./">Ouvrir Pupitre Ouvert</a>
+          <a href="#titre">Revenir en haut</a>
+        </footer>
+      </main>
+    </div>
+
+    <script type="module" src="./src/aide/aide.ts"></script>
+  </body>
+</html>

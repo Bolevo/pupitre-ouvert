@@ -1,0 +1,31 @@
+Nom des notes (sung note names) - sources and licenses
+=======================================================
+
+Every file in this folder was synthesised by tools/make_solfege.py with:
+
+* MBROLA speech synthesizer, https://github.com/numediart/MBROLA (commit 274dead162f2826dc38c208fba92efeddb724c33)
+  License: GNU Affero General Public License v3.0. Only the program's output is stored here.
+
+* MBROLA French diphone voices, https://github.com/numediart/MBROLA-voices (commit fe05a0ccef6a941207fd6aaad0b31294a1f93a51)
+  - fr1 (files *_m_*): French male voice, (c) 1998 Faculte Polytechnique de Mons -
+    TCTS lab (Thierry Dutoit).
+  - fr4 (files *_f_*): French female voice, (c) Faculte Polytechnique de Mons;
+    original diphone database (c) Babel Technologies SA, Belgium.
+  Terms (MBROLA-voices LICENSE.md and each voice's licence): "Permission is granted to use this
+  database for synthesizing speech with and only with MBROLA program made available from the
+  MBROLA project web page [...] this database may not be sold or incorporated into any product
+  which is sold without prior permission from the particular author of the voice database file.
+  When no charge is made, this database may be copied and distributed freely, provided that
+  this notice is copied and distributed with it." The databases carry no warranty.
+
+* WORLD vocoder (M. Morise, modified BSD licence) through pyworld (MIT): analysis and synthesis
+  of MBROLA's output. Only the result is stored here.
+
+Use here: NON-COMMERCIAL ONLY. These sounds are speech synthesised with the MBROLA program from
+those databases, for a personal, free choir-practice tool (Pupitre). They must not be sold or
+included in a product that is sold without permission from the voice authors (fr1: Faculte
+Polytechnique de Mons / T. Dutoit; fr4: Babel Technologies, now Acapela Group).
+
+Processing: MBROLA renders each name once per voice, at a flat pitch in the voice's speaking
+range; from WORLD's analysis of it each note is synthesised at its exact pitch, the first formant
+kept above that pitch; the consonant is levelled against the vowel; trimmed, faded, 16-bit FLAC.

@@ -1,0 +1,817 @@
+/* The help page (aide.html). The app's own colours: the dark "stand" of its bars, the paper of the
+   score, the highlighter of the measure being played (yellow) and its ink (orange-brown). */
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+
+:root {
+  --stand: #2a2c31;
+  --stand-2: #34373e;
+  --chrome-text: #e4e5e9;
+  --chrome-soft: #a3a7b1;
+  --bg: #fcfbf8;
+  --card: #f3f1ea;
+  --ink: #17181b;
+  --ink-soft: #55585f;
+  --line: #e2ded3;
+  --mark: 255, 196, 61;
+  --mark-ink: #9a5c00;
+  --font: 'Atkinson Hyperlegible', system-ui, 'Segoe UI', sans-serif;
+  --measure: 46rem; /* reading width */
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1d1f23;
+    --card: #2a2c31;
+    --ink: #e8e9ec;
+    --ink-soft: #a9adb6;
+    --line: #3a3d44;
+    --mark-ink: #ffc43d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #1d1f23;
+  --card: #2a2c31;
+  --ink: #e8e9ec;
+  --ink-soft: #a9adb6;
+  --line: #3a3d44;
+  --mark-ink: #ffc43d;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem; /* the sticky contents strip on phones */
+  -webkit-text-size-adjust: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.6 var(--font);
+}
+img,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+a {
+  color: var(--mark-ink);
+  text-underline-offset: 0.18em;
+}
+:focus-visible {
+  outline: 3px solid rgb(var(--mark));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+b {
+  font-weight: 700;
+}
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* ---------- top: the app's bar, then the opening on the same dark stand ---------- */
+.masthead {
+  background: var(--stand);
+  color: var(--chrome-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: max(0.7rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 0.7rem max(1rem, env(safe-area-inset-left));
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.brand img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+.open-app {
+  display: inline-block;
+  background: var(--bg);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.masthead .open-app {
+  background: #fcfbf8;
+  color: #17181b;
+}
+.open-app:hover {
+  background: rgb(var(--mark));
+  color: #17181b;
+}
+
+.hero {
+  background: var(--stand);
+  color: var(--chrome-text);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2rem 3rem;
+  padding: 1.5rem max(1rem, env(safe-area-inset-right)) 2.5rem max(1rem, env(safe-area-inset-left));
+  max-width: 72rem;
+  margin: 0 auto;
+}
+/* the dark band runs the full width behind the centred hero */
+body > .hero {
+  box-shadow: 0 0 0 100vmax var(--stand);
+  clip-path: inset(0 -100vmax);
+}
+.hero h1 {
+  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+  letter-spacing: -0.01em;
+  max-width: 15ch;
+}
+.lead {
+  font-size: 1.2rem;
+  color: var(--chrome-text);
+  max-width: 34rem;
+  margin: 1rem 0 1.4rem;
+}
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0;
+}
+.hero-links a {
+  color: var(--chrome-text);
+  background: var(--stand-2);
+  border: 1px solid #4a4e57;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  text-decoration: none;
+}
+.hero-links a:first-child {
+  background: rgb(var(--mark));
+  border-color: rgb(var(--mark));
+  color: #17181b;
+  font-weight: 700;
+}
+.hero-links a:hover {
+  border-color: rgb(var(--mark));
+}
+.hero-video {
+  margin: 0;
+  width: min(270px, 70vw);
+}
+.hero-video figcaption {
+  color: var(--chrome-soft);
+  font-size: 0.92rem;
+  margin-top: 0.8rem;
+  text-align: center;
+}
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+  .hero-video {
+    justify-self: center;
+  }
+}
+
+/* a phone: the screenshots and the video in a dark rounded frame */
+.phone {
+  position: relative;
+  border: 7px solid #111214;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #111214;
+  box-shadow: 0 1px 0 #4a4e57, 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+.phone img,
+.phone video {
+  width: 100%;
+  border-radius: 22px;
+}
+
+/* ---------- contents, then the page ---------- */
+.layout {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
+}
+.toc {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  margin: 0 calc(-1 * max(1rem, env(safe-area-inset-left)));
+  padding: 0.55rem max(1rem, env(safe-area-inset-left));
+}
+.toc-title {
+  display: none;
+}
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.toc-list::-webkit-scrollbar {
+  display: none;
+}
+.toc-list a {
+  display: block;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.toc-list a.here {
+  background: rgba(var(--mark), 0.55);
+  border-color: transparent;
+  color: var(--ink);
+  font-weight: 700;
+}
+@media (min-width: 1100px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 3rem;
+  }
+  .toc {
+    align-self: start;
+    top: 1.5rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .toc-title {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    margin: 0 0 0.5rem 0.75rem;
+  }
+  .toc-list {
+    flex-direction: column;
+    gap: 0.1rem;
+    overflow: visible;
+  }
+  .toc-list a {
+    border: 0;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  .toc-list a:hover {
+    color: var(--ink);
+    background: var(--card);
+  }
+  html {
+    scroll-padding-top: 1.5rem;
+  }
+}
+
+main {
+  min-width: 0;
+  padding-bottom: 3rem;
+}
+.block {
+  padding-top: 2.6rem;
+}
+.block > h2,
+.ref-head h2 {
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
+}
+.intro {
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  max-width: var(--measure);
+  margin: 0.5rem 0 1.5rem;
+}
+p {
+  max-width: var(--measure);
+}
+.tip {
+  color: var(--ink-soft);
+  font-size: 0.97rem;
+}
+
+/* the keys and controls named in the text, drawn as small buttons */
+.key,
+kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 0 0.4em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--card);
+  font: inherit;
+  font-size: 0.92em;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+}
+.key.rec {
+  color: #d23b2e;
+}
+
+/* ---------- the typical rehearsal: five steps ---------- */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+}
+.step {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: 1.2rem 2.5rem;
+  align-items: start;
+  padding: 1.8rem 0;
+  border-top: 1px solid var(--line);
+}
+.step-text {
+  position: relative;
+  padding-left: 3.6rem;
+}
+/* the step's number on a stroke of highlighter, as the measure being played */
+.step-text::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -0.2rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.45rem;
+  color: #17181b;
+  background: rgb(var(--mark));
+  border-radius: 6px;
+  box-shadow: inset 0 -0.35rem 0 rgba(0, 0, 0, 0.08);
+}
+.step.no-shot {
+  grid-template-columns: minmax(0, 1fr);
+}
+.step h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+.step p {
+  margin: 0 0 0.8rem;
+}
+@media (max-width: 760px) {
+  .step {
+    grid-template-columns: 1fr;
+  }
+  .step-text {
+    padding-left: 0;
+    padding-top: 3.3rem;
+  }
+  .step > .shot,
+  .step > .modes {
+    justify-self: center;
+  }
+}
+
+.shot {
+  margin: 0;
+}
+.phone-shot {
+  width: min(15rem, 72vw);
+}
+.phone-shot img {
+  border: 6px solid #111214;
+  border-radius: 26px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+/* a part of a screen: the control spoken of */
+.crop {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+.phone-crop {
+  width: 100%;
+}
+.phone-crop-fig {
+  width: min(20rem, 100%);
+}
+.stack {
+  display: grid;
+  gap: 0.9rem;
+  width: min(18rem, 100%);
+}
+.shot.wide {
+  margin: 1.5rem 0;
+}
+.shot.wide img {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+figcaption {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-top: 0.6rem;
+}
+
+/* the four settings of « Ma voix », in the order of the rehearsal */
+.modes {
+  display: grid;
+  gap: 0.5rem;
+  width: min(18rem, 100%);
+}
+.mode {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  background: var(--card);
+  border-left: 5px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.mode-name {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.mode-what {
+  grid-column: 2;
+}
+/* the icon as on the phone's button: light on the dark bar */
+.mode > .ic {
+  grid-row: span 2;
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0.45rem;
+  border-radius: 8px;
+  background: var(--stand-2);
+  color: var(--chrome-text);
+}
+.mode.on {
+  border-left-color: rgb(var(--mark));
+}
+
+/* ---------- the map of the screen ---------- */
+.map {
+  display: grid;
+  grid-template-columns: 16.5rem minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+.map-figure {
+  margin: 0;
+}
+.pinned {
+  overflow: visible;
+}
+.pin {
+  position: absolute;
+  /* placed on a control's top-right corner, the pin sits mostly outside it: the control stays visible */
+  transform: translate(-40%, -62%);
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(var(--mark));
+  color: #17181b;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 0 0 2px #17181b;
+}
+.legend {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.legend div {
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.legend dt {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(var(--mark));
+  color: #17181b;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.legend dd {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .map {
+    grid-template-columns: 1fr;
+  }
+  .map-figure {
+    width: min(17rem, 80vw);
+    justify-self: center;
+  }
+}
+
+/* ---------- reference ---------- */
+.ref-head {
+  margin-top: 3.5rem;
+  padding-top: 2.2rem;
+  border-top: 3px solid var(--ink);
+}
+.ref-head .intro {
+  margin-bottom: 0;
+}
+.ref h3 {
+  font-size: 1.4rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.ref h4 {
+  font-size: 1.1rem;
+  margin: 1.6rem 0 0.7rem;
+}
+.ref-body {
+  display: grid;
+  /* the picture's column has its own width: a picture sized in % of an "auto" column squeezed the text */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: 1.2rem 2.5rem;
+  align-items: start;
+}
+.ref-body.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ref-body.single .crop {
+  width: min(34rem, 100%);
+}
+.ref-body > div > p:first-child {
+  margin-top: 0;
+}
+@media (max-width: 760px) {
+  .ref-body {
+    grid-template-columns: 1fr;
+  }
+}
+.facts {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  max-width: var(--measure);
+}
+.facts li {
+  margin-bottom: 0.55rem;
+}
+.facts li::marker {
+  color: var(--mark-ink);
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: var(--measure);
+  margin: 1rem 0;
+  font-size: 0.98rem;
+}
+.table th,
+.table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.6rem 0.8rem 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.table thead th {
+  color: var(--ink-soft);
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+.table tbody th {
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  /* the « Pour… » column under the others */
+  .table:not(.keys) thead {
+    display: none;
+  }
+  .table:not(.keys) tr {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .table:not(.keys) th,
+  .table:not(.keys) td {
+    border: 0;
+    padding: 0.1rem 0.6rem 0.1rem 0;
+  }
+  .table:not(.keys) td:last-child {
+    grid-column: 2;
+    color: var(--ink-soft);
+  }
+}
+
+.instruments {
+  margin: 0 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: 0.6rem;
+}
+.instruments div {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+.instruments dt {
+  font-weight: 700;
+}
+.instruments dd {
+  margin: 0.1rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr));
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+}
+.card h4 {
+  margin: 0 0 0.6rem;
+}
+.seq {
+  margin: 0;
+  padding-left: 1.3rem;
+}
+.seq li {
+  margin-bottom: 0.35rem;
+}
+
+details {
+  border-bottom: 1px solid var(--line);
+  max-width: var(--measure);
+}
+summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.85rem 0;
+  list-style-position: outside;
+}
+summary::marker {
+  color: var(--mark-ink);
+}
+details p {
+  margin: 0 0 1rem;
+}
+
+.end {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+.open-app.big {
+  background: var(--stand);
+  color: #fcfbf8;
+  padding: 0.75rem 1.4rem;
+  font-size: 1.05rem;
+}
+.table.keys th {
+  width: min(13rem, 45%);
+}
+
+/* ---------- the app's controls, drawn as in the app (dark bar, light icon) ---------- */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.ic {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+.ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  vertical-align: -0.2em;
+  padding: 0.12em 0.55em;
+  border: 1px solid #42464e;
+  border-radius: 7px;
+  background: var(--stand-2);
+  color: var(--chrome-text);
+  font-size: 0.9em;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.ctl.icon-only {
+  padding: 0.12em 0.32em;
+}
+.rec-dot {
+  width: 0.8em;
+  height: 0.8em;
+  margin: 0.18em;
+  border-radius: 50%;
+  background: #e5484d;
+}
+.legend .ctl {
+  margin-right: 0.15em;
+}
+.legend dd .ic {
+  vertical-align: -0.2em;
+}
+
+/* a warning, said once */
+.note {
+  background: rgba(var(--mark), 0.16);
+  border-left: 4px solid rgb(var(--mark));
+  border-radius: 0 8px 8px 0;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1.2rem;
+}
+
+.table.credits {
+  font-size: 0.93rem;
+}
+.table.credits tbody th {
+  white-space: normal;
+  font-weight: 700;
+}
+@media (max-width: 560px) {
+  .table.credits tr {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .table.credits td:last-child {
+    grid-column: 1;
+  }
+}
+
+/* where it runs: one discreet line under the opening */
+.platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.2rem;
+  margin: 1.1rem 0 0;
+  color: var(--chrome-soft);
+  font-size: 0.9rem;
+}
+.platforms span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* the address to write to */
+.mail-line {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0.8rem;
+}

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+scores/*/work/*
+!scores/*/work/measures.tsv
+!scores/*/work/pages.tsv
+.venv/
+app/public/packs/
+scores/*/pack/
+/packs/
+app/test-results/
+app/public/kit.zip
+app/playwright-report/
+app/e2e/.fixtures/

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a2c31" />
+    <meta name="description" content="Transformer une partition numérisée (PDF, photos) en archive .zip pour Pupitre Ouvert, avec l’aide d’une IA : la méthode, les outils, le format." />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title>Créer l’archive de votre partition — Pupitre Ouvert</title>
+    <link rel="stylesheet" href="./src/aide/aide.css" />
+    <link rel="stylesheet" href="./src/aide/creer.css" />
+  </head>
+  <body>
+    <!-- Two readers. A singer, who needs three steps and a sentence to give to an AI. And that AI,
+         sent here by the sentence: its method is the second half of the page, rendered at build
+         time from docs/CREER.md (vite-creer.ts) - one text for the site, the repository and the kit. -->
+    <header class="masthead">
+      <a class="brand" href="./" title="Ouvrir Pupitre Ouvert">
+        <img src="./icon.svg" alt="" width="32" height="32" />
+        <span>Pupitre Ouvert</span>
+      </a>
+      <a class="open-app" href="./">Ouvrir l’app</a>
+    </header>
+
+    <section class="hero creer-hero" aria-labelledby="titre">
+      <div class="hero-text">
+        <h1 id="titre">Créer l’archive de votre partition</h1>
+        <p class="lead">
+          Pupitre Ouvert ouvre une œuvre à partir d’une archive .zip : les pages de votre partition et leur transcription. Une intelligence
+          artificielle peut la fabriquer pour vous, à partir d’un PDF ou de photos.
+        </p>
+        <p class="hero-links">
+          <a href="#vous">Pour vous : trois étapes</a>
+          <a href="#methode">Pour l’IA : la méthode</a>
+          <a href="./aide.html">L’aide de l’app</a>
+        </p>
+      </div>
+    </section>
+
+    <main class="creer">
+      <section id="vous" class="block">
+        <h2>Pour vous : trois étapes</h2>
+        <ol class="steps">
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Numérisez la partition</h3>
+              <p>
+                Un PDF, ou une photo par page, dans l’ordre : bien à plat, nette, sans ombre, la page entière. Plus l’image est propre, plus
+                la transcription sera juste.
+              </p>
+            </div>
+          </li>
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Confiez-la à une IA, avec cette phrase</h3>
+              <p>
+                Il faut une IA qui sait <b>exécuter du code</b> et <b>lire des images</b> (Claude ou ChatGPT, par exemple, dans leurs modes qui
+                exécutent du code). Joignez vos fichiers et donnez-lui :
+              </p>
+              <div class="prompt">
+                <p id="phrase">
+                  Lis la page https://bolevo.github.io/pupitre-ouvert/creer.html et suis sa méthode pour faire, à partir de la partition que je
+                  te joins, une archive .zip pour Pupitre Ouvert.
+                </p>
+                <button type="button" id="copier" class="open-app">Copier la phrase</button>
+              </div>
+              <p class="tip">
+                C’est long : l’IA lit la musique mesure par mesure, et se relit. Comptez de vingt minutes à une heure par page pour un chœur à
+                quatre voix avec piano ; une œuvre longue se fait en plusieurs fois. Vous pouvez demander les voix d’abord, le piano ensuite.
+              </p>
+            </div>
+          </li>
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Ajoutez l’archive, et vérifiez-la</h3>
+              <p>
+                Dans <a href="./">Pupitre Ouvert</a> : liste des œuvres, en haut à gauche, puis <span class="ctl">Ajouter une partition (.zip)…</span>
+                L’œuvre reste ensuite dans l’app.
+              </p>
+              <p>
+                Puis écoutez, partition en main. Une IA se trompe : une note, une durée, une syllabe. Notez le mouvement, la mesure et la voix,
+                et demandez-lui de corriger ; la nouvelle archive remplace l’ancienne.
+              </p>
+            </div>
+          </li>
+        </ol>
+        <ul class="facts">
+          <li><b>Vos fichiers restent les vôtres.</b> L’archive n’est envoyée nulle part par Pupitre Ouvert : elle est gardée dans votre navigateur.</li>
+          <li>
+            <b>Droits d’auteur.</b> L’archive contient les images de votre partition : elle est faite pour votre usage personnel. Ne la diffusez
+            pas si l’édition est protégée.
+          </li>
+          <li>
+            <b>Vous savez programmer ?</b> Tout est là : <a href="https://github.com/Bolevo/pupitre-ouvert">le dépôt</a>, les mêmes outils, la
+            même méthode.
+          </li>
+        </ul>
+      </section>
+
+      <section id="methode" class="block method">
+        <h2>Pour l’IA : la méthode</h2>
+        <p class="intro">
+          Ce qui suit s’adresse à l’IA qui fabrique l’archive. C’est le document
+          <a href="https://github.com/Bolevo/pupitre-ouvert/blob/main/docs/CREER.md"><code>docs/CREER.md</code></a> du dépôt ; les outils
+          sont dans le <a href="./kit.zip">kit</a>.
+        </p>
+<!-- METHODE -->
+      </section>
+
+      <footer class="end">
+        <a class="open-app big" href="./">Ouvrir Pupitre Ouvert</a>
+        <a href="./aide.html">L’aide</a>
+        <a href="https://github.com/Bolevo/pupitre-ouvert">Le dépôt</a>
+        <a href="#titre">Revenir en haut</a>
+      </footer>
+    </main>
+
+    <script type="module" src="./src/aide/creer.ts"></script>
+  </body>
+</html>

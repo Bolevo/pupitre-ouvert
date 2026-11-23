@@ -1,0 +1,33 @@
+{
+  "name": "pupitre-ouvert",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/tinos": "^5.3.0",
+    "@preact/signals": "^2.11.3",
+    "fflate": "^0.8.3",
+    "idb-keyval": "^6.3.0",
+    "preact": "^11.0.1",
+    "verovio": "^6.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.5",
+    "fake-indexeddb": "^6.2.6",
+    "happy-dom": "^21.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,18 @@
+# Pictures of the help page (`app/aide.html`)
+
+The screenshots and the short video of the help show the **example work** that comes with the
+app: two Bach chorales of the music21 corpus (BWV 140/7 and 244/54, public domain), with pages
+engraved by Verovio and a short sheet (`scores/deux-chorals/`). Redo them when the screen changes.
+
+From `app/`, with a Chromium (`PW_CHROMIUM`, if Playwright's own is not installed):
+
+```sh
+python ../pipeline/publish.py                     # the example, into public/packs/
+npx vite build && (npx vite preview --port 4390 --strictPort &)
+node ../tools/help/shots.cjs 4390 /tmp/raw        # raw PNG; or only some: … /tmp/raw hero desk
+python ../tools/help/help_images.py /tmp/raw      # WebP and MP4 into app/src/aide/img/
+```
+
+Then look at `aide.html` (phone and desktop widths). If the controls moved, the letters of the map
+of the screen (`.pin`, in % of the 360 × 780 phone screenshot) may need moving: they sit on the
+top-right corner of the control they name.

@@ -1,0 +1,9 @@
+# What the tools of this repository need (docs/CREER.md):  pip install -r pipeline/requirements.txt
+verovio==6.3.0          # the version the app embeds: the MEI and its ids must come from it
+pyyaml
+music21                 # pipeline/cht/compile.py (CHT -> MusicXML)
+numpy
+opencv-python-headless  # tools/ (page images)
+cairosvg                # pipeline/cht/render.py (comparison images)
+pypdfium2               # tools/source.py (PDF pages)
+pillow

@@ -1,0 +1,3385 @@
+:root {
+  --stand: #2a2c31;
+  --stand-2: #34373e;
+  --stand-3: #42464e;
+  --chrome-text: #e4e5e9;
+  --chrome-soft: #a3a7b1;
+  --paper: #fcfbf8;
+  --ink: #17181b;
+  --ink-soft: #5d6068;
+  --mark: 255, 196, 61; /* highlighter */
+  --mark-ink: #b26b00;
+  --font: "Atkinson Hyperlegible", system-ui, "Segoe UI", sans-serif;
+  color-scheme: dark;
+  /* The parts of the screen the system keeps (status bar or Dynamic Island, home indicator,
+     the notch's side lying down), which the bars stay clear of. An iPhone gives them in screen
+     points even when its page is zoomed out (Safari › Page Zoom under 100 %: a point is then
+     several px of the page, and the top bar was half under the status bar): --inset-scale is
+     then that number of px (ui/insets.ts), 1 everywhere else. */
+  --inset-scale: 1;
+  --safe-top: calc(env(safe-area-inset-top, 0px) * var(--inset-scale));
+  --safe-bottom: calc(env(safe-area-inset-bottom, 0px) * var(--inset-scale));
+  --safe-left: calc(env(safe-area-inset-left, 0px) * var(--inset-scale));
+  --safe-right: calc(env(safe-area-inset-right, 0px) * var(--inset-scale));
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  /* long presses are for hearing notes: no text selection, no "touch to search", no callout */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none; /* no pull-to-refresh in the middle of a rehearsal */
+  background: var(--stand);
+  color: var(--chrome-text);
+  font: 15px/1.4 var(--font);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* no double-tap zoom of the whole screen */
+}
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+:focus-visible {
+  outline: 2px solid rgb(var(--mark));
+  outline-offset: 2px;
+}
+#app,
+.app {
+  height: 100%;
+  height: 100dvh;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+}
+.app > * {
+  min-width: 0;
+  flex: none;
+}
+.app > .stage,
+.app > .loading {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.loading,
+.error {
+  padding: 40px;
+  text-align: center;
+  color: var(--chrome-soft);
+}
+.error {
+  color: #ff9b8f;
+  padding: 14px 16px;
+  white-space: pre-line; /* a refused archive: one line per thing to correct */
+  overflow-wrap: anywhere;
+}
+.error button {
+  display: block;
+  margin: 10px auto 0;
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 16px;
+  padding-top: calc(
+    8px + var(--safe-top)
+  ); /* under a notch / status bar (installed app) */
+  /* iPhone on its side: not under the notch */
+  padding-left: max(16px, var(--safe-left));
+  padding-right: max(16px, var(--safe-right));
+  min-height: 52px;
+  border-bottom: 1px solid #00000040;
+}
+.work-select {
+  background: var(--stand-2);
+  border: 1px solid var(--stand-3);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.movements {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+/* metronome: on/off + what it beats (just before the end-of-movement modes) */
+.metro {
+  order: 2;
+  margin-left: auto;
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  height: 36px;
+  border: 1px solid var(--stand-3);
+  border-radius: 10px;
+}
+.metro > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: var(--stand-2);
+  color: var(--chrome-soft);
+  font-size: 13px;
+}
+.metro-toggle {
+  padding: 0 10px;
+  border-radius: 9px 0 0 9px;
+}
+.metro-more {
+  padding: 0 6px;
+  border-left: 1px solid var(--stand-3) !important;
+  border-radius: 0 9px 9px 0;
+}
+.metro.on .metro-toggle {
+  background: rgb(var(--mark));
+  color: var(--ink);
+  font-weight: 700;
+}
+.metro-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  min-width: 220px;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px #0007;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.metro-menu-title {
+  font-size: 12px;
+  color: #6b6e75;
+  padding: 4px 8px 6px;
+}
+.metro-menu button {
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 15px;
+}
+.metro-menu button.on {
+  background: rgba(var(--mark), 0.35);
+  font-weight: 700;
+}
+.metro-menu small {
+  color: #6b6e75;
+  font-weight: 400;
+}
+/* end of a movement: stop / loop / go on (far right on a wide screen, beside the work on a phone) */
+.end-mode {
+  order: 2;
+  margin-left: 0;
+  flex: none;
+  display: inline-flex;
+  border: 1px solid var(--stand-3);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 36px;
+}
+.end-mode button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-left: 1px solid var(--stand-3);
+  background: var(--stand-2);
+  color: var(--chrome-soft);
+  padding: 0 10px;
+  font-size: 13px;
+}
+.end-mode button:first-child {
+  border-left: 0;
+}
+.end-mode button.on {
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+}
+.end-mode {
+  position: relative;
+  overflow: visible;
+}
+.end-mode button:first-child {
+  border-radius: 9px 0 0 9px;
+}
+.end-mode button:last-of-type {
+  border-radius: 0 9px 9px 0;
+}
+.end-hint {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  white-space: nowrap;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px #0006;
+}
+.movements button {
+  border: 0;
+  background: transparent;
+  color: var(--chrome-soft);
+  padding: 7px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .movements button:hover {
+    color: var(--chrome-text);
+    background: var(--stand-2);
+  }
+}
+.movements button.on {
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+  /* a long title ends in « … »: the numbers of the movements on either side stay in view */
+  flex-shrink: 0;
+  max-width: min(26em, calc(100% - 96px));
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- pages ---------- */
+.pages-wrap {
+  position: relative;
+  display: flex;
+}
+.pages {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  /* the browser scrolls, the app zooms (pinch): the rest of the screen never grows */
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+}
+.pages > .sheets {
+  margin: auto; /* centred while it fits, scrollable from its edges when zoomed */
+}
+.pages.zoomed {
+  overflow: auto;
+}
+.zoom-reset {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 6;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: var(--stand);
+  color: var(--chrome-text);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 10px #0006;
+}
+.pages.narrow {
+  overflow-y: auto;
+}
+.pages.narrow > .sheets {
+  margin-top: 0;
+}
+.empty-pages {
+  color: var(--chrome-soft);
+}
+.sheets {
+  position: relative;
+  display: flex;
+  padding: 12px 0;
+}
+/* wide areas: whole pages, from the top; their size leaves the navigator its place under the
+   music (PageView › fitPages) */
+.pages:not(.narrow) > .sheets {
+  margin-top: 0;
+  padding: 8px 0;
+}
+.pages.zoomed:not(.narrow) > .sheets {
+  padding-bottom: 56px; /* the end of an enlarged page can come out from under the navigator */
+}
+.sheet {
+  position: relative;
+  background: var(--paper);
+  box-shadow: 0 2px 14px #0000006b;
+  cursor: pointer;
+  flex: none;
+}
+.sheet img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.hover-box {
+  position: absolute;
+  border-radius: 4px;
+  background: rgba(var(--mark), 0.12);
+  outline: 1.5px solid rgba(var(--mark), 0.8);
+  pointer-events: none;
+}
+.hover-box span {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-size: 12px;
+  background: var(--ink);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.lit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+  background: rgba(var(--mark), 0.22);
+  pointer-events: none;
+  opacity: 0;
+  /* placed by a transform, on its own layer: it glides to the next measure on the compositor and
+     the page under it is not painted again */
+  will-change: transform;
+  transition: transform 0.12s;
+}
+.lit.with-voice {
+  background: rgba(var(--mark), 0.14);
+}
+/* the followed voice inside the current measure: another colour, easy to find on the page */
+.lit-voice {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+  background: rgba(37, 99, 235, 0.2);
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.65);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  transition: transform 0.12s;
+}
+.playline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--mark-ink);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+/* ---------- lane ---------- */
+.lane {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border-top: 3px solid var(--stand-3);
+}
+.lane-scroll {
+  overflow: hidden;
+  contain: paint; /* the 12 000-node SVG repaints alone when a note lights up */
+  /* nothing scrolls here: the app moves the line itself (drag along it), and a finger drifting
+     up or down during a long press must not let the browser take the touch (the note would stop) */
+  touch-action: none;
+  min-height: 130px;
+  cursor: grab;
+}
+.lane-pan,
+.lane-svg {
+  width: max-content;
+}
+.lane-svg {
+  will-change: transform;
+}
+.lane-svg svg {
+  display: block;
+}
+.lane-svg text {
+  font-family: Tinos, "Times New Roman", Times, serif;
+}
+/* The line is painted once and kept: its own stacked layer, which the browser caches as a whole.
+   The notes being sung are drawn in colour in a second drawing laid over it (Lane.tsx › overlay),
+   so a note lighting up never makes the browser go through the whole line again. */
+.lane-svg {
+  position: relative;
+}
+.lane-svg > svg {
+  position: relative;
+  z-index: 0;
+}
+.lane-hi {
+  position: absolute; /* placed over the line by Lane.tsx */
+  z-index: 1;
+  pointer-events: none;
+  /* its own compositor layer (it moves with the line): what the line's layer holds, tens of
+     thousands of drawing operations, is not built again when a note lights up */
+  will-change: transform;
+}
+.lane-hi *,
+.lane g.note.on,
+.lane g.note.on * {
+  fill: var(--mark-ink);
+  stroke: var(--mark-ink);
+}
+.lane g.note.held,
+.lane g.note.held * {
+  fill: #1f5bd6;
+  stroke: #1f5bd6;
+}
+.lane g.note {
+  cursor: pointer;
+}
+.playhead {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 0;
+  border-left: 2px solid rgba(var(--mark), 0.95);
+  box-shadow: 0 0 0 5px rgba(var(--mark), 0.16);
+  pointer-events: none;
+}
+.bubble {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  background: #1f5bd6;
+  color: #fff;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 8px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.lane-status {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+  z-index: 2;
+  font-size: 13px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--stand-3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--chrome-soft);
+  padding: 2px 8px;
+  min-width: 28px;
+}
+.seg button.on {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ---------- transport ---------- */
+.transport {
+  display: flex;
+  align-items: center;
+}
+.t-play {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+}
+@media (hover: hover) {
+  .play:hover {
+    background: #fff;
+  }
+}
+.ctl {
+  border: 1px solid var(--stand-3);
+  background: var(--stand-2);
+  border-radius: 10px;
+  min-width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 20px;
+}
+@media (hover: hover) {
+  .ctl:hover {
+    background: var(--stand-3);
+  }
+}
+/* ---------- phones ---------- */
+/* Which layout (the same conditions in ui/media.ts; e2e/sideways.spec.ts tests their limits):
+   - lying down: a screen wider than high and 500 px high at most (a phone), or 760 px at most
+     when it is touched (a small tablet, an unfolded phone): « phone turned sideways », below;
+   - the phone layout: 720 px wide at most, or lying down, or touched and narrower than 9:16
+     whatever its width: a phone held upright whose page is zoomed out (an iPhone at Safari's
+     « Page Zoom » 50 % is 860 px wide; no tablet is that narrow);
+   - the wide layout: every other screen. Written without « not », as three cases: held
+     upright, higher than 760 px (both wider than 9:16), or higher than 500 px with a mouse (a
+     computer's low or narrow window keeps it). Its « more than » limits are written 720.02px,
+     500.02px, 760.02px: Chromium works in 64ths of a pixel, where 720.01px is 720px (both
+     layouts applied at 720 px); « wider than 9:16 » is written 9001/16000. */
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 6px 10px;
+    padding-top: calc(6px + var(--safe-top));
+  }
+  .mv-row {
+    order: 3;
+    width: 100%;
+  }
+  .topbar .title {
+    flex: 1;
+    min-width: 0;
+  }
+  .work-select {
+    width: 100%;
+  }
+  .end-mode {
+    margin-left: 0;
+  }
+  /* touch targets: at least 40 px */
+  .metro,
+  .end-mode {
+    height: 42px; /* 40 px inside the border */
+  }
+  .metro {
+    margin-left: 0;
+  }
+  .metro-toggle {
+    padding: 0 10px;
+  }
+  .metro-more {
+    min-width: 36px;
+    justify-content: center;
+  }
+  .metro-toggle span {
+    display: none;
+  }
+  .metro-menu {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .end-mode button {
+    min-width: 40px;
+    justify-content: center;
+    padding: 0 10px;
+  }
+  .end-mode button span {
+    display: none;
+  }
+  .end-hint {
+    display: block;
+  }
+  .transport {
+    gap: 6px;
+    padding: 8px 10px calc(8px + var(--safe-bottom));
+  }
+  .t-play {
+    flex: 1;
+  }
+  .play {
+    width: 46px;
+    height: 46px;
+  }
+  .ctl {
+    min-width: 40px;
+    height: 40px;
+  }
+  .lane-scroll {
+    min-height: 110px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lit,
+  .lit-voice {
+    transition: none;
+  }
+}
+
+/* ---------- deck: track headers + the followed line ---------- */
+.deck {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid #00000055;
+}
+.deck > * {
+  min-width: 0;
+}
+.tracks {
+  background: var(--stand-2);
+  border-right: 1px solid #00000055;
+  padding: 4px 8px 6px;
+  display: flex;
+  flex-direction: column;
+}
+.tracks-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 2px 0 6px;
+}
+.tracks-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--chrome-soft);
+  margin-right: auto;
+}
+.tracks-reset {
+  border: 0;
+  background: transparent;
+  color: var(--chrome-soft);
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+@media (hover: hover) {
+  .tracks-reset:not(:disabled):hover {
+    color: var(--chrome-text);
+    background: var(--stand-3);
+  }
+}
+.tracks-reset:disabled {
+  opacity: 0.35;
+}
+.tracks-close {
+  display: none;
+}
+.tracks-head .seg {
+  margin-left: auto;
+}
+.tracks-head .seg button {
+  min-width: 26px;
+  height: 22px;
+}
+.tracks-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 0 2px;
+}
+.tracks-foot .tracks-reset {
+  border: 1px solid var(--stand-3);
+  padding: 3px 10px;
+}
+.tracks-lyrics {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--chrome-soft);
+}
+/* which version of the app this is (its commit): small, out of the way, at the end of the footer's
+   first row, where there is room for it (a line of its own would take its height from the pages);
+   it can be selected, to copy it */
+.tracks-version {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--chrome-soft);
+  opacity: 0.7;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.tracks-version .tv-date {
+  display: none; /* in the tooltip */
+}
+.tracks-lyrics select {
+  background: var(--stand);
+  border: 1px solid var(--stand-3);
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+.track-rows {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.track {
+  display: grid;
+  grid-template-columns: 28px minmax(80px, 1fr) 26px 26px 64px 110px;
+  align-items: center;
+  gap: 5px;
+  height: 31px;
+  padding: 0 4px 0 2px;
+  border-radius: 7px;
+  position: relative;
+}
+.track + .track {
+  margin-top: 1px;
+}
+.track.me {
+  background: var(--stand-3);
+}
+.track.me::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: rgb(var(--mark));
+}
+.t-eye {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  color: #ffffff38;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  padding: 0;
+}
+@media (hover: hover) {
+  button.t-eye:hover {
+    color: var(--chrome-text);
+  }
+}
+.t-eye[aria-pressed="true"] {
+  color: rgb(var(--mark));
+}
+.t-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--chrome-text);
+}
+.t-name:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.track.me .t-name {
+  font-weight: 700;
+}
+.t-meter {
+  flex: none;
+  width: 4px;
+  height: 15px;
+  border-radius: 2px;
+  background: #ffffff1f;
+  transition: background 0.08s;
+}
+.t-meter.on {
+  background: rgb(var(--mark));
+  box-shadow: 0 0 6px rgba(var(--mark), 0.6);
+}
+.track.silent .t-name {
+  color: var(--chrome-soft);
+  opacity: 0.55;
+}
+.track.silent .t-meter.on {
+  background: #ffffff55;
+  box-shadow: none;
+}
+.t-btn {
+  width: 26px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--stand-3);
+  background: var(--stand);
+  color: var(--chrome-soft);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+}
+@media (hover: hover) {
+  .t-btn:hover {
+    color: var(--chrome-text);
+    border-color: #ffffff40;
+  }
+}
+.t-btn.solo.on {
+  background: rgb(var(--mark));
+  border-color: rgb(var(--mark));
+  color: var(--ink);
+}
+.t-btn.mute.on {
+  background: #d9604f;
+  border-color: #d9604f;
+  color: #fff;
+}
+.t-vol {
+  width: 100%;
+  margin: 0;
+  accent-color: #c8cbd2;
+  height: 18px;
+}
+.track.silent .t-vol {
+  opacity: 0.45;
+}
+.t-inst {
+  width: 100%;
+  background: var(--stand);
+  border: 1px solid var(--stand-3);
+  border-radius: 6px;
+  padding: 3px 4px;
+  font-size: 13px;
+  color: var(--chrome-text);
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .deck {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tracks {
+    display: none;
+    border-right: 0;
+  }
+  .deck.tracks-open .tracks {
+    display: flex;
+  }
+  .deck.tracks-open .lane {
+    display: none;
+  }
+  .tracks-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 700;
+    padding: 6px 12px;
+  }
+  .tracks-close {
+    min-height: 40px;
+  }
+  /* touch targets: at least 40 px, rows of 44 px */
+  .tracks-head {
+    height: 46px;
+  }
+  .tracks-head .seg button {
+    min-width: 40px;
+    height: 40px;
+  }
+  .track {
+    grid-template-columns: 40px minmax(56px, 1fr) 40px 40px minmax(
+        44px,
+        60px
+      ) 96px;
+    gap: 6px;
+    height: 44px;
+  }
+  .track + .track {
+    margin-top: 2px;
+  }
+  .t-eye,
+  .t-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .t-btn {
+    font-size: 14px;
+  }
+  .t-vol {
+    height: 40px;
+  }
+  .t-inst {
+    height: 40px;
+  }
+  .tracks-foot {
+    gap: 8px 12px;
+    padding-top: 8px;
+  }
+  .tracks-foot .tracks-reset,
+  .tracks-lyrics select {
+    min-height: 40px;
+  }
+  /* no tooltip under a finger: the date is written, on a row of its own under the rest (the list is
+     only open for a moment here) */
+  .tracks-version {
+    order: 1;
+    flex-basis: 100%;
+    text-align: right;
+  }
+  .tracks-version .tv-date {
+    display: inline;
+  }
+  .tracks-toggle {
+    display: inline-flex;
+    gap: 6px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+  .tracks-toggle.on {
+    background: var(--paper);
+    color: var(--ink);
+  }
+}
+.ctl.wide {
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+/* ---------- text can be selected in the fields ---------- */
+input,
+select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ---------- line header: followed voice + entry ---------- */
+.lane-head {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+.lane-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 13px;
+}
+.lane-voice svg {
+  color: rgb(var(--mark));
+}
+/* the followed part: touch it to follow another one (the header lets touches through, this takes them) */
+.voice-pick {
+  position: relative;
+  flex: none;
+  pointer-events: auto;
+}
+button.lane-voice {
+  border: 0;
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+button.lane-voice:disabled {
+  opacity: 1;
+  cursor: default;
+}
+button.lane-voice > svg:last-child {
+  color: var(--paper);
+  opacity: 0.75;
+}
+.voice-menu {
+  /* opens upwards, over the bottom of the pages: always on screen, whatever is below the line */
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 4px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 9px;
+  box-shadow: 0 4px 14px #0006;
+}
+.voice-menu button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.voice-menu button.on {
+  background: rgba(var(--mark), 0.35);
+  font-weight: 700;
+}
+.lane-entry {
+  /* at the right end of the header row, on its own: the voice and the score's information stay
+     whole on the left (the text is shortened to fit, see Lane.tsx entryText) */
+  margin-left: auto;
+  min-width: 0;
+  border: 0;
+  font-family: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--mark-ink);
+  background: var(--paper);
+  padding: 0 6px;
+  border-radius: 6px;
+}
+.lane-entry:empty {
+  display: none;
+}
+/* « Entrée mes. 17 »: a touch goes a measure before my entry (the header lets touches through
+   to the line, this one takes them) */
+.lane-entry:not(:disabled) {
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: underline dotted rgba(var(--mark), 0.7);
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .lane-entry:not(:disabled):hover {
+    background: rgba(var(--mark), 0.16);
+  }
+}
+.lane-entry:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.lane-svg {
+  padding-top: 18px;
+}
+
+/* ---------- transport additions ---------- */
+.play {
+  flex: none;
+}
+.tracks-foot {
+  flex-wrap: wrap;
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .transport {
+    flex-wrap: nowrap;
+  }
+  .t-play {
+    flex: 1;
+    min-width: 0;
+    gap: 6px;
+  }
+  .tracks-toggle span {
+    font-size: 14px;
+  }
+}
+
+.tracks-reset.confirm {
+  background: #d9604f;
+  border-color: #d9604f;
+  color: #fff;
+}
+
+/* ---------- my voice: heard / alone / support / muted ---------- */
+.my-voice {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--stand-3);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 40px;
+}
+.my-voice-name {
+  padding: 0 10px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--chrome-soft);
+}
+.my-voice button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  border: 0;
+  border-left: 1px solid var(--stand-3);
+  background: var(--stand-2);
+  color: var(--chrome-soft);
+  padding: 0 10px;
+  font-size: 13px;
+}
+.my-voice button.on {
+  color: var(--ink);
+  background: var(--paper);
+}
+.my-voice button:focus-visible {
+  outline-offset: -3px; /* inside: the group's rounded border cuts what is outside */
+}
+.my-voice button.mv-solo.on {
+  background: rgb(var(--mark)); /* like S in the track list */
+}
+.my-voice button.mv-support.on {
+  background: #3f9e7a;
+  color: #fff;
+}
+.my-voice button.mv-mute.on {
+  background: #d9604f;
+  color: #fff;
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .my-voice {
+    margin-left: 0;
+    height: 42px; /* 40 px inside the border */
+  }
+  .my-voice-name {
+    display: none;
+  }
+  .my-voice button {
+    padding: 0 8px;
+  }
+  .my-voice button span {
+    display: none;
+  }
+}
+@media (max-width: 440px) {
+  .tracks-toggle span {
+    display: none;
+  }
+  .tracks-toggle {
+    padding: 0 9px;
+  }
+  .my-voice button {
+    padding: 0 9px;
+  }
+}
+/* 360 px (Galaxy S23): the bottom bar stays on one line, the readout keeps some room */
+@media (max-width: 380px) {
+  .transport,
+  .t-play {
+    gap: 5px;
+  }
+  .play {
+    width: 44px;
+    height: 44px;
+  }
+  .my-voice button {
+    padding: 0 8px;
+  }
+  .track {
+    grid-template-columns: 34px minmax(56px, 1fr) 40px 40px 40px 84px; /* room for « Soprano » */
+    gap: 5px;
+  }
+  .t-eye {
+    width: 34px;
+  }
+  /* a three-digit tempo (♩ = 120) must not run into « Ma voix » */
+  .transport {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .transport .tempo-btn {
+    gap: 2px;
+    padding: 0 5px;
+    font-size: 14px;
+  }
+}
+
+/* ---------- movements row: the work's sheet, then the movements ---------- */
+.mv-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.mv-row .movements {
+  flex: 1;
+  min-width: 0;
+}
+/* pinned at the left of the movements (it does not scroll away with them) */
+.fiche-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--stand-3);
+  border-radius: 10px;
+  background: var(--stand-2);
+  color: var(--chrome-soft);
+  padding: 0;
+}
+@media (hover: hover) {
+  .fiche-btn:hover {
+    color: var(--chrome-text);
+    background: var(--stand-3);
+  }
+}
+/* the help (wide screens): a round button floating at the top right of the pages' area, under
+   the end-of-movement control. Not in the top bar: the movements keep their whole row, and no
+   press meant for one of them lands on it. The work's sheet, open, goes over it. */
+.help-btn {
+  position: absolute;
+  top: 10px;
+  right: max(12px, var(--safe-right));
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(42, 44, 49, 0.9);
+  box-shadow:
+    0 0 0 1px #ffffff24,
+    0 2px 10px #00000055;
+  color: var(--chrome-soft);
+}
+@media (hover: hover) {
+  .help-btn:hover {
+    color: var(--chrome-text);
+    background: var(--stand-3);
+  }
+}
+@media (hover: none) {
+  .help-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+/* computers: the pages' zoom, a slider floating at the right of their area, under the help
+   (fingers pinch; PageView shows it under a mouse only). Upwards: larger. */
+.zoom {
+  position: absolute;
+  top: 56px;
+  right: max(12px, var(--safe-right));
+  z-index: 7;
+  display: flex;
+  justify-content: center;
+  width: 36px;
+  height: 150px;
+  padding-top: 9px;
+  border-radius: 18px;
+  background: rgba(42, 44, 49, 0.9);
+  box-shadow:
+    0 0 0 1px #ffffff24,
+    0 2px 10px #00000055;
+  color: var(--chrome-soft);
+}
+.zoom input {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 12px);
+  width: 104px;
+  height: 18px;
+  margin: 0;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  accent-color: #c8cbd2;
+  cursor: pointer;
+}
+/* enlarged pages under a mouse: dragged about (PageView), thin scroll bars that stay clear of
+   the floating buttons, the navigator above the horizontal one */
+@media (hover: hover) {
+  .pages.zoomed:not(.narrow) {
+    scrollbar-width: thin;
+  }
+  .pages.zoomed:not(.narrow) .sheet {
+    cursor: grab;
+  }
+  .pages.dragged .sheet {
+    cursor: grabbing;
+  }
+  .pages.zoomed:not(.narrow) ~ .page-nav-box {
+    bottom: 16px;
+  }
+}
+/* the help among the options of the track list: phones only (styles below) */
+.tracks-help {
+  display: none;
+}
+.help-link {
+  color: rgb(var(--mark));
+  text-underline-offset: 3px;
+}
+.fiche-btn.on {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  /* phones: the help moves to the track list (« Réglages »): the movements keep the whole row, and
+     no tap meant for them lands on it */
+  .help-btn {
+    display: none;
+  }
+  .tracks-help {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 40px;
+    padding: 3px 10px;
+    border: 1px solid var(--stand-3);
+    border-radius: 6px;
+    color: var(--chrome-soft);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .fiche-btn {
+    width: 40px;
+    height: 40px;
+  }
+  /* touch targets of 40 px: the rows are that tall anyway (sheet button, metronome) */
+  .movements button,
+  .work-select,
+  .zoom-reset {
+    min-height: 40px;
+  }
+}
+
+/* ---------- stage: the pages, and the work's sheet over them ---------- */
+.stage {
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+.stage > .pages-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- page navigator: one place for the page and the measure ---------- */
+.page-nav-box {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.page-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 38px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(42, 44, 49, 0.9);
+  box-shadow: 0 2px 10px #00000055;
+  white-space: nowrap;
+  transition: opacity 0.25s;
+}
+/* the current measure passes under it: it steps back (still usable) */
+@media (hover: hover) {
+  .page-nav.dodge:not(:hover):not(:focus-within) {
+    opacity: 0.28;
+  }
+}
+.pn-turn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chrome-text);
+  padding: 0;
+}
+@media (hover: hover) {
+  .pn-turn:hover:not(:disabled) {
+    background: var(--stand-3);
+  }
+}
+/* at the ends: start of the movement / previous movement, next movement (set apart from the
+   page arrows by a thin rule) */
+.pn-mv {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chrome-text);
+  padding: 0;
+}
+@media (hover: hover) {
+  .pn-mv:hover:not(:disabled) {
+    background: var(--stand-3);
+  }
+}
+.pn-mv:disabled {
+  opacity: 0.35;
+}
+.pn-mv:first-child {
+  margin-right: 5px;
+}
+.pn-mv:last-child {
+  margin-left: 5px;
+}
+.pn-mv::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--stand-3);
+}
+.pn-mv:first-child::after {
+  right: -4px;
+}
+.pn-mv:last-child::after {
+  left: -4px;
+}
+.pn-where {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  height: 32px;
+  align-self: center;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chrome-soft);
+  font-size: 14px;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
+}
+.pn-where[aria-expanded="true"] {
+  background: var(--stand-3);
+  color: var(--chrome-text);
+}
+@media (hover: hover) {
+  .pn-where:hover {
+    background: var(--stand-3);
+    color: var(--chrome-text);
+  }
+}
+.pn-page,
+.pn-n {
+  color: var(--chrome-text);
+  font-weight: 700;
+}
+.pn-sep {
+  margin-right: 5px;
+}
+.pn-mark {
+  color: var(--chrome-soft);
+}
+.pages.narrow > .sheets {
+  padding-bottom: 60px; /* phones: the end of the page can come out from under the navigator */
+}
+/* enlarged: « Page entière » floats over the top of the pages. Room above the paper, so that the
+   first system of a page comes out from under it like the others (PageView › followTop) */
+.pages.zoomed.narrow > .sheets {
+  padding-top: 56px;
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .page-nav-box {
+    bottom: 8px;
+  }
+  .page-nav {
+    height: 44px;
+  }
+  .pn-turn {
+    width: 40px;
+    height: 38px;
+  }
+  .pn-mv {
+    width: 38px;
+    height: 38px;
+  }
+  .pn-where {
+    height: 38px;
+    line-height: 38px;
+    padding: 0 8px;
+  }
+}
+
+/* ---------- small popovers (paper, like the metronome menu) ---------- */
+.pop {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px #0008;
+  padding: 10px 12px 12px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.pop-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.pop-go,
+.pop-action {
+  border: 0;
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 14px;
+  height: 40px;
+  padding: 0 14px;
+}
+@media (hover: hover) {
+  .pop-go:hover,
+  .pop-action:hover:not(:disabled) {
+    background: #000;
+  }
+}
+.pop-action:disabled {
+  background: #e4e2dc;
+  color: var(--ink-soft);
+  opacity: 1;
+}
+.pop input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #c9c7c1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 16px; /* no zoom on focus (iOS) */
+  font-variant-numeric: tabular-nums;
+}
+.pop input:focus-visible {
+  outline: 2px solid #1f5bd6;
+  outline-offset: 0;
+}
+
+/* « Aller à » (above the page navigator) */
+.goto {
+  order: -1;
+  margin-bottom: 8px;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+}
+.goto-row {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+}
+.goto-row + .goto-row {
+  margin-top: 10px;
+}
+.goto-row label {
+  font-weight: 700;
+  font-size: 15px;
+}
+.goto-row small {
+  grid-column: 2 / 4;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.3;
+}
+.goto-row.bad input {
+  border-color: #d9604f;
+  box-shadow: 0 0 0 1px #d9604f;
+}
+.goto-row.bad small {
+  color: #b2402f;
+}
+
+/* ---------- tempo (bottom bar): the metronome value, touch to change it ---------- */
+.tempo-box {
+  position: relative;
+  flex: none;
+}
+.tempo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 40px;
+  min-width: 96px;
+  padding: 0 12px;
+  white-space: nowrap;
+  border: 1px solid var(--stand-3);
+  border-radius: 10px;
+  background: var(--stand-2);
+  color: var(--chrome-text);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.tempo-btn[aria-expanded="true"] {
+  background: var(--stand-3);
+}
+@media (hover: hover) {
+  .tempo-btn:hover {
+    background: var(--stand-3);
+  }
+}
+.tempo-btn .glyph {
+  margin-right: 1px;
+}
+.tempo-eq {
+  color: var(--chrome-soft);
+}
+.tempo-num {
+  font-weight: 700;
+}
+/* not the score's tempo: in the highlighter colour */
+.tempo-btn.changed {
+  border-color: rgba(var(--mark), 0.75);
+  color: rgb(var(--mark));
+}
+.tempo-btn.changed .tempo-eq {
+  color: rgba(var(--mark), 0.8);
+}
+.tempo-pop {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 30;
+  width: 290px;
+  max-width: calc(100vw - 20px);
+}
+.tp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tp-step {
+  width: 52px;
+  height: 44px;
+  border: 1px solid #c9c7c1;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+}
+@media (hover: hover) {
+  .tp-step:hover:not(:disabled) {
+    background: #f0eee8;
+  }
+}
+.tp-step:active:not(:disabled) {
+  background: #e8e6e0;
+}
+.tp-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tp-val.changed {
+  color: var(--mark-ink);
+}
+.tp-ref,
+.tp-pct {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.tp-ref .glyph {
+  vertical-align: -3px;
+  margin-left: 2px;
+}
+.tp-pct {
+  margin-top: 2px;
+  color: var(--mark-ink);
+  font-weight: 700;
+}
+.tempo-pop .pop-action {
+  width: 100%;
+  margin-top: 10px;
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .tempo-btn {
+    height: 42px;
+    min-width: 0;
+    padding: 0 8px;
+    font-size: 15px;
+  }
+  .tempo-pop {
+    position: fixed;
+    left: 10px;
+    bottom: calc(68px + var(--safe-bottom));
+  }
+}
+
+/* ---------- line header: clef, key signature, time signature, key ---------- */
+.lane-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.li-clefs {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.sig {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.li-ts {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  font:
+    700 14px/12px Tinos,
+    "Times New Roman",
+    serif;
+}
+.li-key {
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.li-key .short {
+  display: none;
+}
+/* the key's name and, small under it, the pitch the sounds are tuned to (« la 440 Hz »): a second
+   line in the box rather than more width in a row that is full on a phone */
+.li-tone {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 14px;
+}
+.li-pitch {
+  font-size: 10px;
+  line-height: 11px;
+  color: var(--ink-soft);
+}
+/* under a key's name it never widens the box (a name can be 2 px shorter than it: « si min. »):
+   it counts for nothing in the width, then takes the name's */
+.li-key + .li-pitch {
+  width: 0;
+  min-width: 100%;
+}
+.lane-head {
+  right: 8px;
+  flex-wrap: nowrap;
+}
+.lane-svg {
+  padding-top: 28px;
+}
+@media (max-width: 559px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none) {
+  .li-key .long {
+    display: none;
+  }
+  .li-key .short {
+    display: inline;
+  }
+  .lane-head {
+    gap: 6px;
+  }
+  .lane-info {
+    gap: 7px;
+    padding: 0 6px;
+  }
+}
+
+/* ---------- the work's sheet (over the pages; the line and the transport stay usable) ---------- */
+.fiche {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-user-select: text;
+  user-select: text;
+}
+@media (min-width: 900px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000), (min-width: 900px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000), (min-width: 900px) and (min-height: 500.02px) and (hover: hover) {
+  /* a sheet at the right of the pages: the page stays partly visible beside it (not on a large
+     phone lying down, where the pages have half of the screen: the sheet covers them) */
+  .fiche {
+    left: auto;
+    width: min(680px, 62%);
+    box-shadow: -10px 0 30px #0006;
+  }
+}
+.fiche-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid #e4e2dc;
+  color: var(--ink-soft);
+}
+.fiche-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.fiche-title b {
+  color: var(--ink);
+  font-size: 15px;
+}
+.fiche-title span {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fiche-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #ecebe6;
+  color: var(--ink);
+}
+@media (hover: hover) {
+  .fiche-close:hover {
+    background: #e0ded7;
+  }
+}
+.fiche-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 20px 40px;
+  -webkit-overflow-scrolling: touch;
+}
+.fiche-empty {
+  color: var(--ink-soft);
+}
+.md {
+  max-width: 64ch;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.md h1 {
+  font-size: 22px;
+  line-height: 1.25;
+  margin: 12px 0 6px;
+}
+.md h2 {
+  font-size: 19px;
+  line-height: 1.3;
+  margin: 28px 0 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e4e2dc;
+}
+.md h3 {
+  font-size: 16px;
+  margin: 20px 0 6px;
+}
+.md p,
+.md ul,
+.md ol,
+.md blockquote {
+  margin: 0 0 12px;
+}
+.md ul,
+.md ol {
+  padding-left: 22px;
+}
+.md li + li {
+  margin-top: 3px;
+}
+.md em {
+  color: #44464d;
+}
+.md a {
+  color: #1f5bd6;
+  text-underline-offset: 3px;
+}
+.md a[data-mv] {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e8eefb;
+}
+.md blockquote {
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid rgba(var(--mark), 0.9);
+  color: #3a3c42;
+}
+.md code {
+  font-size: 0.92em;
+  background: #efede7;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.md hr {
+  border: 0;
+  border-top: 1px solid #e4e2dc;
+  margin: 20px 0;
+}
+.md .table-wrap {
+  overflow-x: auto;
+  margin: 0 0 14px;
+}
+.md table {
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.35;
+  min-width: 100%;
+}
+.md th,
+.md td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e4e2dc;
+  text-align: left;
+  vertical-align: top;
+}
+.md th {
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 2px solid #d8d6cf;
+  white-space: nowrap;
+}
+.md tbody tr:nth-child(even) {
+  background: #f6f5f1;
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .fiche-body {
+    padding: 4px 14px 32px;
+  }
+  .md {
+    font-size: 15.5px;
+  }
+}
+
+/* ---------- between a phone and a wide screen (tablet portrait, small windows) ---------- */
+/* the work, the metronome and the end of a movement on the first row, the sheet and the
+   movements on their own row: they no longer slide under the metronome */
+@media (min-width: 720.02px) and (max-width: 1100px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (max-width: 1100px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (max-width: 1100px) and (min-height: 500.02px) and (hover: hover) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .topbar .title {
+    min-width: 0;
+    flex: 1 1 200px;
+  }
+  .work-select {
+    max-width: 100%;
+  }
+  .mv-row {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* ---------- phone turned sideways (low and wide; a small tablet lying down too): the phone layout, the top bar on one row ---------- */
+@media (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none) {
+  /* one row where the height is a phone's, or where the movements have the room beside the
+     work (a small tablet up to 1100 px wide keeps the phone's two rows: on one, the third
+     movement of three was cut off) */
+  @media (max-height: 500px), (min-width: 1100.02px) {
+    .topbar {
+      flex-wrap: nowrap;
+      padding: 4px max(10px, var(--safe-right)) 4px
+        max(10px, var(--safe-left));
+    }
+    .topbar .title {
+      flex: 0 1 190px;
+    }
+    .mv-row {
+      order: 1;
+      width: auto;
+      flex: 1 1 0;
+    }
+  }
+  .transport {
+    padding: 4px max(10px, var(--safe-right))
+      calc(4px + var(--safe-bottom))
+      max(10px, var(--safe-left));
+  }
+  /* a line taller than what a low screen leaves it is cut at the bottom of its place: it was
+     painted over the bottom bar, which could no longer be pressed (the size of the line is
+     changed in the track list, behind that bar). The deck's one row has the deck's height,
+     the line no more than that row, its drawing no more than the line. */
+  .app > .deck {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .lane {
+    min-height: 0;
+  }
+  .lane-scroll {
+    max-height: 100%;
+  }
+  /* the menu of the voices opens downwards: the line is at the top of the screen here, and
+     opening upwards (as over the pages of a phone held upright) it left the screen */
+  .voice-menu {
+    top: calc(100% + 4px);
+    bottom: auto;
+    max-height: calc(100dvh - 104px);
+  }
+  /* the page (at a phone's width) beside the line: stacked, neither would be readable */
+  .app {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+  .app > .topbar,
+  .app > .transport {
+    grid-column: 1 / -1;
+  }
+  .app > .topbar {
+    grid-row: 1;
+  }
+  .app > .error {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+  .app > .stage {
+    grid-row: 3;
+    grid-column: 1;
+  }
+  .app > .loading {
+    grid-row: 3;
+    grid-column: 1 / -1;
+  }
+  .app > .deck {
+    grid-row: 3;
+    grid-column: 2;
+    min-height: 0;
+    border-top: 0;
+    border-left: 1px solid #00000055;
+  }
+  .app > .transport {
+    grid-row: 4;
+  }
+  /* the track list (in the line's half): the whole panel scrolls, the rows keep their height */
+  .deck.tracks-open .tracks {
+    overflow-y: auto;
+  }
+  .deck.tracks-open .track-rows {
+    flex: none;
+    overflow: visible;
+  }
+  .track {
+    grid-template-columns: 34px minmax(56px, 1fr) 40px 40px 40px 84px; /* room for « Soprano » */
+    gap: 5px;
+  }
+  .t-eye {
+    width: 34px;
+  }
+  .lane {
+    border-top: 0;
+    height: 100%;
+  }
+}
+.lane-voice,
+.lane-info {
+  flex: none;
+}
+
+/* ---------- learning the text (in the sheet's panel) ---------- */
+.fiche-memo {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: #e8eefb;
+  color: #1f5bd6;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .fiche-memo:hover {
+    background: #dbe5fa;
+  }
+}
+@media (max-width: 420px) {
+  .fiche-memo-long {
+    display: none;
+  }
+}
+.memo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.memo-bar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #e4e2dc;
+}
+.memo-scope {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 260px;
+  height: 34px;
+  border: 1px solid #d8d6cf;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 6px;
+  font-size: 15px;
+  color-scheme: light;
+}
+.memo .seg {
+  flex: none;
+  border-color: #d8d6cf;
+  background: #fff;
+}
+.memo .seg button {
+  height: 32px;
+  padding: 0 10px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.memo .seg button + button {
+  border-left: 1px solid #d8d6cf;
+}
+.memo .seg button.on {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+}
+.memo-status {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: 34px;
+  padding: 4px 16px;
+  border-bottom: 1px solid #e4e2dc;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+/* the field that receives the keys: kept out of sight, but in the visible part of the panel (the
+   browser would otherwise scroll to show it when the phone's keyboard opens) */
+.memo-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px; /* no zoom on focus (iOS) */
+  caret-color: transparent;
+  pointer-events: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.memo-tag {
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 12px;
+}
+.memo-where {
+  white-space: nowrap;
+}
+.memo-streak {
+  margin-left: auto;
+  white-space: nowrap;
+  color: var(--ink);
+  font-weight: 700;
+}
+.memo-streak.hot {
+  color: var(--mark-ink);
+}
+.memo-type {
+  border: 1px solid #c9c7c1;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f5bd6;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.memo-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: rgb(var(--mark));
+  transform-origin: left;
+  transition: transform 0.25s ease-out;
+}
+.memo-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 16px 0;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: text;
+}
+.memo-text {
+  max-width: 62ch;
+  margin: 0 auto;
+  padding-bottom: 40vh; /* room to bring the last line up, above a phone's keyboard */
+}
+.memo-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 20px 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.memo-head:first-child {
+  margin-top: 8px;
+}
+/* the heading starts the run from its movement */
+.memo-head-go {
+  border: 0;
+  padding: 2px 0;
+  margin: -2px 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline dotted transparent;
+  text-underline-offset: 3px;
+}
+.memo-head-go:focus-visible {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+@media (hover: hover) {
+  .memo-head-go:hover {
+    color: var(--ink);
+    text-decoration-color: currentColor;
+  }
+}
+@media (hover: none) {
+  .memo-head-go {
+    text-decoration-color: #b9b7b0;
+  }
+}
+/* « Recommencer »: always at hand, quiet */
+.memo-restart {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: -4px -6px -4px -4px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.memo-restart:focus-visible {
+  background: #ecebe6;
+  color: var(--ink);
+}
+@media (hover: hover) {
+  .memo-restart:hover {
+    background: #ecebe6;
+    color: var(--ink);
+  }
+}
+/* the help of the movement, in words */
+.memo-help-level {
+  font-weight: 400;
+  font-size: 12px;
+  color: #8d9098;
+}
+.memo-help-level.up,
+.memo-help-level.down {
+  font-weight: 700;
+  animation: memo-next 0.6s ease-out;
+}
+.memo-help-level.up {
+  color: var(--mark-ink);
+}
+@keyframes memo-next {
+  from {
+    opacity: 0;
+  }
+}
+.ml {
+  margin: 2px -8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+.ml.cur {
+  background: rgba(var(--mark), 0.14);
+}
+.ml-text {
+  margin: 0;
+  font:
+    21px/1.6 Tinos,
+    "Times New Roman",
+    Times,
+    serif;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.w {
+  border-radius: 3px;
+}
+.w.cue {
+  color: #9a9ca3;
+}
+.w.miss {
+  color: var(--mark-ink);
+  background: rgba(var(--mark), 0.3);
+}
+.w.hid .w-ghost {
+  color: transparent;
+  border-bottom: 2px solid #cfcdc6;
+}
+.w.cur {
+  position: relative;
+  display: inline-block; /* its box is the line's: the letters typed sit on the words' baseline */
+}
+.w.cur .w-ghost {
+  border-bottom: 2px solid var(--ink);
+}
+.w.cur.hid .w-ghost {
+  color: transparent;
+}
+.w.cur.cue .w-ghost {
+  color: #8d9098;
+}
+.w-typed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.bad-typed {
+  color: #c62828;
+}
+.w.cur.bad {
+  animation: memo-bad 0.32s ease-out;
+}
+.w.cur.wrong .w-ghost {
+  border-bottom-color: #c62828;
+}
+@keyframes memo-bad {
+  0% {
+    background: rgba(198, 40, 40, 0.28);
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-2px);
+  }
+  60% {
+    transform: translateX(2px);
+  }
+  100% {
+    background: transparent;
+    transform: none;
+  }
+}
+.ml-tr {
+  margin: 0 0 4px;
+  font-size: 14px;
+  line-height: 1.35;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+/* the end of a run */
+.memo-result {
+  margin: 22px 0 0;
+  padding: 14px 16px 16px;
+  border: 1px solid #e4e2dc;
+  border-radius: 12px;
+  background: #fff;
+}
+.memo-result h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.memo-score {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-variant-numeric: tabular-nums;
+}
+.memo-score b {
+  font-size: 34px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.memo-score span,
+.memo-best {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.memo-best,
+.memo-record {
+  margin: 4px 0 0;
+}
+.memo-record {
+  font-weight: 700;
+  color: var(--mark-ink);
+}
+.memo-review h4 {
+  margin: 14px 0 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.memo-review ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font:
+    17px/1.5 Tinos,
+    "Times New Roman",
+    Times,
+    serif;
+}
+.memo-review-line {
+  display: block;
+  width: 100%;
+  margin: 0 -6px;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.memo-review-line:focus-visible {
+  background: #ecebe6;
+}
+@media (hover: hover) {
+  .memo-review-line:hover {
+    background: #ecebe6;
+  }
+}
+.memo-review .miss {
+  color: var(--mark-ink);
+  background: rgba(var(--mark), 0.3);
+  border-radius: 3px;
+}
+.memo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.memo-actions kbd {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid #ffffff66;
+  border-radius: 4px;
+  font: 11px/16px var(--font);
+}
+.memo-alt {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #c9c7c1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 14px;
+}
+.memo-help {
+  flex: none;
+  margin: 0;
+  padding: 6px 16px;
+  border-top: 1px solid #e4e2dc;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+/* touch screens: no physical keyboard to explain */
+@media (hover: none) and (pointer: coarse) {
+  .memo-help,
+  .memo-actions kbd {
+    display: none;
+  }
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .memo-bar {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+  .memo-scope {
+    font-size: 16px; /* no zoom on focus (iOS) */
+    max-width: none;
+  }
+  .memo .seg button {
+    padding: 0 9px;
+  }
+  .memo-status {
+    padding: 3px 12px;
+  }
+  .memo-body {
+    padding: 4px 12px 0;
+  }
+  .ml-text {
+    font-size: 19.5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memo-progress {
+    transition: none;
+  }
+  .w.cur.bad,
+  .memo-help-level {
+    animation: none !important;
+  }
+}
+
+/* ---------- « Enregistrer ma voix »: switch in the track list, panel under the bottom bar ---------- */
+.tracks-foot .tracks-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--stand-3);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--chrome-soft);
+  font-size: 13px;
+  padding: 3px 10px 3px 6px;
+}
+@media (hover: hover) {
+  .tracks-rec:hover {
+    color: var(--chrome-text);
+    background: var(--stand-3);
+  }
+}
+.tracks-rec .sw {
+  flex: none;
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--stand);
+  border: 1px solid #ffffff30;
+  transition: background 0.15s;
+}
+.tracks-rec .sw::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chrome-soft);
+  transition: transform 0.15s;
+}
+.tracks-rec.on {
+  color: var(--chrome-text);
+}
+.tracks-rec.on .sw {
+  background: #d93a3f;
+  border-color: #d93a3f;
+}
+.tracks-rec.on .sw::after {
+  background: #fff;
+  transform: translateX(12px);
+}
+
+.transport:has(+ .rec) {
+  padding-bottom: 8px; /* the panel below takes the bottom inset */
+}
+.rec {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px calc(6px + var(--safe-bottom));
+  border-top: 1px solid #00000040;
+  background: #25272b;
+  font-size: 13px;
+}
+.rec-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--stand-3);
+  border-radius: 999px;
+  background: var(--stand-2);
+  color: var(--chrome-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+@media (hover: hover) {
+  .rec-btn:hover:not(:disabled) {
+    background: var(--stand-3);
+  }
+}
+.rec-dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e5484d;
+}
+/* recording: red, the time, and a ring that follows the microphone's level */
+.rec-btn.recording {
+  background: #d93a3f;
+  border-color: #d93a3f;
+  color: #fff;
+  padding: 0 12px;
+  box-shadow: 0 0 0 calc(1px + var(--lvl, 0) * 6px) rgba(229, 72, 77, 0.35);
+  transition: box-shadow 0.1s linear;
+}
+@media (hover: hover) {
+  .rec-btn.recording:hover {
+    background: #c5323a;
+  }
+}
+.rec-time {
+  font-variant-numeric: tabular-nums;
+  min-width: 2.6em;
+  text-align: left;
+}
+.rec-ctl {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--stand-3);
+  border-radius: 10px;
+  background: var(--stand-2);
+  color: var(--chrome-soft);
+  font-size: 13px;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .rec-ctl:hover:not(:disabled) {
+    background: var(--stand-3);
+    color: var(--chrome-text);
+  }
+}
+.rec-take.on {
+  color: var(--chrome-text);
+}
+.rec-take.on svg {
+  color: #ff8a8f;
+}
+.rec-vol {
+  flex: none;
+  width: 100px;
+  margin: 0;
+  accent-color: #c8cbd2;
+  height: 18px;
+}
+.rec-vol:disabled {
+  opacity: 0.35;
+}
+.rec-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--chrome-soft);
+}
+.rec-info .glyph {
+  vertical-align: -2px;
+}
+.rec .short {
+  display: none;
+}
+.rec-sum {
+  color: var(--chrome-text);
+  font-variant-numeric: tabular-nums;
+}
+.rec-live {
+  color: #ff8a8f;
+  font-weight: 700;
+}
+.rec-msg {
+  color: #ffcf8f;
+}
+.rec-tempo {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: rgb(var(--mark));
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  font-size: inherit;
+  white-space: nowrap;
+}
+.rec-more-box {
+  flex: none;
+  position: relative;
+}
+.rec-pop {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 30;
+  width: 330px;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  font-size: 14px;
+}
+.rp-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-weight: 700;
+}
+.rp-row select {
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #c9c7c1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 400;
+}
+.rp-row input[type="range"] {
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--ink);
+}
+.rp-vol {
+  display: none;
+}
+.rp-offset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rp-offset .tp-step {
+  width: 44px;
+  height: 40px;
+}
+.rp-offset output {
+  min-width: 70px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.rp-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.rp-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #1f5bd6;
+  text-decoration: underline;
+  font-size: inherit;
+}
+.rp-link:disabled {
+  display: none;
+}
+.rp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.rp-actions .pop-action {
+  flex: 1 1 auto;
+  padding: 0 10px;
+}
+.pop-action.light {
+  background: #ece9e2;
+  color: var(--ink);
+}
+@media (hover: hover) {
+  .pop-action.light:hover:not(:disabled) {
+    background: #e0ddd5;
+  }
+}
+.pop-action.danger {
+  background: #d9604f;
+  color: #fff;
+}
+@media (hover: hover) {
+  .pop-action.danger:hover {
+    background: #d9604f;
+    color: #fff;
+  }
+}
+@media (max-width: 720px), (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none), (hover: none) and (max-aspect-ratio: 9/16) {
+  .rec {
+    gap: 6px;
+    padding: 5px 10px calc(5px + var(--safe-bottom));
+  }
+  .rec-take span {
+    display: none;
+  }
+  .rec-take {
+    padding: 0 9px;
+  }
+  .rec-vol {
+    width: 72px;
+  }
+  .rec .long {
+    display: none;
+  }
+  .rec .short {
+    display: inline;
+  }
+  .tracks-foot .tracks-rec {
+    min-height: 40px;
+  }
+  .rec-pop {
+    position: fixed;
+    right: 10px;
+    bottom: calc(60px + var(--safe-bottom));
+  }
+}
+/* narrow phones: the record button is the red dot alone, the volume goes into the menu */
+@media (max-width: 440px) {
+  .rec-label,
+  .rec-listen span {
+    display: none;
+  }
+  .rec-btn {
+    padding: 0;
+    width: 44px;
+  }
+  .rec-btn.recording {
+    width: auto;
+    padding: 0 10px;
+  }
+  .rec-listen {
+    padding: 0 9px;
+  }
+  .rec-vol {
+    display: none;
+  }
+  .rp-vol {
+    display: grid;
+  }
+}
+/* phone sideways: the panel under the page (left half), the line keeps its full height */
+@media (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none) {
+  .app {
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  }
+  .app > .deck {
+    grid-row: 3 / 5;
+  }
+  .app > .transport {
+    grid-row: 5;
+  }
+  .app > .rec {
+    grid-row: 4;
+    grid-column: 1;
+    padding: 4px 8px 4px max(10px, var(--safe-left));
+  }
+  .transport:has(+ .rec) {
+    padding-bottom: calc(4px + var(--safe-bottom));
+  }
+  .rec-label,
+  .rec-listen span,
+  .rec-vol {
+    display: none;
+  }
+  .rec-btn {
+    padding: 0;
+    width: 44px;
+  }
+  .rec-btn.recording {
+    width: auto;
+    padding: 0 10px;
+  }
+  .rec-listen {
+    padding: 0 9px;
+  }
+  .rp-vol {
+    display: grid;
+  }
+  .rec-pop {
+    bottom: 8px;
+    max-height: calc(100dvh - 16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-btn.recording {
+    transition: none;
+  }
+}
+
+/* ---------- phone turned sideways: the line of my voice, the page, or both ---------- */
+/* Side by side (above), the page and the line each have half of a small screen: hard to read on
+   most phones. The bottom bar chooses (Bars.tsx › SideViewControl): the line alone across the
+   screen, the page alone, or both as above (until a view is chosen: the line on a phone, both
+   on a small tablet — state.ts › sideView). Shown on no other screen. */
+.side-view {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 500px), (orientation: landscape) and (max-height: 760px) and (hover: none) {
+  .side-view {
+    display: inline-flex;
+    flex: none;
+    height: 42px; /* 40 px inside the border, as « ma voix » */
+    margin: 0 auto; /* in the middle of the room between the tempo and my voice */
+    border: 1px solid var(--stand-3);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .t-play {
+    flex: none; /* it no longer takes that room */
+  }
+  .side-view button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    height: 100%;
+    padding: 0 11px;
+    border: 0;
+    background: var(--stand-2);
+    color: var(--chrome-soft);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .side-view button + button {
+    border-left: 1px solid var(--stand-3);
+  }
+  .side-view button.on {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .side-view button:focus-visible {
+    outline-offset: -3px; /* inside: the group's rounded border cuts what is outside */
+  }
+
+  /* the line alone. The work's sheet, when open, takes the left half, as in « Les deux »: the
+     line stays in sight beside it */
+  .app.side-line:not(.fiche-open) > .stage {
+    display: none;
+  }
+  .app.side-line:not(.fiche-open) > .deck {
+    grid-column: 1 / -1;
+    border-left: 0;
+    padding: 0 var(--safe-right) 0 var(--safe-left);
+  }
+  /* its track list: at the right as in « Les deux », the line still in sight at the left */
+  .app.side-line:not(.fiche-open) > .deck.tracks-open {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .app.side-line:not(.fiche-open) > .deck.tracks-open .lane {
+    display: block;
+    grid-area: 1 / 1;
+  }
+  .app.side-line:not(.fiche-open) > .deck.tracks-open .tracks {
+    grid-area: 1 / 2;
+    border-left: 1px solid #00000055;
+    position: relative;
+    z-index: 4; /* over the recording panel, below */
+  }
+
+  /* the page alone, across the screen (PageView: fitted to the width, it scrolls) */
+  .app.side-page > .stage {
+    grid-column: 1 / -1;
+    padding: 0 var(--safe-right) 0 var(--safe-left);
+  }
+  .app.side-page > .deck {
+    display: none;
+  }
+  /* its track list: at the right as in « Les deux », over the page, which does not move */
+  .app.side-page > .deck.tracks-open {
+    display: grid;
+    z-index: 25; /* over the page and the work's sheet (20), under the menus (30), as on a wide screen */
+    box-shadow: -10px 0 30px #0006;
+  }
+
+  /* « Enregistrer ma voix »: its panel takes no height from the line or the page (a phone lying
+     down has little), it lies over a corner where nothing is read. The page: its bottom left
+     corner, the navigator beside it (the music being played is kept above both). */
+  .app.side-page:not(.fiche-open) > .stage {
+    grid-row: 3 / 5;
+  }
+  .app.side-page:not(.fiche-open) > .rec {
+    z-index: 9;
+    border-top-right-radius: 12px;
+    box-shadow: 0 -2px 10px #0004;
+  }
+  .app.side-page:not(.fiche-open):has(> .rec) .page-nav-box {
+    left: min(75%, 100% - 152px); /* in the right half, and whole on the narrowest screens */
+  }
+  .app.side-page.fiche-open > .rec {
+    grid-column: 1 / -1; /* under the work's sheet, which has the screen */
+  }
+  /* The line: its top right corner, above the staff, where only the entry text was (the
+     line's header keeps the left half) */
+  .app.side-line:not(.fiche-open) > .rec {
+    grid-row: 3;
+    grid-column: 2;
+    align-self: start;
+    z-index: 3;
+    padding: 4px max(10px, var(--safe-right)) 4px 8px;
+    border-top: 0;
+    border-bottom-left-radius: 12px;
+    box-shadow: 0 2px 10px #0004;
+  }
+  .app.side-line:not(.fiche-open):has(> .rec) > .deck:not(.tracks-open) .lane-head {
+    right: calc(50% + 8px); /* not when the track list has that half: the line is beside it */
+  }
+  /* the panel's « ⋯ » menu: over everything, as where the panel has its own row (laid over a
+     view, the panel has a level of its own, which held its menu under the track list) */
+  .app.side-line > .rec:has(.rec-pop),
+  .app.side-page > .rec:has(.rec-pop) {
+    z-index: 31;
+  }
+}
+/* narrow phones: the view shown keeps its word, the two others their pictures alone (a finger
+   has no tooltip); the three pictures alone where even that does not fit */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 739px), (orientation: landscape) and (max-height: 760px) and (hover: none) and (max-width: 739px) {
+  .side-view button:not(.on) span {
+    display: none;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 619px), (orientation: landscape) and (max-height: 760px) and (hover: none) and (max-width: 619px) {
+  .side-view button span {
+    display: none;
+  }
+}
+/* the voice menu opens over the pages: above the page navigator while it is open */
+.lane-head:has(.voice-menu) {
+  z-index: 60;
+}
+
+/* ---------- the general volume (computers only: Volume.tsx) ---------- */
+.volume {
+  display: none; /* shown where each layout has it, below */
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--chrome-soft);
+}
+.volume input {
+  width: 116px;
+  height: 18px;
+  margin: 0;
+  accent-color: #c8cbd2;
+}
+/* the phone layout on a computer (a narrow window): in the track list's header */
+@media (hover: hover) and (max-width: 720px), (hover: hover) and (orientation: landscape) and (max-height: 500px) {
+  .tracks-head .volume {
+    display: flex;
+    flex: 0 1 150px;
+    min-width: 0;
+  }
+  .tracks-head .volume input {
+    flex: 1;
+    width: 0;
+    min-width: 40px;
+  }
+}
+@media (max-width: 440px) {
+  .tracks-head .volume span {
+    display: none; /* the slider alone, with its tooltip */
+  }
+}
+
+/* ---------- wide screens: every screen that does not have the phone layout ---------- */
+/* The same elements as on a phone, placed by a grid: the pages take the height; under them, at the
+   left the controls (the phone's bottom bar), at the right the followed line, as tall as it
+   needs. The track list unfolds above the controls, over the bottom left of the pages' area:
+   the pages keep clear of it wherever the window lets them (PageView › fitPages).
+   No rule of the phone layout is touched: everything wide is in these media queries (but the
+   whole pages' own margins, `.pages:not(.narrow)`, which go with fitPages). */
+:root {
+  --console: 388px; /* the controls and the track list (PageView: LIST_W) */
+  --strip: 42px; /* the strip of the track list's button */
+}
+@media (min-width: 720.02px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (min-height: 500.02px) and (hover: hover) {
+  .app {
+    display: grid;
+    grid-template-columns: var(--console) minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+  }
+  .app > .topbar {
+    grid-area: 1 / 1 / auto / -1;
+  }
+  .app > .error {
+    grid-area: 2 / 1 / auto / -1;
+  }
+  .app > .stage,
+  .app > .loading {
+    grid-area: 4 / 1 / auto / -1;
+  }
+  .app > .deck {
+    display: contents; /* the list and the line are placed in the screen's grid */
+  }
+  .deck > .lane {
+    grid-area: 5 / 2;
+    padding-bottom: var(--safe-bottom);
+  }
+  .app > .rec {
+    grid-area: 6 / 1 / auto / -1;
+  }
+  .app:has(> .rec) .lane {
+    padding-bottom: 0; /* the panel below takes the bottom inset */
+  }
+
+  /* the controls: one block in the bottom left corner whatever the line's height. A strip with
+     the track list's button and the general volume; under it the tempo (left) with replay and
+     play at the right, play the nearest to the line; then my voice. */
+  .app > .transport {
+    grid-area: 5 / 1;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) var(--strip) 58px 56px;
+    grid-template-areas:
+      ". ."
+      "list volume"
+      "play play"
+      "voice voice";
+    gap: 0 12px;
+    padding: 0 8px var(--safe-bottom);
+  }
+  .app > .transport:has(+ .rec) {
+    padding-bottom: 0;
+  }
+  .transport::before {
+    content: "";
+    grid-area: list / 1 / auto / -1;
+    align-self: stretch;
+    margin: 0 -8px;
+    background: var(--stand-2);
+    border-top: 1px solid #00000055;
+    border-bottom: 1px solid #00000055;
+  }
+  .transport .tracks-toggle {
+    grid-area: list;
+    display: inline-flex;
+    gap: 6px;
+    height: calc(var(--strip) - 12px);
+    padding: 0 12px 0 8px;
+    font-size: 14px;
+    background: var(--stand);
+  }
+  .transport .tracks-toggle.on {
+    background: var(--paper);
+    border-color: var(--paper);
+    color: var(--ink);
+  }
+  .transport .volume {
+    grid-area: volume;
+    justify-self: end;
+    display: flex;
+  }
+  .transport .my-voice {
+    grid-area: voice;
+    display: flex;
+  }
+  .transport .my-voice-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 7px;
+  }
+  .transport .my-voice button {
+    flex: 1 0 auto;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 5px;
+  }
+  .transport .t-play {
+    grid-area: play;
+    align-self: end;
+    justify-content: flex-end;
+  }
+  .transport .tempo-box {
+    order: -1;
+    margin-right: auto;
+  }
+
+  /* the track list, unfolded from the strip: over the bottom left of the pages' area (and the
+     empty top of the controls when the line is tall) */
+  .deck > .tracks {
+    grid-area: 4 / 1 / 6 / 2;
+    align-self: end;
+    --under: calc(var(--strip) + 114px + var(--safe-bottom));
+    margin-bottom: var(--under);
+    max-height: calc(100% - var(--under));
+    z-index: 25; /* over the pages and the work's sheet, under the menus */
+    display: none;
+    padding: 6px 8px 8px;
+    border-top: 1px solid #00000055;
+    border-top-right-radius: 12px;
+    box-shadow: 0 -6px 24px #00000066;
+  }
+  .deck.tracks-open > .tracks {
+    display: flex;
+  }
+  .app:has(> .rec) .tracks {
+    --under: calc(var(--strip) + 114px); /* the panel below takes the bottom inset */
+  }
+  /* the « Enregistrer ma voix » strip under everything: on the controls' margin */
+  .app > .rec {
+    padding-left: 8px;
+  }
+
+  .zoom-reset {
+    right: 58px; /* the help has the corner */
+  }
+
+  /* the navigator: centred under the pages (clear of the track list), over the paper's bottom
+     margin: the pages' size keeps the music above it (PageView › fitPages) */
+  .page-nav-box {
+    left: calc(50% + var(--list, 0px) / 2);
+  }
+}
+/* fingers: the track list's button as tall as the other targets */
+@media (min-width: 720.02px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000) and (hover: none), (min-width: 720.02px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000) and (hover: none) {
+  :root {
+    --strip: 52px;
+  }
+}
+/* a narrower screen: the work's sheet, open, would be under the list (it takes the whole area
+   below 900 px, 62 % of it above): the list waits behind it */
+@media (min-width: 720.02px) and (max-width: 1022px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (max-width: 1022px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000), (min-width: 720.02px) and (max-width: 1022px) and (min-height: 500.02px) and (hover: hover) {
+  .stage:has(.fiche) ~ .deck > .tracks {
+    display: none;
+  }
+}
+/* under a mouse the navigator is thinner: more of the height goes to the pages */
+@media (min-width: 720.02px) and (min-height: 500.02px) and (hover: hover) {
+  .page-nav-box {
+    bottom: 6px;
+  }
+  .page-nav {
+    height: 32px;
+    padding: 2px;
+  }
+  .pn-turn,
+  .pn-mv,
+  .pn-where {
+    height: 28px;
+  }
+  .pn-where {
+    line-height: 28px;
+  }
+  .pn-mv::after {
+    top: 6px;
+    bottom: 6px;
+  }
+}
+@media (min-width: 720.02px) and (orientation: portrait) and (min-aspect-ratio: 9001/16000) and (prefers-reduced-motion: no-preference), (min-width: 720.02px) and (min-height: 760.02px) and (min-aspect-ratio: 9001/16000) and (prefers-reduced-motion: no-preference), (min-width: 720.02px) and (min-height: 500.02px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .deck.tracks-open > .tracks {
+    animation: tracks-unfold 0.16s ease-out;
+  }
+  @keyframes tracks-unfold {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+}
