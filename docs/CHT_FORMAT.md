@@ -53,7 +53,8 @@ m 13
   - `key` = nombre de dièses (positif) ou de bémols (négatif) : La majeur = 3, Mi majeur = 4, Fa majeur = -1.
   - `tempo` = noires par minute. Si la partition n'en donne pas, estimer et le dire en commentaire.
 - `system K` (recommandé) : la mesure suivante commence le K-ième système **de la page imprimée** ;
-  contrôlé contre `work/measures.tsv` ; `render.py --compare` s'en sert pour découper la photo.
+  contrôlé contre `work/measures.tsv` ; `render.py --compare` s'en sert pour mettre chaque système
+  de la page au-dessus de sa gravure.
 - `m N` ouvre une mesure. N = numéro de mesure **dans le mouvement** (1 = première mesure ; chaque
   segment entre deux barres compte pour une mesure). Le premier numéro de chaque page est donné par
   `scores/<oeuvre>/work/measures.tsv` (voir `docs/TRANSCRIBE.md`).
@@ -75,6 +76,7 @@ Les solistes s'écrivent dans les voix `S A T B` existantes, nommées par `part`
 | Soprano I et II | `S`, `A` | `part S "Soprano I"` + `part A "Soprano II"` |
 | Alto solo | `A` | `part A "Alto solo"` |
 | Alto solo **sur la portée d'alto du chœur** (« Solo »/« Tutti ») | `A` | aucun `part` ; `# Solo` / `# Tutti` en commentaire de la ligne `A` |
+| Soliste sur **sa propre portée**, le chœur se taisant | la voix de son nom (`S` pour un soprano) | `part S "Soprano solo"` sur ces pages ; leurs systèmes dans `work/pages.tsv` (`staves`, `solo`) |
 
 Le nom du soliste peut aussi figurer en commentaire. Une voix qui ne chante dans aucune mesure du
 mouvement n'apparaît pas dans le MusicXML compilé.
@@ -103,8 +105,11 @@ complet ; les lignes `system K` gardent la numérotation de la page (009b commen
   Une liaison relie deux notes **de la même voix** (`PR` → `PR`, pas `PR2` → `PR`).
 - N-olets : `{3 a3:8 b3:8 c#4:8}` = triolet (3 dans le temps de 2) ; `{6 …}`, `{5 …}` idem ;
   `{6:4 …}` donne explicitement le temps normal. Espace obligatoire après `{3`.
-- Nuances optionnelles, avant la note : `!ppp !pp !p !mp !mf !f !ff !fff !sf !sfz !fz !fp !cresc !dim`.
-- Changement de clé (piano) : jeton `clef:G`, `clef:F` (ou `clef:G8`) à sa place dans la voix.
+- Nuances optionnelles, avant la note : `!ppp !pp !p !mp !mf !f !ff !fff !sf !sfz !fz !fp !cresc !dim`
+  (un soufflet : `!cresc` ou `!dim` à son début, ou rien).
+- Changement de clé (piano) : jeton `clef:G`, `clef:F` (ou `clef:G8`) à sa place dans la voix ; il
+  vaut jusqu'au jeton suivant, d'une mesure et d'une page à l'autre. Les hauteurs restent réelles.
+- Ne s'écrivent pas : liaisons d'expression, staccatos, accents, trilles, doigtés, pédale.
 - Plus de deux voix sur une portée : réduire à deux (`PR`, `PR2`) ; une note tenue sous des notes
   mobiles s'écrit en accords liés (`<b3 f#4~>:4 <d4 f#4~>:4 …`).
 - Notes d'ornement (appoggiatures) : ignorées.

@@ -29,7 +29,7 @@ IMAGE = re.compile(r"^(\d+)\.(jpe?g|png|webp|tiff?)$", re.I)
 def work_folder(path: Path) -> Path:
     """`scores/<work>` or `scores/<work>/work` -> the work folder."""
     path = Path(path)
-    return path / "work" if (path / "work.yaml").exists() else path
+    return path / "work" if (path / "work.yaml").exists() or (path / "work").is_dir() else path
 
 
 def load_pages_tsv(work: Path) -> dict[int, dict]:
@@ -59,6 +59,15 @@ def work_staves(work: Path) -> list[str] | None:
     if isinstance(v, str):
         v = [x.strip() for x in v.replace(",", " ").split()]
     return [str(x) for x in v] if v else None
+
+
+def system_sizes(work: Path) -> list[int] | None:
+    """How many staves a system of this work can have, from `staves` of work.yaml: its length,
+    and two more when it names the voices only (the keyboard then stands under them)."""
+    staves = work_staves(work)
+    if not staves:
+        return None
+    return [len(staves)] if {"PR", "PL"} & set(staves) else [len(staves), len(staves) + 2]
 
 
 def solo_voices(work: Path, page: int) -> list[str]:

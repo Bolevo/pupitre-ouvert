@@ -269,9 +269,9 @@ def check(files: dict[str, bytes]) -> tuple[list[str], list[str], list[str]]:
 
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 1:
+    if len(args) != 1 or args[0].startswith("-"):
         print(__doc__)
-        return 2
+        return 0 if args[:1] in (["-h"], ["--help"]) else 2
     path = Path(args[0])
     try:
         files = read_archive(path)

@@ -216,7 +216,8 @@ def annotate(pages: list[dict], pages_dir: Path, sigs: dict[tuple[int, str], tup
             continue
         r["m"]["xn"] = r["m"]["x0"] + r["xn"]
         if r["how"] == "model":
-            notes.append(f"{r['where']}: no gap near the model, placed by the model (check the image)")
+            notes.append(f"{r['where']}: the first note was not found where this edition usually has it; the playhead "
+                         f"starts at the usual distance from the barline (clef and signatures of the edition)")
     if rows_out is not None:
         rows_out += rows
     return [head] + notes

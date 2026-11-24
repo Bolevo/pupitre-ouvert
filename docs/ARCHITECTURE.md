@@ -53,14 +53,18 @@ position dans la mesure est interpolée.
 - `publish.py` : construit, zippe, contrôle ; sans argument, installe aussi les œuvres de
   `scores/` comme œuvres livrées avec l'app (`app/public/packs/`).
 - `check_pack.py` : le contrôle d'une archive (mêmes règles que `app/src/pack/validate.ts`, et davantage).
-- `cht/` : le format texte de transcription (`parse.py`), ses contrôles (`check.py`), son rendu
-  pour la relecture (`render.py`), sa compilation en MusicXML (`compile.py`, music21),
-  `measures.tsv` (`measures.py`).
+- `crosscheck.py` : les notes chantées que le clavier ne double pas (des endroits à relire).
+- `cht/` : le format texte de transcription (`parse.py`), ses contrôles (`check.py`), sa gravure
+  sous la page, portée par portée et barres alignées, pour la relecture (`render.py`), sa
+  compilation en MusicXML (`compile.py`, music21), `measures.tsv` (`measures.py`).
 
 ## Les outils d'image (`tools/`)
 
-- `source.py` : PDF ou photos → une image par page.
-- `omr/` : détection des portées et des barres, découpes pour la lecture (`pages.py`, `zoom.py`) ;
+- `source.py` : PDF ou photos → une image par page, et un aperçu de toutes (`work/apercu.png`).
+- `omr/` : détection des portées, des systèmes et des barres (`layout.py`), table des mesures et
+  découpes pour la lecture (`pages.py`, `zoom.py`). Ce que la détection ne trouve pas se corrige
+  dans trois petites tables du dossier `work/` : `measures.tsv` (mesures par système),
+  `bars.tsv` (barres placées à la main), `pages.tsv` (portées par système) ;
   `draft.py` : brouillon Audiveris, facultatif.
 - `page_assets.py` (+ `page_staves.py`, `page_starts.py`) : les pages de l'app et les cases des
   mesures. Une photo ou un scan y devient une page propre : fond blanc et encre rétablie

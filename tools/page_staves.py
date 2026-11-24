@@ -173,27 +173,53 @@ def system_staves(mask: np.ndarray, band: tuple[int, int, int, int], top: int, b
 def staff_counts(work_dir: Path) -> dict[int, int]:
     """Movement number (1-based, work.yaml order) -> number of score staves, for the
     compiled movements (same rule as pipeline/build_pack.py: max <staves> per part)."""
+    return {mv: n for mv, (n, _) in score_staves(work_dir).items()}
+
+
+def score_staves(work_dir: Path) -> dict[int, tuple[int, bool]]:
+    """Movement number -> (number of score staves, the score has a keyboard part)."""
     cfg = yaml.safe_load((work_dir / "work.yaml").read_text(encoding="utf-8"))
     out = {}
     for i, mv in enumerate(cfg["movements"]):
         f = work_dir / mv["file"]
         if not f.exists():
             continue
-        n = 0
+        n, keyboard = 0, False
         for part in ET.parse(f).getroot().iter("part"):
-            n += max([1] + [int(s.text) for s in part.iter("staves")])
-        out[i + 1] = n
+            k = max([1] + [int(s.text) for s in part.iter("staves")])
+            n += k
+            keyboard = keyboard or k > 1
+        out[i + 1] = (n, keyboard)
     return out
+
+
+def vocal_staves_of(work_dir: Path):
+    """-> f(page, number of staves of a system) = the indices of its vocal staves, top to bottom
+    (the names of the staves: work.yaml `staves`, work/pages.tsv `solo`; pipeline/cht/workdir.py)."""
+    import sys
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from pipeline.cht import workdir
+    work = work_dir / "work"
+
+    def vocal(page: int, n: int) -> list[int]:
+        names = workdir.staff_names(n, workdir.solo_voices(work, page))
+        return [i for i, nm in enumerate(names) if nm not in ("PR", "PL")]
+    return vocal
 
 
 # ---------------------------------------------------------------- pages
 
 def annotate(pages: list[dict], pages_dir: Path, counts: dict[int, int],
-             detected: dict | None = None) -> list[str]:
+             detected: dict | None = None, keyboard: dict[int, bool] | None = None, vocal=None) -> list[str]:
     """Add/refresh systems[].staves in pages (in place). Returns one line per system
     left without staves (with the reason) or with a weak detection. `detected`, if given,
-    receives {(page, system index): staves} for every system, kept or not."""
+    receives {(page, system index): staves} for every system, kept or not.
+    `keyboard` {movement: the score has a keyboard part} and `vocal` (vocal_staves_of): when
+    the page prints an accompaniment that the score does not hold (the voices alone were
+    transcribed), the vocal staves of the page are the staves of the score."""
     misses = []
+    voices_only: list[int] = []
     for pg in pages:
         gray = cv2.imread(str(pages_dir / pg["img"]), cv2.IMREAD_GRAYSCALE)
         mask = line_mask(gray)
@@ -216,12 +242,23 @@ def annotate(pages: list[dict], pages_dir: Path, counts: dict[int, int],
                 misses.append(f"{where}: {len(staves)} staves, movement {mvs} not compiled (staff count unknown)")
             elif len(want) > 1:
                 misses.append(f"{where}: movements {mvs} with different staff counts")
-            elif len(staves) != want.pop():
-                misses.append(f"{where}: {len(staves)} staves detected, {counts[mvs[0]]} in the score")
+            elif len(staves) != counts[mvs[0]]:
+                ix = vocal(pg["page"], len(staves)) if vocal and keyboard is not None and not keyboard.get(mvs[0], True) else []
+                if len(ix) == counts[mvs[0]] and len(ix) < len(staves):
+                    s["staves"] = [staves[i] for i in ix]          # the voices, without the accompaniment printed under them
+                    if pg["page"] not in voices_only:
+                        voices_only.append(pg["page"])
+                else:
+                    misses.append(f"{where}: {len(staves)} staves on the page, {counts[mvs[0]]} in the score: "
+                                  f"the staff of the voice followed is not shown on this system (staves of the work: work.yaml `staves`, "
+                                  f"of a page: work/pages.tsv)")
             else:
                 s["staves"] = staves
                 if agree < 0.5:
                     misses.append(f"{where}: kept, but only {agree:.0%} of the strips agree (check the image)")
+    if voices_only:
+        misses.insert(0, f"page(s) {', '.join(map(str, voices_only))}: the accompaniment printed on the page is not in the score; "
+                         f"the vocal staves are those of the score")
     return misses
 
 
@@ -268,7 +305,9 @@ def main():
         path = wd / "pages" / "pages.json"
         pages = json.loads(path.read_text(encoding="utf-8"))
         detected: dict = {}
-        misses = annotate(pages, path.parent, staff_counts(wd), detected)
+        layout = score_staves(wd)
+        misses = annotate(pages, path.parent, {m: n for m, (n, _) in layout.items()}, detected,
+                          {m: k for m, (_, k) in layout.items()}, vocal_staves_of(wd))
         total = sum(len(p["systems"]) for p in pages)
         done = sum(1 for p in pages for s in p["systems"] if "staves" in s)
         print(f"{wd.name}: staves on {done}/{total} systems")

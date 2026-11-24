@@ -40,6 +40,7 @@ id: faure-cantique            # identifiant simple et stable : lettres, chiffres
 title: "Cantique de Jean Racine"
 composer: "G. Fauré"
 notice: "Édition …, domaine public."        # facultatif (provenance, droits)
+defaultPart: T                              # facultatif : la voix montrée à qui n'en a pas encore choisi
 staves: [S, A, T, B, PR, PL]                # facultatif : les portées d'un système, de haut en bas (voir CREER.md)
 movements:
   - {file: mvt1.musicxml, id: mvt1, title: "Cantique de Jean Racine"}
@@ -124,7 +125,8 @@ Une section `## ` par mouvement, avec un lien `(#mv:<id du mouvement>)` ; chaque
 chanté **en gras** sur sa ligne (sans les répétitions musicales), puis sa traduction *en italique*
 sur la ligne suivante (une ligne ordinaire entre les deux serait lue comme une prononciation).
 `python tools/fiche_data.py <oeuvre> --words` imprime les faits utiles pour l'écrire (tons,
-mesures, durées, paroles de chaque voix).
+mesures, durées, paroles de chaque voix), d'après l'archive construite : lancer
+`pipeline/publish.py` avant, et de nouveau une fois la fiche écrite.
 
 ## 2. Ce que contient l'archive
 

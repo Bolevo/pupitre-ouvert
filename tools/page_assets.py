@@ -17,8 +17,12 @@ For every page listed in <work>/work/measures.tsv:
     tools/page_staves.py, which can also be rerun alone on the webp files
   - adds xn to the first measure of every system (where its music starts, after the clef
     and the signatures: the playhead's start) with tools/page_starts.py, same remark
-Pages whose detection cannot be reconciled are reported; their measures get evenly
-spaced boxes so the app still works (fix measures.tsv or the photo, then rerun).
+  - draws <work>/work/boxes/<work>_pNNN.png: the page as the app has it, the box of every
+    measure in grey, the staff of each part of the score in colour - what to look at
+Barlines are fitted to the counts of measures.tsv as tools/omr/pages.py does (doubtful strokes
+taken, narrowest measure merged, work/bars.tsv). A system that still does not fit is reported
+(WARN): its measures get evenly spaced boxes so the app still works (correct measures.tsv or
+place the barlines in work/bars.tsv, then rerun).
 """
 from __future__ import annotations
 
@@ -35,18 +39,18 @@ sys.path.insert(0, str(ROOT))
 from tools.omr import imgproc as ip, layout as lay  # noqa: E402
 from tools.omr import dewarp  # noqa: E402
 from tools.omr.frame import content_box  # noqa: E402
-from tools.omr.pages import reconcile  # noqa: E402
+from tools.omr.pages import load_hand_bars, reconcile  # noqa: E402
 from tools.omr.surface import ANALYSIS_W, lines_of, rectify  # noqa: E402
 from pipeline.cht.measures import load_measures  # noqa: E402
-from pipeline.cht.workdir import load_pages_tsv, page_images  # noqa: E402
+from pipeline.cht.workdir import load_pages_tsv, page_images, system_sizes  # noqa: E402
 from tools import page_starts  # noqa: E402
-from tools.page_staves import annotate, staff_counts, write_pages  # noqa: E402
+from tools.page_staves import annotate, draw, score_staves, vocal_staves_of, write_pages  # noqa: E402
 
 WIDTH = 1300
 
 
 def process(args):
-    img_path, page, rows, out, counts, frame = args
+    img_path, page, rows, out, counts, frame, per_system, hand = args
     gray = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
     # straightened once at full resolution with one smooth surface (tools/omr/surface.py);
     # the layout detector is tuned for ~1100 px wide pages: it works on a reduced copy
@@ -64,7 +68,7 @@ def process(args):
     # `counts` (work/pages.tsv): staves per system, forces the grouping when the detection differs
     mx, my, centres = dewarp.displacement_field(norm.shape, dewarp.staff_tracks(lines_of(norm)), norm.shape[1] / 2)
     det = cv2.remap(norm, mx, my, interpolation=cv2.INTER_CUBIC, borderValue=255)
-    systems = lay.analyse(ip.binarize(det, 205), ip.binarize(det), lines_of(det), centres, counts or None)
+    systems = lay.analyse(ip.binarize(det, 205), ip.binarize(det), lines_of(det), centres, counts or None, per_system)
 
     def back(s, y):
         """A height on the analysis copy -> the same point on the displayed page."""
@@ -97,8 +101,13 @@ def process(args):
             n = sys_first[k]
         if k < len(systems):
             s = systems[k]
-            if len(s.barlines) != want and not reconcile(s, want):
-                warn.append(f"p{page} s{k + 1}: {len(s.barlines)} barlines, {want} expected (evenly spaced)")
+            # barlines placed by hand (work/bars.tsv): given as shares of the system's width, the
+            # same on this picture as on the one they were read on
+            end = s.barlines[-1] if s.barlines else w - 40
+            placed = [round(s.start_x + f * (end - s.start_x)) for f in hand.get(k + 1, [])]
+            if (len(s.barlines) != want or placed) and not reconcile(s, want, placed):
+                warn.append(f"p{page} s{k + 1}: {len(s.barlines)} barlines for the {want} measures of measures.tsv: "
+                            f"boxes evenly spaced (correct the count, or place the barlines in work/bars.tsv)")
                 x0s, x1 = s.start_x, (s.barlines[-1] if s.barlines else w - 40)
                 step = (x1 - x0s) / want
                 edges = [x0s + i * step for i in range(want + 1)]
@@ -125,8 +134,24 @@ def process(args):
             "systems": sys_out, "measures": measures}, warn
 
 
+def hand_shares(work: Path, page: int, bars: dict[int, list[int]]) -> dict[int, list[float]]:
+    """The barlines of work/bars.tsv (pixels of work/img/pNNN_overlay.png) as shares of the width of
+    their system, from its opening line to its last barline (work/img/pNNN.json)."""
+    js = work / "img" / f"p{page:03d}.json"
+    if not bars or not js.exists():
+        return {}
+    import json
+    systems = json.loads(js.read_text())["systems"]
+    out: dict[int, list[float]] = {}
+    for k, xs in bars.items():
+        if 1 <= k <= len(systems) and systems[k - 1]["barlines"]:
+            x0, x1 = systems[k - 1]["start_x"], systems[k - 1]["barlines"][-1]
+            out[k] = [(x - x0) / (x1 - x0) for x in xs if x0 < x <= x1]
+    return out
+
+
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("work", type=Path, help="scores/<work>")
     ap.add_argument("--images", type=Path, help="folder of page images (default: <work>/work/source)")
     ap.add_argument("--offset", type=int, help="printed page = image number + OFFSET (instead of work/pages.tsv)")
@@ -137,19 +162,26 @@ def main():
     tsv = load_pages_tsv(a.work / "work")
     out = a.work / "pages"
     out.mkdir(exist_ok=True)
+    sizes = system_sizes(a.work / "work")
+    hand_px = load_hand_bars(a.work / "work")
     jobs = []
     for page, img in sorted(page_images(a.work / "work", a.images, a.offset).items()):
         if page in mt:
-            jobs.append((img, page, mt.rows(page), out, tsv.get(page, {}).get("staves"), not a.no_frame))
+            jobs.append((img, page, mt.rows(page), out, tsv.get(page, {}).get("staves"), not a.no_frame,
+                         sizes, hand_shares(a.work / "work", page, hand_px.get(page, {}))))
     if not jobs:
         raise SystemExit("no page to prepare: work/measures.tsv lists no page that has an image")
     with ProcessPoolExecutor(a.jobs) as ex:
         results = list(ex.map(process, jobs))
     pages, warns = [r[0] for r in results], [w for r in results for w in r[1]]
     pages.sort(key=lambda p: p["page"])
-    staff_notes = annotate(pages, out, staff_counts(a.work))   # systems[].staves, from the webp files
+    layout, detected = score_staves(a.work), {}
+    staff_notes = annotate(pages, out, {m: n for m, (n, _) in layout.items()}, detected,   # systems[].staves, from the webp files
+                           {m: k for m, (_, k) in layout.items()}, vocal_staves_of(a.work))
     start_notes = page_starts.annotate(pages, out, page_starts.signatures(a.work))   # measures[].xn, after the staves
     write_pages(out / "pages.json", pages)
+    boxes = a.work / "work" / "boxes"
+    draw(pages, out, boxes, a.work.name, detected)
     print(f"{len(pages)} pages -> {out}")
     for n in staff_notes:
         print("staves:", n)
@@ -157,6 +189,7 @@ def main():
         print("starts:", n)
     for w in warns:
         print("WARN", w)
+    print(f"to look at: {boxes}/{a.work.name}_pNNN.png (grey: the box of each measure; colours: the staff of each part)")
 
 
 if __name__ == "__main__":

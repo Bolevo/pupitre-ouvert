@@ -101,7 +101,7 @@ def test_ties_across_the_gap_the_edition_places_the_start(tmp_path):
     systems = [(3, False, {})] * 8 + [(3, False, {"tied": True})]
     pages, sigs, drawn = make_work(tmp_path, systems, (1.3, 0.3))
     report = ps.annotate(pages, tmp_path, sigs)
-    assert report[0].startswith("8/9 systems measured") and "p3 s3: no gap near the model" in report[1]
+    assert report[0].startswith("8/9 systems measured") and "p3 s3: the first note was not found" in report[1]
     end, notes = drawn[81]
     assert end - SP <= starts(pages)[81] <= notes
 

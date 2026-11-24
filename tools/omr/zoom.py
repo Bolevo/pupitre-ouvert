@@ -3,6 +3,7 @@
     python tools/omr/zoom.py 4 50 --work scores/<work>              # page 4, measure 50, all staves, enlarged
     python tools/omr/zoom.py 4 50-51 --staff T --work scores/<work> # tenor only (with lyrics below it)
     python tools/omr/zoom.py 3 12 --staff PR,PL --scale 8 --work scores/<work>
+    python tools/omr/zoom.py 4 50,53-54,58 --staff A --work scores/<work>   # several places: one picture each
     python tools/omr/zoom.py 9 3 --movement 2 --work scores/<work>
         # a page shared by two movements: --movement picks the measure
 
@@ -37,7 +38,7 @@ def zoom(work: Path, page: int, lo: int, hi: int, staves_sel: list[str] | None, 
     systems = lay.from_dict(d)
     first = d.get("first_measure") or 1
     if not d.get("absolute_numbers"):
-        print("warning: page not in measures.tsv (or counts differ): measures numbered 1..n on this page")
+        print("warning: this page's systems do not match work/measures.tsv: measures numbered 1..n on this page (run tools/omr/pages.py)")
     all_nums = d.get("numbers")
     if not all_nums:                       # older pNNN.json
         all_nums, n = [], first
@@ -54,6 +55,9 @@ def zoom(work: Path, page: int, lo: int, hi: int, staves_sel: list[str] | None, 
     i = nums.index(lo)
     j = nums.index(hi) if hi in nums else len(nums) - 1
     edges = [s.start_x] + s.barlines
+    if len(edges) - 1 != len(nums):        # barlines not fitted to the count of measures.tsv: the whole system
+        print(f"warning: system {k + 1} has {len(edges) - 1} barlines for {len(nums)} measures (see tools/omr/pages.py): shown whole")
+        edges, nums, i, j = [edges[0], edges[-1]], [nums[0]], 0, 0
     names = (d.get("staff_names") or [None] * len(systems))[k] or workdir.staff_names(len(s.staves))
     chosen = [st for st, nm in zip(s.staves, names) if not staves_sel or nm in staves_sel]
     if not chosen:
@@ -79,15 +83,16 @@ def zoom(work: Path, page: int, lo: int, hi: int, staves_sel: list[str] | None, 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("page", type=int)
-    ap.add_argument("measures", help="N or A-B (movement measure numbers, same system)")
+    ap.add_argument("measures", help="N or A-B (movement measure numbers, same system); several: 50,53-54")
     ap.add_argument("--staff", help="comma list among S,A,T,B,PR,PL")
     ap.add_argument("--scale", type=float, help="enlargement (default: a staff space shown at 49 px, x7 for a small photo)")
     ap.add_argument("--movement", type=int, help="movement of the measure (page shared by two movements)")
     ap.add_argument("--work", type=Path, required=True, help="score folder (scores/<work>)")
     a = ap.parse_args(argv)
-    lo, _, hi = a.measures.partition("-")
     sel = [x.strip() for x in a.staff.split(",")] if a.staff else None
-    print(zoom(workdir.work_folder(a.work), a.page, int(lo), int(hi or lo), sel, a.scale, a.movement))
+    for rng in a.measures.split(","):
+        lo, _, hi = rng.strip().partition("-")
+        print(zoom(workdir.work_folder(a.work), a.page, int(lo), int(hi or lo), sel, a.scale, a.movement))
     return 0
 
 

@@ -9,9 +9,9 @@ Sources (read only):
 - scores/<work>/work.yaml           titles, tempo words, pages, choir/solo (movements not in the pack too)
 - scores/<work>/mvtN.musicxml       key signatures (fifths), time signatures, tempo words, metronome marks,
                                     other text directions (Solo/Tutti...), with their measure numbers
-- app/public/packs/<work>/pack.json measures (count, ts, tonic/minor, t ms, q quarters), durationMs,
-                                    notes per part (m = measure index)
-- app/public/packs/<work>/mvtN.mei  lyric syllables (<verse n><syl wordpos con>) per staff
+- scores/<work>/pack/pack.json      measures (count, ts, tonic/minor, t ms, q quarters), durationMs,
+                                    notes per part (m = measure index); built by pipeline/publish.py
+- scores/<work>/pack/mvtN.mei       lyric syllables (<verse n><syl wordpos con>) per staff
 
 Keys: the MusicXML has no <mode>, so the pack's `minor` flag is always False. The mode is printed
 here from the last chord (lowest note of the bass + all voices' last notes) and must be judged by
@@ -210,9 +210,12 @@ GAP = 4
 
 
 def report(work: str, show_words: bool) -> None:
+    work = Path(work).name                      # 'scores/<work>' is accepted too
     sdir = ROOT / "scores" / work
-    pdir = ROOT / "app" / "public" / "packs" / work
+    pdir = sdir / "pack"                        # built by pipeline/publish.py (or build_pack.py)
     cfg = load_yaml(sdir / "work.yaml")
+    if not (pdir / "pack.json").exists():
+        raise SystemExit(f"{work}: no built archive yet (scores/{work}/pack/): run  python pipeline/publish.py {work}  first")
     pack = json.loads((pdir / "pack.json").read_text(encoding="utf-8"))
     in_pack = {m["id"]: m for m in pack["movements"]}
     print(f"# {cfg['title']} — {cfg['composer']}")
@@ -280,6 +283,9 @@ def report(work: str, show_words: bool) -> None:
 
 
 def main() -> None:
+    if {"-h", "--help"} & set(sys.argv[1:]):
+        print(__doc__)
+        return
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     show_words = "--words" in sys.argv
     global GAP

@@ -3,6 +3,20 @@
 .creer-hero {
   grid-template-columns: 1fr;
 }
+/* a line for the AI that was sent here: where the exact text and the tools are */
+.for-ai {
+  max-width: var(--measure);
+  margin: 1.1rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.82;
+  overflow-wrap: anywhere;
+}
+.for-ai a {
+  color: inherit;
+}
+.for-ai code {
+  font: 0.92em/1.4 ui-monospace, 'Cascadia Mono', 'DejaVu Sans Mono', Menlo, Consolas, monospace;
+}
 main.creer {
   max-width: 62rem;
   margin: 0 auto;

@@ -139,7 +139,7 @@ def main(argv: list[str]) -> int:
         print(__doc__)
         return 2
     path = Path(argv[1])
-    work = path / "work" if (path / "work.yaml").exists() else path
+    work = path / "work" if (path / "work.yaml").exists() or (path / "work").is_dir() else path
     if argv[0] == "init":
         print(f"wrote {init(work, force)}")
         return 0

@@ -9,9 +9,14 @@ Writes, in reading order (the order given; a PDF gives its pages in order):
     scores/<work>/work/pages.tsv         image -> printed page (first image = --first-page,
                                          default 1), to correct by hand where the print skips
                                          or restarts its numbers (pipeline/cht/workdir.py)
+    scores/<work>/work/apercu.png        every image of the files given, small, with its number:
+                                         one look tells which ones are music and what page number
+                                         is printed on the first (apercu-2.png… when there are many)
 The printed page number names everything that follows (src/NNN.cht, work/img/pNNN.png,
 pages/pNNN.webp) and is what the app shows.
 
+A cover, a title page, a blank page, the pieces that are not wanted: run once, look at
+work/apercu.png, then run again with `--pages` and `--first-page` (and `--force`).
 `--pages A-B[,C…]`: keep only these (counted from 1 over all the files given).
 A PDF page is rendered at --dpi (default 300), the long side kept under --max-side pixels
 (default 3600: a staff space of 15-20 px, what the page tools are tuned for). A photo is
@@ -67,6 +72,32 @@ def images_of(files: list[Path], dpi: int):
             raise SystemExit(f"{f}: a PDF or an image is expected ({', '.join(sorted(IMAGES))})")
 
 
+THUMB_W, PER_ROW, PER_SHEET = 236, 6, 24
+
+
+def contact_sheets(thumbs: list[tuple[int, int | None, np.ndarray]], out: Path) -> list[Path]:
+    """work/apercu.png (apercu-2.png…): every image, small, under its number among the files
+    given (what --pages counts) and the printed page it was given ('left out' when not kept)."""
+    for old in out.glob("apercu*.png"):
+        old.unlink()
+    files = []
+    for k in range(0, len(thumbs), PER_SHEET):
+        part = thumbs[k:k + PER_SHEET]
+        cell_h = max(t.shape[0] for _, _, t in part) + 34
+        rows = -(-len(part) // PER_ROW)
+        sheet = np.full((rows * cell_h + 8, min(len(part), PER_ROW) * (THUMB_W + 10) + 10, 3), 255, np.uint8)
+        for j, (i, page, t) in enumerate(part):
+            x, y = 10 + (j % PER_ROW) * (THUMB_W + 10), 8 + (j // PER_ROW) * cell_h
+            label = f"{i}: p. {page}" if page is not None else f"{i}: left out"
+            cv2.putText(sheet, label, (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.62, (0, 0, 200) if page is not None else (130, 130, 130), 2)
+            sheet[y + 28:y + 28 + t.shape[0], x:x + t.shape[1]] = t if page is not None else (t // 2 + 110)
+            cv2.rectangle(sheet, (x - 1, y + 27), (x + t.shape[1], y + 28 + t.shape[0]), (190, 190, 190), 1)
+        f = out / ("apercu.png" if not k else f"apercu-{k // PER_SHEET + 1}.png")
+        cv2.imwrite(str(f), sheet)
+        files.append(f)
+    return files
+
+
 def parse_pages(spec: str | None) -> set[int] | None:
     if not spec:
         return None
@@ -96,8 +127,12 @@ def main(argv=None) -> int:
     out.mkdir(parents=True)
     keep = parse_pages(a.pages)
     rows, n = ["image\tpage\tstaves\tsolo\tnote"], 0
+    thumbs = []
     for i, img in enumerate(images_of(a.files, a.dpi), 1):
-        if keep is not None and i not in keep:
+        kept = keep is None or i in keep
+        small = cv2.resize(img, (THUMB_W, max(1, round(img.shape[0] * THUMB_W / img.shape[1]))), interpolation=cv2.INTER_AREA)
+        thumbs.append((i, a.first_page + n if kept else None, small if small.ndim == 3 else cv2.cvtColor(small, cv2.COLOR_GRAY2BGR)))
+        if not kept:
             continue
         h, w = img.shape[:2]
         if max(h, w) > a.max_side:
@@ -111,7 +146,11 @@ def main(argv=None) -> int:
     if not n:
         raise SystemExit("no page kept")
     tsv.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    sheets = contact_sheets(thumbs, a.work / "work")
     print(f"{n} page(s) -> {out}, {tsv}")
+    print(f"look at {', '.join(str(f) for f in sheets)}: every image with its number and the page number it was given. "
+          f"A cover, a blank page, another piece? Run again with --pages (the images to keep) and --first-page "
+          f"(the number printed on the first one kept), and --force.")
     return 0
 
 

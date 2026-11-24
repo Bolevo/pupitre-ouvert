@@ -411,6 +411,14 @@ def build_movement(work_dir: Path, mv: dict, idx: int, cfg: dict, out_dir: Path)
             prev = measures[i - 1] if i else None
             m["t"] = prev["t"] if prev else 0
             m["q"] = prev["q"] if prev else 0
+    # A movement whose last measures hold no sound (the voices alone, under a closing ritornello of
+    # the accompaniment that was not transcribed; a general pause): it ends where its last measure
+    # ends, not with its last note - the page goes on to the double bar, and so does the app.
+    if measures and duration <= measures[-1]["t"]:
+        last = measures[-1]
+        prev = next((m for m in reversed(measures[:-1]) if m["t"] < last["t"] and m["q"] < last["q"]), None)
+        per_quarter = (last["t"] - prev["t"]) / (last["q"] - prev["q"]) if prev else 500.0
+        duration = round(last["t"] + last["ts"][0] * 4 / last["ts"][1] * per_quarter)
 
     # the key's name, when work.yaml gives it (`keys: [{m: printed measure, name: "si mineur"}]`);
     # tonic and mode (metronome pitches) from it, else from the MEI's mode, else guessed

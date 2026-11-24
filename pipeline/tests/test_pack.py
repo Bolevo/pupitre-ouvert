@@ -308,3 +308,34 @@ def test_the_pack_plays_the_tremolo_slower_and_the_score_keeps_every_stroke(tmp_
     ns, xid = "{http://www.music-encoding.org/ns/mei}", "{http://www.w3.org/XML/1998/namespace}id"
     drawn = {n.get(xid) for st in mei.iter(f"{ns}staff") if st.get("n") == "2" for n in st.iter(f"{ns}note")}
     assert len(drawn) == 33 and drawn == {i for n in piano for i in n.get("ids", [n["id"]])}
+
+
+SILENT_END = """<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Tenor</part-name></score-part></part-list>
+<part id="P1">
+<measure number="1"><attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>3</beats><beat-type>4</beat-type></time>
+<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>
+<direction><sound tempo="60"/></direction>
+<note><pitch><step>G</step><octave>3</octave></pitch><duration>3</duration><type>half</type><dot/></note></measure>
+<measure number="2"><note><pitch><step>A</step><octave>3</octave></pitch><duration>1</duration><type>quarter</type></note>
+<note><rest/><duration>2</duration><type>half</type></note></measure>
+<measure number="3"><note><rest measure="yes"/><duration>3</duration></note></measure>
+<measure number="4"><note><rest measure="yes"/><duration>3</duration></note></measure>
+</part></score-partwise>
+"""
+
+
+def test_a_movement_ends_with_its_last_measure_even_when_the_voices_are_silent_there(tmp_path):
+    """The voices alone, under a closing ritornello that was not transcribed: the last note ends
+    in measure 2, the movement goes on to the end of measure 4 (the archive was refused before:
+    'durationMs is not after the last measure's start')."""
+    (tmp_path / "work.yaml").write_text('id: t\ntitle: T\nmovements:\n  - {file: m.musicxml, id: m1, title: M}\n', encoding="utf-8")
+    (tmp_path / "m.musicxml").write_text(SILENT_END, encoding="utf-8")
+    out = build(tmp_path, tmp_path / "pack")
+    mv = json.loads((out / "pack.json").read_text(encoding="utf-8"))["movements"][0]
+    assert [m["t"] for m in mv["measures"]] == [0, 3000, 6000, 9000]
+    assert mv["durationMs"] == 12000
+    sys.path.insert(0, str(ROOT / "pipeline"))
+    import check_pack
+    errors, _warnings, _info = check_pack.check(check_pack.read_archive(out))
+    assert errors == []

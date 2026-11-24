@@ -36,6 +36,8 @@ class System:
     barlines: list[int] = field(default_factory=list)   # x of barlines ending each measure
     start_x: int = 0                                    # x of the system's opening line
     piano: bool = False                                 # last two staves = piano grand staff
+    weak: list[int] = field(default_factory=list)       # x of strokes that may be barlines too (best first)
+    guessed: bool = False                               # its staves were put together by rule, not by a line seen
 
     @property
     def top(self) -> int:
@@ -232,9 +234,11 @@ def find_barlines(ink: np.ndarray, sysm: System, strict: np.ndarray | None = Non
     x1 = max(s.x1 for s in st)
     sp = float(np.mean([s.space for s in st]))
     per = []
+    strokes: list[tuple[int, int]] = []        # (x, staff) of every full-height stroke, stems included
     for i, s in enumerate(st):
         keep = []
         for x, cov in _staff_candidates(ink, s, x0, x1, 0.85):
+            strokes.append((x, i))
             # a stroke continuing to the neighbouring staff is a barline (grand staff, bracket)
             if (i > 0 and _connected(ink, x, st[i - 1].bottom, s.top)) or \
                (i + 1 < len(st) and _connected(ink, x, s.bottom, st[i + 1].top)):
@@ -250,10 +254,24 @@ def find_barlines(ink: np.ndarray, sysm: System, strict: np.ndarray | None = Non
     need = max(1, int(np.ceil(0.6 * len(st))))
     pts = [(x, i) for i, xs_ in enumerate(per) for x in xs_]
     cands: list[tuple[int, int]] = []          # (x, number of staves agreeing)
+    doubt: list[tuple[float, int]] = []        # (evidence, x) of the lines seen on too few staves
     for g in _clusters([p[0] for p in pts], 1.2 * sp):
         hit = {i for x, i in pts if g[0] <= x <= g[-1]}
+        x = int(np.median(g))
         if len(hit) >= need:
-            cands.append((int(np.median(g)), len(hit)))
+            cands.append((x, len(hit)))
+            continue
+        # A barline can be seen for what it is on a few staves only: on the others a note stands
+        # against it, or a tie crosses it, and it is put aside with the stems. When those staves
+        # do have a full-height stroke at the same place, it is one line down the whole system.
+        seen = {i for sx, i in strokes if g[0] - 0.6 * sp <= sx <= g[-1] + 0.6 * sp}
+        # (not in the first spaces of the system: the figures of a time signature, one above the
+        # other on every staff, make such a column too)
+        if len(st) >= 3 and x - x0 > 10 * sp and len(hit) >= max(2, int(np.ceil(len(st) / 3))) \
+                and len(seen) >= int(np.ceil(0.8 * len(st))):
+            cands.append((x, len(hit)))
+        else:
+            doubt.append((len(hit) + 0.5 * len(seen - hit), x))
     # a measure is never narrower than ~3 spaces: keep the best-supported line
     # (for double barlines, the last one)
     merged: list[tuple[int, int]] = []
@@ -274,6 +292,9 @@ def find_barlines(ink: np.ndarray, sysm: System, strict: np.ndarray | None = Non
     if not bars or x1 - bars[-1] > 2 * sp:
         bars.append(x1)
     sysm.barlines = bars
+    # what may be a barline too, best first: used when the count of the page says some are missing
+    sysm.weak = [x for _, x in sorted(doubt, reverse=True)
+                 if x - sysm.start_x > 3 * sp and all(abs(x - b) >= 3 * sp for b in bars)]
     # piano grand staff = last two staves joined by most barlines
     if len(st) >= 2:
         a, b = st[-2], st[-1]
@@ -294,18 +315,70 @@ def regroup(systems: list[System], counts: list[int]) -> list[System]:
     return out
 
 
+def regular_counts(systems: list[System], per_system: int | list[int] | None = None) -> list[int] | None:
+    """Staves per system when the grouping found cannot be the page's: None when it can.
+
+    Some editions join the staves of a system with a bracket only, or the line at the left is
+    broken in the scan: the staves then come out one by one, or in uneven groups. A page is
+    made of systems alike: of `per_system` staves each when the work says so (work.yaml
+    `staves`; several sizes when it leaves a doubt) and the page holds a whole number of them;
+    else of the number of staves for which the spaces between the staves repeat from one
+    system to the next, without cutting two staves that a line does join."""
+    staves = [st for s in systems for st in s.staves]
+    total, got = len(staves), [len(s.staves) for s in systems]
+    sizes = [per_system] if isinstance(per_system, int) else list(per_system or [])
+    sizes = [n for n in sizes if n > 0 and total % n == 0]
+    if any(set(got) == {n} for n in sizes):
+        return None
+    if not sizes and len(set(got)) <= 1 and got and got[0] > 1:
+        return None                                   # even groups of several staves
+    joined, i = set(), 0                              # k: staves k and k+1 are joined by a line
+    for s in systems:
+        joined.update(range(i, i + len(s.staves) - 1))
+        i += len(s.staves)
+    gaps = [(b.top - a.bottom) / a.space for a, b in zip(staves, staves[1:])]
+
+    def fit(n: int) -> tuple[float, float]:
+        """(how unevenly the spaces inside the systems repeat, the same less the space between systems)."""
+        rows = np.array([gaps[k * n:k * n + n - 1] for k in range(total // n)])
+        dev = float(np.mean(np.abs(rows - np.median(rows, axis=0)))) if rows.size else 0.0
+        between = [gaps[k * n + n - 1] for k in range(total // n - 1)]
+        # the space between two systems is usually the widest: it settles between two regular cuts
+        inner = float(np.median(rows)) if rows.size else 0.0
+        return dev, dev - 0.3 * ((min(between) - inner) if between else 0.0)
+
+    if sizes:
+        n = min(sizes, key=lambda n: fit(n)[1]) if len(sizes) > 1 else sizes[0]
+        return [n] * (total // n)
+    best: tuple[float, int] | None = None
+    for n in range(2, 9):
+        if total % n or total == n or any((k + 1) % n == 0 for k in joined):
+            continue
+        dev, score = fit(n)
+        if dev < 0.6 and (best is None or score < best[0]):
+            best = (score, n)
+    return [best[1]] * (total // best[1]) if best else None
+
+
 def analyse(ink: np.ndarray, strict: np.ndarray | None = None,
             lines: np.ndarray | None = None, centres=None,
-            counts: list[int] | None = None) -> list[System]:
+            counts: list[int] | None = None, per_system: int | list[int] | None = None) -> list[System]:
     """`ink`: lenient mask (keeps faint lines); `strict`: Otsu mask (thin strokes);
     `lines`: mask used to find staff lines; `centres`: [(y, space)] of staves
     already located by dewarp (more robust than a full-width search);
-    `counts`: expected staves per system (see regroup)."""
+    `counts`: staves per system of this page (work/pages.tsv), forces the grouping (see regroup);
+    `per_system`: staves of a system of the work (work.yaml), see regular_counts."""
     lm = ink if lines is None else lines
     staves = staves_at(lm, centres) if centres else find_staves(lm)
     systems = group_systems(ink, staves)
+    guessed = False
+    if not counts:
+        counts = regular_counts(systems, per_system)
+        guessed = bool(counts) and not per_system
     if counts:
         systems = regroup(systems, counts)
+        for s in systems:
+            s.guessed = guessed
     for s in systems:
         find_barlines(ink, s, strict)
     return systems
@@ -317,6 +390,7 @@ def to_dict(systems: list[System]) -> dict:
         out.append({
             "top": s.top, "bottom": s.bottom, "start_x": s.start_x,
             "barlines": [int(x) for x in s.barlines], "piano": bool(s.piano),
+            "weak": [int(x) for x in s.weak],
             "staves": [asdict(st) for st in s.staves],
         })
     return {"systems": out}
@@ -326,5 +400,5 @@ def from_dict(d: dict) -> list[System]:
     res = []
     for s in d["systems"]:
         res.append(System([Staff(**st) for st in s["staves"]], list(s["barlines"]),
-                          s["start_x"], s.get("piano", False)))
+                          s["start_x"], s.get("piano", False), list(s.get("weak", []))))
     return res

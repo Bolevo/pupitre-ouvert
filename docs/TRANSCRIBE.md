@@ -1,8 +1,8 @@
 # TRANSCRIRE — lire une page et l'écrire en `.cht`
 
 Étape 4 de [`CREER.md`](CREER.md). Le format : [`CHT_FORMAT.md`](CHT_FORMAT.md).
-Ce qui suit vient de la transcription de deux œuvres entières (80 pages, chœur et piano) : ce
-qui a bien marché, et les pièges qui ont réellement coûté des erreurs. À prendre comme une
+Ce qui suit vient de la transcription d'œuvres entières (chœur et piano, a cappella, éditions
+récentes et anciennes) : ce qui a bien marché, et les pièges qui ont réellement coûté des erreurs. À prendre comme une
 expérience, pas comme un règlement.
 
 Ce qui compte le plus : **les voix (notes, rythme, paroles)**, puis l'accompagnement. La lecture
@@ -13,16 +13,19 @@ regard donne des erreurs que rien ne signale.
 
 - `work/measures.tsv` : pour chaque page, le mouvement, les mesures par système, le premier et le
   dernier numéro de mesure. **C'est la source des numéros** : votre page commence à `first`.
-- `work/img/` (écrit par `tools/omr/pages.py`) :
-  1. `pNNN_overlay.png` — la page, barres détectées en rouge avec leur numéro : vérifiez que les
-     numéros tombent sur les bonnes mesures.
-  2. `pNNN_sK.png` — le système K entier : vue d'ensemble, texte, nuances, repères.
-  3. `pNNN_sK_ch_mA-B.png` (voix) et `pNNN_sK_pf_mA-B.png` (piano) — quelques mesures agrandies,
-     numéros de mesure en haut, et dans la marge **la hauteur réelle de chaque ligne de portée**
-     (le ténor déjà à l'octave inférieure). C'est la vue de travail.
+- `work/img/` (écrit par `tools/omr/pages.py`), et `work/img/crops.txt` qui liste les découpes
+  dans l'ordre de lecture :
+  1. `pNNN_overlay.png` — la page, barres trouvées en rouge avec leur numéro : les numéros
+     tombent-ils sur les bonnes mesures ?
+  2. `pNNN_sK.png` — le système K entier : vue d'ensemble (qui chante, texte, nuances, repères).
+     Trop petit pour y lire les notes.
+  3. `pNNN_sK_ch_mAAA-BBB.png` (voix) et `pNNN_sK_pf_mAAA-BBB.png` (clavier, plus grand) —
+     quelques mesures agrandies, numéros de mesure en haut, et dans la marge **la hauteur réelle
+     de chaque ligne de portée** (le ténor déjà à l'octave inférieure) et des deux premières
+     lignes supplémentaires de chaque côté, en vert. C'est la vue de travail.
 - Un doute sur une note : `python tools/omr/zoom.py <page> <mesure> --staff T --work scores/<id>`
-  → `work/zoom/`. Une tête entre deux lignes se confond vite avec la ligne : zoomez plutôt que de
-  supposer.
+  → `work/zoom/` (plusieurs endroits d'un coup : `50,53-54,58`). Une tête entre deux lignes se
+  confond vite avec la ligne : zoomez plutôt que de supposer.
 
 ## 2. Écrire `src/NNN.cht`
 
@@ -66,18 +69,30 @@ S.de| Wun- der- schö- nen Mo- nat
 
 ```
 python pipeline/cht/check.py scores/<id> --pages 13-20              # durées, syllabes, liaisons (< 1 s)
-python pipeline/cht/render.py scores/<id>/src/013.cht --compare      # work/render/013_cmp_sK.png
+python pipeline/cht/render.py scores/<id>/src/013.cht --compare      # work/render/013_cmp_sK.png, 013_cmp_sK_pf.png
 python pipeline/cht/render.py scores/<id>/src/013.cht --compare --parts T
 ```
 
-`--compare` empile, système par système, la page (haut) et le rendu de votre texte (bas) :
-hauteurs, rythmes, liaisons et syllabes s'y comparent d'un coup d'œil. Avec `--parts T`, la page
-est recadrée sur la portée du ténor et ses paroles : utile pour la voix de la personne. Pages
-sans chœur : `--parts PR,PL`.
+`--compare` écrit une image par système pour les voix, une pour le clavier : chaque portée de la
+page (fond blanc) et, juste dessous, la même portée gravée d'après votre texte (fond teinté),
+étirée pour que ses barres de mesure tombent sous celles de la page. On compare de haut en bas,
+temps par temps : une tête plus haut ou plus bas, une valeur, une altération, une syllabe. La
+gravure rappelle la clé et la mesure au début de chaque image, et ne dessine ni liaisons
+d'expression ni soufflets : ce ne sont pas des différences. Avec `--parts T`, seule la portée du
+ténor : utile pour la voix de la personne.
+
+`check.py` ne peut pas voir une note de bonne durée et de mauvaise hauteur : seule la comparaison
+la montre. Regardez donc chaque image, en particulier les têtes sur lignes supplémentaires, les
+altérations, et les mesures où plusieurs voix ont le même rythme (une faute s'y recopie).
+
+Pour une œuvre avec clavier, une fois l'archive construite, `python pipeline/crosscheck.py <id>`
+liste les notes chantées que le clavier ne joue à aucune octave pendant qu'elles durent. Une
+réduction double presque toujours le chœur : chaque ligne désigne un endroit à relire, dans la
+voix et au clavier.
 
 Une page est au point quand `check.py` ne signale plus d'erreur (ses avertissements — tessiture,
 saut de plus d'une octave — désignent souvent une erreur d'octave ou de clé), que chaque système
-concorde avec son rendu, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste que de vrais doutes.
+concorde avec sa gravure, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste que de vrais doutes.
 
 ## 4. Pièges observés
 
@@ -98,10 +113,26 @@ concorde avec son rendu, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste
 - **Mesure à `C` barré, mesures doubles** : comptez ce que contient réellement la mesure avant
   d'écrire `time=`.
 - **Levée** : `m 0 dur=1/8`, et `first` = 0 dans `measures.tsv`.
-- **Clavier** : changements de clé (`clef:G`, `clef:F`) ; trois voix sur une portée → réduire à
-  deux (notes tenues en accords liés) ; une tête commune à deux voix s'écrit dans une seule,
-  l'autre reçoit un silence invisible `s:`. Les notes répétées identiques se recopient (vérifier
-  la première, la dernière, puis le rendu).
+- **Clavier** : trois voix sur une portée → réduire à deux (notes tenues en accords liés) ; une
+  tête commune à deux voix s'écrit dans une seule, l'autre reçoit un silence invisible `s:`. Les
+  notes répétées identiques se recopient (vérifier la première, la dernière, puis la gravure).
+- **Changement de clé** au clavier : `clef:G`, `clef:F` à sa place dans la voix ; il vaut jusqu'au
+  suivant, au-delà de la barre et de la page. Les hauteurs s'écrivent toujours réelles : la clé ne
+  change que la gravure. La marge des découpes, elle, suppose la clé habituelle de la portée : là
+  où la page imprime une autre clé, lisez d'après la clé.
+- **Lignes supplémentaires** : compter les lignes depuis la portée ; la marge nomme les deux
+  premières. Ce sont les lectures les moins sûres : un zoom coûte moins qu'une faute.
+- **Éditions anciennes** (gravures du XIXᵉ siècle) : le **soupir** y a souvent la forme d'un demi-
+  soupir retourné (un « 7 » à l'envers) — compter les temps de la mesure le départage ; le
+  ténor est souvent en clé de sol sans le « 8 » (il sonne quand même à l'octave inférieure) ; une
+  voix en clé d'ut se lit d'après sa clé, la marge ne vaut plus pour elle.
+- **Ce qui ne s'écrit pas** : liaisons d'expression, points de staccato, accents, trilles, notes
+  d'ornement, doigtés, pédale. Un soufflet s'écrit `!cresc` ou `!dim` à son début, ou pas du tout.
+- **Nombres imprimés** : en haut de la page, c'est le numéro de page ; au-dessus d'un système, un
+  chiffre ou une lettre de répétition (`mark=`) ; en début de système, parfois le numéro de mesure.
+- **Soliste sur sa propre portée** : une voix `S A T B` nommée par `part S "Soprano solo"` ; les
+  pages où les systèmes changent (soliste et piano, puis chœur et piano) se décrivent dans
+  `work/pages.tsv` (colonnes `staves` et `solo`).
 - **Silence de mesure** d'une voix : `R` (aussi dans les pages où le chœur se tait).
 - **Tempo** : sans métronome imprimé, estimer et le dire (`tempo=60  # estimated`) ;
   `meta text="…"` juste après `m N` pour une indication à cette mesure.
