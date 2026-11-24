@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { between, ficheOpen, importZip, removeOpenWork, prefs as prefsSig, setEndMode, setMetro, setMetroSub, type EndMode, movement, myModeOf, myPart, setMyMode, trackOf, openMovement, openWork, replayMine, playing, position, seekParked, setSideView, setTracksOpen, sideView, type SideView, toggle, tracksOpen, work, works } from '../state';
+import { between, ficheOpen, importZip, libraryOpen, prefs as prefsSig, setEndMode, setMetro, setMetroSub, type EndMode, movement, myModeOf, myPart, setMyMode, trackOf, openMovement, openWork, replayMine, playing, position, seekParked, setSideView, setTracksOpen, sideView, type SideView, toggle, tracksOpen, work, works } from '../state';
 import { measureIndexAt } from './timing';
 import { TempoControl } from './Tempo';
 import { Icon } from './Icon';
@@ -26,23 +26,25 @@ export function TopBar() {
       <div class="title">
         <select
           class="work-select"
-          value={w?.pack.id}
+          value={w?.pack.id ?? ''}
           aria-label={tt('Œuvre')}
           onChange={(e) => {
             const sel = e.target as HTMLSelectElement;
             const chosen = sel.value;
-            if (chosen !== IMPORT && chosen !== REMOVE) return void openWork(chosen);
+            if (chosen !== IMPORT && chosen !== MANAGE) return void (chosen && openWork(chosen));
             sel.value = w?.pack.id ?? ''; // the two actions of the list are not works
             if (chosen === IMPORT) pickZip();
-            else if (w && confirm(tt('Retirer « {title} » de cet appareil ?\n\nSes enregistrements et la progression de son texte sont effacés aussi. Votre fichier .zip n’est pas touché : vous pourrez l’ajouter de nouveau.', { title: w.pack.title }))) void removeOpenWork();
+            else libraryOpen.value = true; // « Mes partitions » (Library.tsx): remove, hide, put back
           }}
         >
+          {/* no work on the screen: the list shows its name, and its two actions can be chosen */}
+          {!w && <option value="">{tt('Mes partitions')}</option>}
           {works.value.map((x) => (
             <option value={x.id}>{x.composer ? `${x.composer} — ${x.title}` : x.title}</option>
           ))}
+          <hr />
           <option value={IMPORT}>{tt('Ajouter une partition (.zip)…')}</option>
-          {/* only a work added here can be removed (the example comes with the app) */}
-          {w?.source === 'imported' && <option value={REMOVE}>{tt('Retirer « {title} »…', { title: w.pack.title })}</option>}
+          <option value={MANAGE}>{tt('Gérer mes partitions…')}</option>
         </select>
       </div>
       <MetroControl />
@@ -83,7 +85,7 @@ export function TopBar() {
 }
 
 const IMPORT = '__import__';
-const REMOVE = '__remove__';
+const MANAGE = '__manage__';
 
 /** The help page (aide.html, or help.html in English), in a tab of its own: the rehearsal stays where it is. A
  *  round button floating at the top right of the pages' area (wide screens; phones have the help

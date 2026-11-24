@@ -4,13 +4,14 @@ import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import './fonts.css'; // Tinos, the score's text (see there)
 import './styles.css';
-import { boot, booted, error, ficheOpen, setTracksOpen, sideView, tracksOpen, work } from './state';
+import { boot, booted, error, ficheOpen, hiddenExamples, libraryOpen, restoreExamples, setTracksOpen, sideView, tracksOpen, work } from './state';
 import { PageView } from './ui/PageView';
 import { Lane } from './ui/Lane';
 import { HelpLink, pickZip, TopBar, Transport } from './ui/Bars';
 import { Tracks } from './ui/Tracks';
 import { RecPanel } from './ui/Rec';
 import { Fiche } from './ui/Fiche';
+import { Library } from './ui/Library';
 import { startNow } from './ui/now';
 import { startMediaKeys } from './mediaKeys';
 import { startInsetScale } from './ui/insets';
@@ -50,7 +51,8 @@ function App() {
     // side-…, fiche-open: what a phone lying down shows between the bars (styles.css)
     <div class={`app side-${sideView.value}${ficheOpen.value ? ' fiche-open' : ''}`} onContextMenu={(e) => (e.target as HTMLElement).closest('input') || e.preventDefault()}>
       <TopBar />
-      {error.value && (
+      {/* « Mes partitions » open: it says itself what went wrong (it covers this line) */}
+      {error.value && !libraryOpen.value && (
         <div class="error" role="alert">
           {error.value}
           <button class="ctl wide" onClick={() => (error.value = null)}>
@@ -82,6 +84,11 @@ function App() {
               <button class="ctl wide" onClick={pickZip}>
                 {tt('Ajouter une partition (.zip)')}
               </button>
+              {hiddenExamples.value.length > 0 && (
+                <button class="ctl wide" onClick={() => void restoreExamples()}>
+                  {tt('Remettre les exemples')}
+                </button>
+              )}
               <p>
                 <HelpLink text={tt('Comment se servir de Pupitre Ouvert ?')} />
               </p>
@@ -89,6 +96,7 @@ function App() {
           )}
         </div>
       )}
+      {libraryOpen.value && <Library />}
     </div>
   );
 }

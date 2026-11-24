@@ -185,7 +185,8 @@ et ses identifiants viennent de Verovio 6.3.0, la version que l'app embarque).
 - Import : liste des œuvres (en haut à gauche) → « Ajouter une partition (.zip)… ». L'œuvre est
   gardée dans le navigateur (IndexedDB) : elle reste là aux visites suivantes, hors connexion
   aussi. Elle ne quitte pas l'appareil.
-- Retrait : même liste → « Retirer « … »… » (efface aussi les enregistrements et la progression
-  du texte de cette œuvre).
+- Retrait : même liste → « Gérer mes partitions… » → « Retirer » (efface aussi les
+  enregistrements et la progression du texte de cette œuvre). Les exemples livrés avec l'app s'y
+  masquent, sur cet appareil, et s'y remettent.
 - La voix suivie est celle que le chanteur a choisie (Ténor au départ) ; si l'œuvre ne l'a pas,
   la voix de la même famille, sinon la première.

@@ -6,7 +6,8 @@ import { FIXTURES } from './setup';
 const EXAMPLE = 'Anton Bruckner — Locus iste'; // the work the app opens on
 const EXAMPLES = [EXAMPLE, 'Franz Schubert — Messe en sol — Kyrie']; // the works that come with the app
 const IMPORT = '__import__';
-const REMOVE = '__remove__';
+const MANAGE = '__manage__';
+const ACTIONS = ['Ajouter une partition (.zip)…', 'Gérer mes partitions…']; // what the list of works ends with
 
 const works = (page: Page) => page.locator('.work-select option').allTextContents();
 const current = (page: Page) => page.locator('.work-select').evaluate((s: HTMLSelectElement) => s.selectedOptions[0]?.textContent ?? '');
@@ -30,6 +31,14 @@ async function add(page: Page, file: string | { name: string; mimeType: string; 
   await (await chooser).setFiles(file);
 }
 
+/** « Mes partitions », opened from the list of works. */
+async function manage(page: Page) {
+  await page.locator('.work-select').selectOption(MANAGE);
+  const panel = page.getByRole('dialog', { name: /^(Mes partitions|My scores)$/ });
+  await expect(panel).toBeVisible();
+  return panel;
+}
+
 /** The music goes on: the line of the voice keeps moving left under the playhead. */
 async function plays(page: Page, play = 'Lecture') {
   await page.locator('.play').click();
@@ -45,8 +54,8 @@ test('the app opens on the example: its pages, the line of a voice, and it plays
   await expect(page).toHaveTitle('Pupitre Ouvert');
   await expect(page.locator('img[alt="Page 8"]')).toBeVisible(); // the pages keep the numbers printed on them
   await expect(page.locator('.lane-voice')).toHaveText('Ténor');
-  // a work can be added; the examples, which come with the app, cannot be removed
-  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
+  // the list: the examples, then its two actions
+  expect(await works(page)).toEqual([...EXAMPLES, ...ACTIONS]);
   await plays(page);
   await expect(page.locator('.pn-page')).toContainText('8');
   // nothing of the app is kept under the names of its sibling on the same site (bolevo.github.io/Pupitre)
@@ -80,7 +89,7 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   await expect.poll(() => current(page)).toBe(mine);
   await lane(page);
   await expect(page.locator('img[alt="Page 1"]')).toBeVisible();
-  expect(await works(page)).toEqual([...EXAMPLES, mine, 'Ajouter une partition (.zip)…', 'Retirer « Deux chorals (all) »…']);
+  expect(await works(page)).toEqual([...EXAMPLES, mine, ...ACTIONS]);
   await plays(page);
 
   // kept in the browser: the work is there, and open, at the next visit
@@ -96,21 +105,106 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   await expect.poll(() => current(page)).toBe('J. S. Bach — Deux chorals, corrigés');
   expect((await works(page)).filter((w) => w.startsWith('J. S. Bach'))).toHaveLength(1);
 
-  // declined: nothing happens; accepted: the work goes, the example is back, also after a reload
-  page.once('dialog', (d) => d.dismiss());
-  await page.locator('.work-select').selectOption(REMOVE);
-  await expect.poll(() => current(page)).toBe('J. S. Bach — Deux chorals, corrigés');
-  page.once('dialog', (d) => {
-    expect(d.message()).toContain('Retirer « Deux chorals, corrigés » de cet appareil ?');
-    void d.accept();
-  });
-  await page.locator('.work-select').selectOption(REMOVE);
+  // « Mes partitions »: the work on the screen is marked; a work added can be removed, an example hidden
+  const panel = await manage(page);
+  const rows = panel.locator('.lib-list > li');
+  await expect(rows.locator('.lib-work b')).toHaveText(['Locus iste', 'Messe en sol — Kyrie', 'Deux chorals, corrigés']);
+  await expect(rows.nth(2).locator('.lib-work')).toHaveAttribute('aria-current', 'true');
+  await expect(rows.locator('.lib-act')).toHaveText(['Masquer', 'Masquer', 'Retirer']);
+  // declined: nothing happens; accepted: the work goes, the example is on the screen, also after a reload
+  await panel.getByRole('button', { name: 'Retirer « Deux chorals, corrigés »' }).click();
+  await expect(panel.locator('.lib-ask')).toContainText('Retirer « Deux chorals, corrigés » de cet appareil ?');
+  await expect(panel.getByRole('button', { name: 'Annuler' })).toBeFocused();
+  await panel.getByRole('button', { name: 'Annuler' }).click();
+  await expect(panel.locator('.lib-ask')).toHaveCount(0);
+  await expect(rows).toHaveCount(3);
+  await panel.getByRole('button', { name: 'Retirer « Deux chorals, corrigés »' }).click();
+  await panel.locator('.lib-ask').getByRole('button', { name: 'Retirer' }).click();
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0).locator('.lib-work')).toHaveAttribute('aria-current', 'true');
+  await page.keyboard.press('Escape');
+  await expect(panel).toHaveCount(0);
   await expect.poll(() => current(page)).toBe(EXAMPLE);
   await lane(page);
-  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, ...ACTIONS]);
   await page.reload();
   await lane(page);
-  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, ...ACTIONS]);
+  expect(errors).toEqual([]);
+});
+
+test('« Mes partitions »: an example is hidden on this device and put back; a work is opened and added from there', async ({ page }) => {
+  const errors = await ready(page);
+  let panel = await manage(page);
+  // the keys of the app are not for what is behind the panel: R (play my voice again) starts nothing
+  await page.keyboard.press('r');
+  await expect(panel).toBeVisible();
+  await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Lecture');
+  // the example on the screen is hidden: the other one takes its place, nothing is erased
+  await panel.getByRole('button', { name: 'Masquer « Locus iste »' }).click();
+  await expect(panel.locator('.lib-list:not(.lib-hidden) .lib-work b')).toHaveText(['Messe en sol — Kyrie']);
+  await expect(panel.locator('.lib-hidden .lib-work b')).toHaveText(['Locus iste']);
+  await panel.getByRole('button', { name: 'Fermer' }).click();
+  await expect.poll(() => current(page)).toBe(EXAMPLES[1]);
+  await lane(page);
+  expect(await works(page)).toEqual([EXAMPLES[1], ...ACTIONS]);
+  // kept by the browser: still hidden at the next visit
+  await page.reload();
+  await lane(page);
+  await expect.poll(() => current(page)).toBe(EXAMPLES[1]);
+  expect(await works(page)).toEqual([EXAMPLES[1], ...ACTIONS]);
+
+  // the last one hidden too: the empty screen offers to add a score or to put the examples back
+  panel = await manage(page);
+  await panel.getByRole('button', { name: 'Masquer « Messe en sol — Kyrie »' }).click();
+  await expect(panel.locator('.lib-none')).toBeVisible();
+  await page.mouse.click(1200, 700); // a press beside the panel closes it
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByText('Aucune partition dans cette app pour l’instant.')).toBeVisible();
+  expect(await works(page)).toEqual(['Mes partitions', ...ACTIONS]);
+  await page.reload();
+  await expect(page.getByText('Aucune partition dans cette app pour l’instant.')).toBeVisible();
+
+  // a work is added from the panel: it opens, the panel closes
+  panel = await manage(page);
+  const chooser = page.waitForEvent('filechooser');
+  await panel.getByRole('button', { name: 'Ajouter une partition (.zip)…' }).click();
+  await (await chooser).setFiles(`${FIXTURES}/solo.zip`);
+  await expect(panel).toHaveCount(0);
+  await expect.poll(() => current(page)).toBe('J. S. Bach — Deux chorals (solo)');
+  await lane(page);
+
+  // one example is put back from the panel, and opened from there
+  panel = await manage(page);
+  await panel.getByRole('button', { name: 'Remettre « Messe en sol — Kyrie »' }).click();
+  await expect(panel.locator('.lib-list:not(.lib-hidden) .lib-work b')).toHaveText(['Messe en sol — Kyrie', 'Deux chorals (solo)']);
+  await panel.locator('button.lib-work', { hasText: 'Messe en sol — Kyrie' }).click();
+  await expect(panel).toHaveCount(0);
+  await expect.poll(() => current(page)).toBe(EXAMPLES[1]);
+  await lane(page);
+  // (its pages show, although the screen came back with a work that has none)
+  await expect(page.locator('img[alt="Page 1"]')).toBeVisible();
+
+  // an archive that is refused says why in the panel itself
+  panel = await manage(page);
+  const again = page.waitForEvent('filechooser');
+  await panel.getByRole('button', { name: 'Ajouter une partition (.zip)…' }).click();
+  await (await again).setFiles({ name: 'photo.zip', mimeType: 'application/zip', buffer: Buffer.from('not a zip') });
+  await expect(panel.getByRole('alert')).toContainText('Ce fichier n’est pas une archive .zip lisible.');
+
+  // the work added is removed, the examples all put back from the empty screen
+  await panel.getByRole('button', { name: 'Retirer « Deux chorals (solo) »' }).click();
+  await panel.locator('.lib-ask').getByRole('button', { name: 'Retirer' }).click();
+  await panel.getByRole('button', { name: 'Masquer « Messe en sol — Kyrie »' }).click();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Remettre les exemples' }).click();
+  await lane(page);
+  await expect.poll(() => current(page)).toBe(EXAMPLE);
+  expect(await works(page)).toEqual([...EXAMPLES, ...ACTIONS]);
+  // (the key that did nothing behind the panel does start the music here)
+  await page.keyboard.press('r');
+  await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Pause');
+  await page.locator('.play').click();
   expect(errors).toEqual([]);
 });
 
@@ -132,6 +226,14 @@ for (const [name, voice] of [
     await expect(page.locator('.lane-voice')).toHaveText(voice);
     await expect(page.getByText('Pas d’images de pages pour cette œuvre.')).toBeVisible();
     await plays(page);
+    if (name === 'solo') {
+      // the app started on a work without pages: the pages of the next work opened are shown
+      await page.reload();
+      await lane(page);
+      await expect(page.getByText('Pas d’images de pages pour cette œuvre.')).toBeVisible();
+      await page.locator('.work-select').selectOption({ label: EXAMPLE });
+      await expect(page.locator('img[alt="Page 8"]')).toBeVisible();
+    }
     expect(errors).toEqual([]);
   });
 }
@@ -150,7 +252,7 @@ test('an archive the app could not show is refused, with what to correct', async
   await expect(error).toContainText('Page 2 : l’image pages/p002.webp n’est pas dans l’archive.');
   // the example is still there, nothing was added
   expect(await current(page)).toBe(EXAMPLE);
-  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, ...ACTIONS]);
   await error.getByRole('button', { name: 'Fermer' }).click();
   await expect(error).toHaveCount(0);
   // a file that is no archive at all
@@ -195,7 +297,7 @@ test('English: chosen in the settings, kept, asked by ?lang=en, and the pages of
   await expect(page.locator('.lane-voice')).toHaveText('Tenor');
   await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Play');
   await expect(page.locator('.tracks-help')).toHaveAttribute('href', 'help.html');
-  expect(await works(page)).toEqual([...EXAMPLES, 'Add a score (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, 'Add a score (.zip)…', 'Manage my scores…']);
   // an archive that is refused says why in the same language (the check runs in a worker)
   await add(page, { name: 'photo.zip', mimeType: 'application/zip', buffer: Buffer.from('not a zip') });
   await expect(page.locator('.error')).toContainText('This file is not a readable .zip archive.');

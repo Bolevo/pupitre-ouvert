@@ -181,8 +181,12 @@ export function PageView() {
   const manualAt = useRef(0);
   const [hover, setHover] = useState<{ page: number; box: PageMeasure } | null>(null);
 
+  // the area of the pages is there only for a work that has pages: what is attached to it is
+  // attached when it comes (a work without pages may be the first one opened), detached when it goes
+  const hasPages = pages.length > 0;
   useLayoutEffect(() => {
-    const el = host.current!;
+    const el = host.current;
+    if (!el) return;
     // Wide screens: the area's outer size, scroll bars included. Enlarged pages bring scroll bars,
     // which take 10 to 17 px from the inner size on a computer: fitted to it, the pages made a
     // loop at the zoom where they just fill the width (a horizontal bar comes, the area is less
@@ -204,7 +208,7 @@ export function PageView() {
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [hasPages]);
 
   // when the movement changes, show its first page
   useEffect(() => {
@@ -406,7 +410,7 @@ export function PageView() {
       el.removeEventListener('touchcancel', onEnd);
       el.removeEventListener('wheel', onWheel);
     };
-  }, []);
+  }, [hasPages]);
 
   // live highlight + page following
   const lit = useRef<HTMLDivElement>(null);

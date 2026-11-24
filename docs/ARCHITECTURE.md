@@ -34,7 +34,7 @@ partition numérisée ──► scores/<oeuvre>/ ──► packs/<oeuvre>.zip �
 | `src/state.ts` | l'état (signaux Preact) : œuvre, mouvement, voix suivie, pistes, lecture, réglages gardés |
 | `src/audio/` | le moteur : une horloge (`AudioContext`), une piste par partie (`engine.ts`), ce qu'il faut jouer et quand (`plan.ts`, pur et testé), instruments échantillonnés (`sfont.ts`, `instruments.ts`), nom des notes (`solfege.ts`), métronome, enregistrement de sa voix (`recorder.ts`, `take.ts`) |
 | `src/score/` | la ligne de la voix : Verovio (WebAssembly) dans un worker (`verovio.worker.ts`, `renderer.ts`) dessine la seule portée suivie, tirée du MEI (`meiFilter.ts`) |
-| `src/ui/` | l'écran : pages et cases des mesures (`PageView.tsx`), ligne (`Lane.tsx`), barres (`Bars.tsx`), pistes (`Tracks.tsx`), fiche et apprentissage du texte (`Fiche.tsx`, `Memo.tsx`), enregistrement (`Rec.tsx`) |
+| `src/ui/` | l'écran : pages et cases des mesures (`PageView.tsx`), ligne (`Lane.tsx`), barres (`Bars.tsx`), « Mes partitions » (`Library.tsx`), pistes (`Tracks.tsx`), fiche et apprentissage du texte (`Fiche.tsx`, `Memo.tsx`), enregistrement (`Rec.tsx`) |
 | `src/memo/` | « Apprendre le texte » : le texte de la fiche (`text.ts`), l'exercice (`drill.ts`), la progression (`store.ts`) |
 | `src/site.ts` | le nom de l'app et le préfixe de tout ce qu'elle garde dans le navigateur |
 | `src/i18n.ts`, `src/i18n-en.ts` | la langue : `tt('Texte en français')` rend le texte dans la langue choisie ; la table anglaise a le texte français pour clé (`tests/i18n.test.ts` vérifie qu'aucun texte n'y manque) |

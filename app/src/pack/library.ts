@@ -8,34 +8,43 @@ import { lang, tt } from '../i18n';
 
 export type { WorkSummary };
 
+/** A work of the library and where it comes from: served with the app (an example), or added in
+ *  this browser from its .zip. A work added stands for the example of the same id, if any. */
+export interface LibraryWork extends WorkSummary {
+  source: 'builtin' | 'imported';
+}
+
 const BASE = import.meta.env.BASE_URL;
 const cache = new Map<string, LoadedPack>();
 const builtinDirs = new Map<string, string>();
+const builtins = new Map<string, LibraryWork>();
 
 /** What packs/index.json lists (pipeline/publish.py). */
 interface PackIndex {
   packs?: { id: string; dir: string; title?: string; composer?: string }[];
 }
 
-/** The works that can be opened: built-in (served with the app), then imported in this browser.
+/** The works of this device: built-in (served with the app), then imported in this browser.
  *  Read once (packs/index.json + IndexedDB): no pack is downloaded or deserialised. */
-export async function loadLibrary(): Promise<WorkSummary[]> {
-  const out: WorkSummary[] = [];
+export async function loadLibrary(): Promise<LibraryWork[]> {
+  let out: LibraryWork[] = [];
+  builtins.clear();
   try {
     const idx = (await (await fetch(`${BASE}packs/index.json`, { cache: 'no-cache' })).json()) as PackIndex;
     for (const p of idx.packs ?? []) {
       builtinDirs.set(p.id, p.dir);
       if (p.title !== undefined) {
-        out.push({ id: p.id, title: p.title, composer: p.composer ?? '' });
+        builtins.set(p.id, { id: p.id, title: p.title, composer: p.composer ?? '', source: 'builtin' });
         continue;
       }
       try {
         // index.json written before title/composer were listed in it: read the pack itself
-        out.push(summary((await loadWork(p.id)).pack));
+        builtins.set(p.id, { ...summary((await loadWork(p.id)).pack), source: 'builtin' });
       } catch (e) {
         console.warn('pack', p.dir, e);
       }
     }
+    out = [...builtins.values()];
   } catch (e) {
     console.warn('no built-in packs', e);
   }
@@ -51,16 +60,27 @@ export async function loadLibrary(): Promise<WorkSummary[]> {
         s = summary(sp.pack);
         await set(`packmeta:${id}`, s);
       }
-      if (!out.some((o) => o.id === s!.id)) out.push(s);
+      out = withWork(out, { ...s, source: 'imported' }); // in the place of the example of the same id
     }
   }
   return out;
 }
 
 /** `works` with `w` added, or replacing the entry with the same id (same place in the list). */
-export function withWork(works: WorkSummary[], w: WorkSummary): WorkSummary[] {
+export function withWork<W extends WorkSummary>(works: W[], w: W): W[] {
   const i = works.findIndex((o) => o.id === w.id);
   return i < 0 ? [...works, w] : works.map((o, k) => (k === i ? w : o));
+}
+
+/** The works listed: all of them but the examples hidden on this device (`hidden`: their ids).
+ *  A work one has added is never hidden, even under the id of a hidden example. */
+export function shownWorks(all: LibraryWork[], hidden: readonly string[] = []): LibraryWork[] {
+  return all.filter((w) => w.source === 'imported' || !hidden.includes(w.id));
+}
+
+/** The examples hidden on this device, which can be put back. */
+export function hiddenWorks(all: LibraryWork[], hidden: readonly string[] = []): LibraryWork[] {
+  return all.filter((w) => w.source === 'builtin' && hidden.includes(w.id));
 }
 
 export async function loadWork(id: string): Promise<LoadedPack> {
@@ -129,13 +149,13 @@ function inWorker(zip: ArrayBuffer): Promise<WorkSummary | 'no-worker'> {
 }
 
 /** Removes an imported work from this browser, with what was kept about it: the recordings of
- *  one's voice (rec.ts) and the progress in learning the text (memo/store.ts). Returns whether a
- *  built-in work of the same id remains. */
-export async function removeWork(id: string): Promise<boolean> {
+ *  one's voice (rec.ts) and the progress in learning the text (memo/store.ts). Returns the
+ *  built-in work of the same id, which takes its place in the library, if there is one. */
+export async function removeWork(id: string): Promise<LibraryWork | undefined> {
   for (const k of await keys()) {
     if (typeof k === 'string' && (k === `pack:${id}` || k === `packmeta:${id}` || k.startsWith(takeKey(id, '')))) await del(k);
   }
   forgetProgress(id);
   cache.delete(id);
-  return builtinDirs.has(id);
+  return builtins.get(id);
 }

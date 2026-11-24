@@ -3,7 +3,7 @@ import { computed, effect, signal, untracked } from '@preact/signals';
 import { Engine, type ChannelState } from './audio/engine';
 import type { InstId } from './audio/instruments';
 import { clicksFor, type MetroSub } from './audio/metronome';
-import { importWorkZip, loadLibrary, loadWork, removeWork, withWork, type WorkSummary } from './pack/library';
+import { hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, withWork, type LibraryWork } from './pack/library';
 import type { LoadedPack, Movement, Part } from './pack/types';
 import { measureIndexAt } from './ui/timing';
 import { canHover, lowScreen, onHoverChange, onLayoutChange, onLowScreenChange, phoneLayout } from './ui/media';
@@ -43,6 +43,7 @@ interface Prefs {
   volume?: number; // computers: the general volume's slider, 0..1 (the gain is its square)
   sideView?: SideView; // a screen lying down: what is shown between the bars (unset: see sideView)
   firstShown?: string; // the work shown at the arrival that this device has already been shown (FIRST_WORK)
+  hidden?: string[]; // the examples hidden on this device (« Mes partitions »): ids of built-in works
   lang?: Lang; // the language of the app (unset: French)
 }
 export type EndMode = 'stop' | 'loop' | 'next';
@@ -87,6 +88,10 @@ export function migratePrefs(raw: unknown): Prefs {
   if (p.volume !== undefined) p.volume = Number.isFinite(Number(p.volume)) ? Math.max(0, Math.min(1, Number(p.volume))) : 1;
   if (p.sideView !== undefined && !SIDE_VIEWS.includes(p.sideView)) delete p.sideView;
   if (p.lang !== undefined && !isLang(p.lang)) delete p.lang;
+  if (p.hidden !== undefined) {
+    p.hidden = Array.isArray(p.hidden) ? [...new Set(p.hidden.filter((id) => typeof id === 'string'))] : [];
+    if (!p.hidden.length) delete p.hidden;
+  }
   return p;
 }
 /** The recorded voice's manual offset: −800…+800 ms, by 10 ms (a Bluetooth headset's latency
@@ -299,7 +304,14 @@ onHoverChange(() => {
   if (hasVolume.value) eng?.setVolume(outGain());
 });
 
-export const works = signal<WorkSummary[]>([]);
+/** Every work of this device: the examples served with the app, the works added in this browser. */
+export const library = signal<LibraryWork[]>([]);
+/** The works listed (the selector, « Mes partitions »): all but the examples hidden here. */
+export const works = computed(() => shownWorks(library.value, prefs.value.hidden));
+/** The examples hidden on this device, which « Mes partitions » can put back. */
+export const hiddenExamples = computed(() => hiddenWorks(library.value, prefs.value.hidden));
+/** « Mes partitions » is open: add a work, remove one, hide or put back an example. */
+export const libraryOpen = signal(false);
 export const booted = signal(false);
 export const work = signal<LoadedPack | null>(null);
 export const error = signal<string | null>(null);
@@ -627,7 +639,7 @@ async function openStartWork() {
 export async function boot() {
   cacheEarlySamples(); // first visit: let the service worker cache the instruments loaded now
   try {
-    works.value = await loadLibrary();
+    library.value = await loadLibrary();
     await openStartWork();
     if (work.value) engine(); // start loading the instruments now (the audio itself starts on the first play)
   } catch (e) {
@@ -641,8 +653,9 @@ export async function importZip(file: File) {
   try {
     error.value = null;
     const w = await importWorkZip(file);
-    works.value = withWork(works.value, w);
+    library.value = withWork(library.value, { ...w, source: 'imported' });
     await openWork(w.id);
+    libraryOpen.value = false; // the work added is on the screen
     engine();
     keepStorage();
   } catch (e) {
@@ -657,24 +670,46 @@ function keepStorage() {
   void navigator.storage?.persist?.().catch(() => false);
 }
 
-/** Removes the open work, imported in this browser, with its recordings and the progress in its
- *  text. Then opens another work: the built-in one of the same id if there is one, else the
- *  first of the list. */
-export async function removeOpenWork() {
-  const w = work.value;
-  if (!w || w.source !== 'imported') return;
-  pause();
-  const id = w.pack.id;
+/** Removes a work added in this browser, with its recordings and the progress in its text. If it
+ *  was the open one, another is opened (see `openAnother`). */
+export async function removeImportedWork(id: string) {
+  if (library.value.find((x) => x.id === id)?.source !== 'imported') return;
+  const open = work.value?.pack.id === id;
+  if (open) pause();
   try {
-    const builtin = await removeWork(id);
-    if (!builtin) works.value = works.value.filter((x) => x.id !== id);
-    work.value = null;
-    const next = builtin ? id : works.value[0]?.id;
-    if (next) await openWork(next);
-    else setPrefs({ work: null, mv: null });
+    error.value = null;
+    const builtin = await removeWork(id); // the example of the same id takes its place
+    library.value = builtin ? withWork(library.value, builtin) : library.value.filter((x) => x.id !== id);
+    if (open) await openAnother(id);
   } catch (e) {
     error.value = `${tt('Retrait impossible.')} ${e instanceof Error ? e.message : e}`;
   }
+}
+
+/** Hides an example on this device: it leaves the list until it is put back (nothing is erased). */
+export async function hideExample(id: string) {
+  const hidden = prefs.value.hidden ?? [];
+  if (!hidden.includes(id)) setPrefs({ hidden: [...hidden, id] });
+  if (work.value?.pack.id === id && work.value.source === 'builtin') await openAnother(id);
+}
+
+/** Puts hidden examples back in the list: this one, or all of them. With no work on the screen,
+ *  the first one put back is opened. */
+export async function restoreExamples(id?: string) {
+  const back = hiddenExamples.value.filter((x) => id === undefined || x.id === id);
+  const hidden = (prefs.value.hidden ?? []).filter((x) => id !== undefined && x !== id);
+  setPrefs({ hidden: hidden.length ? hidden : undefined });
+  if (!work.value && back[0]) await openWork(back[0].id);
+}
+
+/** The open work `id` has left the list (removed, hidden): opens the one that takes its place,
+ *  the example of the same id if it is listed, else the first of the list; none: the empty screen. */
+async function openAnother(id: string) {
+  pause();
+  work.value = null;
+  const next = works.value.some((x) => x.id === id) ? id : works.value[0]?.id;
+  if (next) await openWork(next);
+  else setPrefs({ work: null, mv: null });
 }
 
 export async function openWork(id: string, mv?: string) {

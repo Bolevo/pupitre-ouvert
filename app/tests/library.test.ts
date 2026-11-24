@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { strToU8, zipSync } from 'fflate';
 import { get, set } from '../src/pack/db';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { importWorkZip, loadLibrary, loadWork, removeWork } from '../src/pack/library';
+import { hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, type LibraryWork } from '../src/pack/library';
 import { problems } from '../src/pack/validate';
 
 const listWorks = loadLibrary;
@@ -50,7 +50,7 @@ describe('importWorkZip', () => {
     const s = await importWorkZip(archive({ fiche: 'fiche.md' }, { 'fiche.md': '# Fiche', 'notes.txt': 'ignored' }));
     expect(s).toEqual({ id: 'test-work', title: 'Messe brève', composer: 'Anonyme' });
     expect(await get('packmeta:test-work')).toEqual(s);
-    expect(await listWorks()).toContainEqual(s);
+    expect(await listWorks()).toContainEqual({ ...s, source: 'imported' });
     const w = await loadWork('test-work');
     expect(w.source).toBe('imported');
     expect(w.pack.movements[0].title).toBe('Kyrie');
@@ -71,7 +71,7 @@ describe('importWorkZip', () => {
     expect((await loadWork('again')).pack.title).toBe('v1');
     await importWorkZip(archive({ id: 'again', title: 'v2' }));
     expect((await loadWork('again')).pack.title).toBe('v2');
-    expect((await listWorks()).filter((w) => w.id === 'again')).toEqual([{ id: 'again', title: 'v2', composer: 'Anonyme' }]);
+    expect((await listWorks()).filter((w) => w.id === 'again')).toEqual([{ id: 'again', title: 'v2', composer: 'Anonyme', source: 'imported' }]);
   });
   it('refuses a zip without pack.json or of another pack version, and stores nothing', async () => {
     await expect(importWorkZip(zip({ 'mvt1.mei': '<mei/>' }))).rejects.toThrow('pack.json manquant');
@@ -152,7 +152,7 @@ describe('removeWork', () => {
     await set('take:to-remove:mvt1', { pcm: 1 });
     await set('take:to-remove-2:mvt1', { pcm: 2 });
     await loadWork('to-remove');
-    expect(await removeWork('to-remove')).toBe(false); // no built-in work of that id
+    expect(await removeWork('to-remove')).toBeUndefined(); // no built-in work of that id
     expect(await get('pack:to-remove')).toBeUndefined();
     expect(await get('packmeta:to-remove')).toBeUndefined();
     expect(await get('take:to-remove:mvt1')).toBeUndefined();
@@ -168,16 +168,45 @@ describe('removeWork', () => {
       vi.fn(async (url: string) => new Response(url.endsWith('index.json') ? JSON.stringify({ packs: [{ id: 'shipped', dir: 'shipped', title: builtin.title, composer: '' }] }) : JSON.stringify(builtin))),
     );
     try {
+      const shipped = { id: 'shipped', title: 'Livrée avec l’app', composer: '', source: 'builtin' };
+      expect((await listWorks())[0]).toEqual(shipped);
       await importWorkZip(archive({ id: 'shipped', title: 'La mienne' }));
+      // one entry, at the example's place, under the title of the work that opens
+      expect((await listWorks())[0]).toEqual({ id: 'shipped', title: 'La mienne', composer: 'Anonyme', source: 'imported' });
       expect((await listWorks()).filter((w) => w.id === 'shipped')).toHaveLength(1);
       expect((await loadWork('shipped')).source).toBe('imported');
       expect((await loadWork('shipped')).pack.title).toBe('La mienne');
-      expect(await removeWork('shipped')).toBe(true);
+      expect(await removeWork('shipped')).toEqual(shipped); // the example takes its place again
       expect((await loadWork('shipped')).source).toBe('builtin');
       expect((await loadWork('shipped')).pack.title).toBe('Livrée avec l’app');
+      expect((await listWorks())[0]).toEqual(shipped);
     } finally {
       vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 404 })));
     }
   });
 });
 
+
+describe('the works listed: the examples one has hidden are left out', () => {
+  const of = (id: string, source: LibraryWork['source']): LibraryWork => ({ id, title: id, composer: '', source });
+  const all = [of('example-1', 'builtin'), of('example-2', 'builtin'), of('mine', 'imported')];
+  const ids = (l: LibraryWork[]) => l.map((w) => w.id);
+  it('nothing hidden: every work is listed', () => {
+    expect(shownWorks(all)).toEqual(all);
+    expect(hiddenWorks(all)).toEqual([]);
+  });
+  it('a hidden example leaves the list and can be put back; the others stay', () => {
+    expect(ids(shownWorks(all, ['example-1']))).toEqual(['example-2', 'mine']);
+    expect(ids(hiddenWorks(all, ['example-1']))).toEqual(['example-1']);
+    expect(ids(shownWorks(all, ['example-1', 'example-2']))).toEqual(['mine']);
+  });
+  it('a work one has added is never hidden, even under the id of a hidden example', () => {
+    const replaced = [of('example-1', 'imported'), of('example-2', 'builtin')];
+    expect(ids(shownWorks(replaced, ['example-1', 'mine']))).toEqual(['example-1', 'example-2']);
+    expect(hiddenWorks(replaced, ['example-1'])).toEqual([]);
+  });
+  it('an example the app no longer has is neither listed nor offered', () => {
+    expect(ids(shownWorks(all, ['gone']))).toEqual(['example-1', 'example-2', 'mine']);
+    expect(hiddenWorks(all, ['gone'])).toEqual([]);
+  });
+});

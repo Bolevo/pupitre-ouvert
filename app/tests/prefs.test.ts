@@ -70,6 +70,13 @@ describe('migratePrefs', () => {
     expect(migratePrefs({ sideView: 'all' }).sideView).toBeUndefined();
     expect(migratePrefs({ sideView: 2 }).sideView).toBeUndefined();
   });
+  it('the examples hidden on this device: a list of ids, each once; nothing hidden is not kept', () => {
+    expect(migratePrefs({}).hidden).toBeUndefined();
+    expect(migratePrefs({ hidden: ['a', 'b', 'a'] }).hidden).toEqual(['a', 'b']);
+    expect(migratePrefs({ hidden: ['a', 3, null] }).hidden).toEqual(['a']);
+    expect(migratePrefs({ hidden: [] }).hidden).toBeUndefined();
+    expect(migratePrefs({ hidden: 'a' }).hidden).toBeUndefined();
+  });
   it('a round trip through JSON changes nothing', () => {
     const p = migratePrefs({ part: 'B', rate: 0.75, tracks: { T: { vol: 0.6, mute: true, solo: false, inst: 'clarinet' } } });
     expect(migratePrefs(JSON.parse(JSON.stringify(p)))).toEqual(p);
