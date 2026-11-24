@@ -6,7 +6,8 @@ Apprendre sa partie de chœur avec **sa propre partition** : suivre les pages, �
 ensemble ou séparément, voir défiler sa ligne, apprendre le texte, s'enregistrer.
 
 - **L'app** : <https://bolevo.github.io/pupitre-ouvert/> — gratuite, sans compte, hors ligne une
-  fois ouverte, sur téléphone et ordinateur. Elle s'ouvre sur un exemple (deux chorals de Bach).
+  fois ouverte, sur téléphone et ordinateur. Elle s'ouvre sur deux exemples : le *Locus iste* de
+  Bruckner et le Kyrie de la Messe en sol de Schubert, d'après des éditions anciennes numérisées.
 - **L'aide** : <https://bolevo.github.io/pupitre-ouvert/aide.html>
 - **Ajouter votre partition** : il faut en faire une archive `.zip`. Une IA qui exécute du code
   sait le faire à partir de votre PDF ou de vos photos :
@@ -22,11 +23,11 @@ anglais (Réglages).
 | La méthode, de la partition numérisée à l'archive | [`docs/CREER.md`](docs/CREER.md) |
 | Ce que contient une archive, et le dossier d'œuvre | [`docs/ARCHIVE.md`](docs/ARCHIVE.md) |
 | Lire une page et l'écrire | [`docs/TRANSCRIBE.md`](docs/TRANSCRIBE.md), [`docs/CHT_FORMAT.md`](docs/CHT_FORMAT.md) |
-| Un dossier d'œuvre complet | [`scores/deux-chorals/`](scores/deux-chorals) |
+| Deux dossiers d'œuvre complets, de la numérisation à l'archive | [`scores/locus-iste/`](scores/locus-iste), [`scores/schubert-kyrie/`](scores/schubert-kyrie) |
 
 ```
 pip install -r pipeline/requirements.txt
-python pipeline/publish.py deux-chorals      # -> packs/deux-chorals.zip   OK
+python pipeline/publish.py locus-iste        # -> packs/locus-iste.zip   OK
 ```
 
 ## Pour qui veut lire ou changer le code

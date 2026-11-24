@@ -69,6 +69,7 @@ S.de| Wun- der- schö- nen Mo- nat
 
 ```
 python pipeline/cht/check.py scores/<id> --pages 13-20              # durées, syllabes, liaisons (< 1 s)
+python pipeline/cht/heads.py scores/<id> --pages 13-20              # têtes de note de la page / hauteurs écrites
 python pipeline/cht/render.py scores/<id>/src/013.cht --compare      # work/render/013_cmp_sK.png, 013_cmp_sK_pf.png
 python pipeline/cht/render.py scores/<id>/src/013.cht --compare --parts T
 ```
@@ -81,8 +82,13 @@ gravure rappelle la clé et la mesure au début de chaque image, et ne dessine n
 d'expression ni soufflets : ce ne sont pas des différences. Avec `--parts T`, seule la portée du
 ténor : utile pour la voix de la personne.
 
-`check.py` ne peut pas voir une note de bonne durée et de mauvaise hauteur : seule la comparaison
-la montre. Regardez donc chaque image, en particulier les têtes sur lignes supplémentaires, les
+`check.py` ne peut pas voir une note de bonne durée et de mauvaise hauteur. `heads.py` en trouve
+une bonne part sans regarder d'image : il repère les têtes de note de la page et liste les mesures
+où une note écrite n'a pas de tête à sa hauteur (`p10 m41 A: g3 written, the head stands 1 step
+higher (a3?)`). Relisez ces mesures au zoom — ce peut être une altération, un silence ou une
+liaison pris pour une tête. Il ne voit ni un rythme faux ni une erreur d'octave, ne juge que les
+voix, et compte sans les lister les mesures dont il n'a pas su séparer les têtes : la comparaison
+reste donc à regarder, image par image, en particulier les têtes sur lignes supplémentaires, les
 altérations, et les mesures où plusieurs voix ont le même rythme (une faute s'y recopie).
 
 Pour une œuvre avec clavier, une fois l'archive construite, `python pipeline/crosscheck.py <id>`
@@ -91,8 +97,8 @@ réduction double presque toujours le chœur : chaque ligne désigne un endroit 
 voix et au clavier.
 
 Une page est au point quand `check.py` ne signale plus d'erreur (ses avertissements — tessiture,
-saut de plus d'une octave — désignent souvent une erreur d'octave ou de clé), que chaque système
-concorde avec sa gravure, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste que de vrais doutes.
+saut de plus d'une octave — désignent souvent une erreur d'octave ou de clé), que les mesures
+listées par `heads.py` ont été relues, que chaque système concorde avec sa gravure, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste que de vrais doutes.
 
 ## 4. Pièges observés
 

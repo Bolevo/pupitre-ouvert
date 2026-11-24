@@ -1,0 +1,23 @@
+# Œuvre d'exemple de Pupitre Ouvert, et modèle d'un dossier d'œuvre complet, de la numérisation
+# à l'archive (docs/CREER.md) :
+#   source.pdf             la numérisation (première édition, domaine public)
+#   work/pages.tsv         ses pages, work/measures.tsv : les mesures de chaque système
+#   src/NNN.cht            la transcription, une page par fichier
+#   mvt1.musicxml          compilé de src/        } écrits par les outils, gardés ici pour que
+#   pages/                 les pages de l'app     } l'app se construise sans les refaire
+#   fiche.md               le texte chanté et sa traduction
+# Tout refaire depuis la numérisation :
+#   python tools/source.py scores/locus-iste scores/locus-iste/source.pdf --pages 2-4 --first-page 8 --force
+#   python tools/omr/pages.py --work scores/locus-iste
+#   python pipeline/cht/compile.py scores/locus-iste
+#   python tools/page_assets.py scores/locus-iste
+#   python pipeline/publish.py locus-iste          # -> packs/locus-iste.zip   OK
+id: bruckner-locus-iste
+title: "Locus iste"
+composer: "Anton Bruckner"
+notice: "Graduel « Locus iste » (WAB 23), n° 2 des Vier Graduale. Première édition, Th. Rättig, Vienne, 1886 ; numérisation IMSLP n° 437277. Domaine public."
+staves: [S, A, T, B]
+movements:
+  - {file: mvt1.musicxml, id: mvt1, title: "Locus iste", keys: [{m: 1, name: "do majeur"}]}
+lyrics:
+  1: {id: la, label: "Latin", lang: la}

@@ -1,4 +1,4 @@
-"""Works of other shapes than four voices and a piano, made from the example (scores/deux-chorals):
+"""Works of other shapes than four voices and a piano, made from two chorales (pipeline/tests/deux-chorals):
 one voice alone, two, three, a voice and a keyboard, instruments only, no printed pages.
 The builder and the app must take them all (pipeline/tests/test_layouts.py, app/e2e).
 
@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "pipeline"))
 from build_pack import build  # noqa: E402
 
-EXAMPLE = ROOT / "scores" / "deux-chorals"
+EXAMPLE = Path(__file__).resolve().parent / "deux-chorals"
 
 # name -> (parts kept: {name in the example: name in the variant}, pages kept)
 LAYOUTS: dict[str, tuple[dict[str, str], bool]] = {

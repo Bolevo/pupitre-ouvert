@@ -1,0 +1,126 @@
+# Bruckner, Locus iste (WAB 23) -- first edition, printed page 9
+page 9
+movement 1
+lyrics la
+meta key=0 time=4/4 tempo=66
+system 1
+m 14
+S   | d4:4. e4:8 f4:4 bb4:4
+S.la| ma- bi- le _
+A   | d4:4. d4:8 d4:4 f4:4
+A.la| ma- bi- le _
+T   | d4:4. d4:8 d4:2
+T.la| ma- bi- le
+B   | bb3:2. bb3:4
+B.la| sa- cra-
+m 15
+S   | d5:2. e5:4
+S.la| sa- cra-
+A   | f4:2. g4:4
+A.la| sa- cra-
+T   | d4:2. d4:4
+T.la| sa- cra-
+B   | bb3:2 bb2:2
+B.la| men- _
+m 16
+S   | e5:4 a4:4 r:2
+S.la| men- tum
+A   | a4:4 e4:4 r:2
+A.la| men- tum
+T   | d4:4 c#4:4 r:2
+T.la| men- tum
+B   | a2:4 !ff a2:4 a2:4 b2:4
+B.la| tum, in- æ- sti-
+m 17
+S   | r:4 !ff e4:4 e4:4 e4:4
+S.la| in- æ- sti-
+A   | r:4 !ff e4:4 e4:4 e4:4
+A.la| in- æ- sti-
+T   | r:4 !ff e3:4 c4:4 d4:4
+T.la| in- æ- sti-
+B   | c3:4. e3:8 a3:4 b3:4
+B.la| ma- bi- le _
+system 2
+m 18
+S   | e4:4. f#4:8 g4:4 c5:4
+S.la| ma- bi- le _
+A   | e4:4. e4:8 e4:4 g4:4
+A.la| ma- bi- le _
+T   | e4:4. e4:8 e4:2
+T.la| ma- bi- le
+B   | c4:2. c4:4
+B.la| sa- cra-
+m 19
+S   | e5:2. f#5:4
+S.la| sa- cra-
+A   | g4:2. a4:4
+A.la| sa- cra-
+T   | e4:2. e4:4
+T.la| sa- cra-
+B   | c4:2 c3:2
+B.la| men- _
+m 20
+S   | f#5:4 b4:4 r:2
+S.la| men- tum
+A   | b4:4 f#4:4 r:2
+A.la| men- tum
+T   | e4:4 d#4:4 r:2
+T.la| men- tum
+B   | b2:2 r:2
+B.la| tum,
+m 21
+S   | R
+A   | R
+T   | !pp c4:4 c4:4 c4:4 c4:4
+T.la| ir- re- pre- hen-
+B   | R
+system 3
+m 22
+S   | !pp f#4:4 f#4:4 f#4:4 f#4:4
+S.la| ir- re- pre- hen-
+A   | !pp e4:4 e4:4 d#4:4 d#4:4
+A.la| ir- re- pre- hen-
+T   | !pp b3:8. b3:16 b3:4 b3:4 r:4
+T.la| si- bi- lis est
+B   | R
+m 23
+S   | g4:8. g4:16 g4:4 g4:4 r:4
+S.la| si- bi- lis est
+A   | d4:8. d4:16 d4:4 d4:4 r:4
+A.la| si- bi- lis est
+T   | bb3:4 bb3:4 bb3:4 bb3:4
+T.la| ir- re- pre- hen-
+B   | R
+m 24
+S   | e4:4 e4:4 e4:4 e4:4
+S.la| ir- re- pre- hen-
+A   | d4:4 d4:4 c#4:4 c#4:4
+A.la| ir- re- pre- hen-
+T   | a3:8. a3:16 a3:4 a3:4 r:4
+T.la| si- bi- lis est
+B   | R
+system 4
+m 25
+S   | !cresc f4:8. f4:16 f4:4 f4:4 r:4
+S.la| si- bi- lis est
+A   | !cresc c4:8. c4:16 c4:4 c4:4 r:4
+A.la| si- bi- lis est
+T   | ab3:4 ab3:4 ab3:4 ab3:4
+T.la| ir- re- pre- hen-
+B   | R
+m 26
+S   | !p f4:2 e4:2
+S.la| ir- re-
+A   | !p b3:2 c4:2
+A.la| ir- re-
+T   | g3:8. g3:16 g3:4 g3:4 r:4
+T.la| si- bi- lis est,
+B   | R
+m 27
+S   | !mf a4:2. g4:4
+S.la| pre- hen-
+A   | !mf c4:2. c4:4
+A.la| pre- hen-
+T   | !mf f3:4 f3:4 e3:4 e3:4
+T.la| ir- re- pre- hen-
+B   | R

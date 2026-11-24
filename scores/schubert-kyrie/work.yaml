@@ -1,0 +1,30 @@
+# Œuvre d'exemple de Pupitre Ouvert : une soliste, le chœur et le piano. Modèle d'un dossier
+# d'œuvre complet, de la numérisation à l'archive (docs/CREER.md) :
+#   source.pdf             la numérisation (six pages d'une édition ancienne, domaine public)
+#   work/pages.tsv         ses pages : la page 3 y dit ses systèmes (trois « soliste et piano »,
+#                          puis un « chœur et piano ») ; work/measures.tsv : les mesures de chaque système
+#   src/NNN.cht            la transcription, une page par fichier
+#   mvt1.musicxml          compilé de src/        } écrits par les outils, gardés ici pour que
+#   pages/                 les pages de l'app     } l'app se construise sans les refaire
+#   fiche.md               le texte chanté et sa traduction
+# Tout refaire depuis la numérisation :
+#   python tools/source.py scores/schubert-kyrie scores/schubert-kyrie/source.pdf --force
+#   python tools/omr/pages.py --work scores/schubert-kyrie
+#   python pipeline/cht/compile.py scores/schubert-kyrie
+#   python tools/page_assets.py scores/schubert-kyrie
+#   python pipeline/publish.py schubert-kyrie       # -> packs/schubert-kyrie.zip   OK
+id: schubert-messe-sol-kyrie
+title: "Messe en sol — Kyrie"
+composer: "Franz Schubert"
+notice: "Messe n° 2 en sol majeur, D 167 : Kyrie. Réduction pour piano de Berthold Tours, Novello, Ewer and Co., Londres ; numérisation IMSLP n° 974289. Domaine public."
+staves: [S, A, T, B, PR, PL]
+movements:
+  - file: mvt1.musicxml
+    id: mvt1
+    title: "Kyrie"
+    keys:
+      - {m: 1, name: "sol majeur"}
+      - {m: 30, name: "la mineur"}
+      - {m: 68, name: "sol majeur"}
+lyrics:
+  1: {id: la, label: "Texte", lang: la}

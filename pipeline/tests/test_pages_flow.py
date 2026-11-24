@@ -161,3 +161,18 @@ def test_a_work_that_names_its_voices_only_may_have_a_keyboard_under_them(tmp_pa
     img = page(systems=2, staves=4, joined=False)                   # two voices and a piano, twice
     _, systems = pages.clean_page(cv2.cvtColor(img, cv2.COLOR_GRAY2BGR), per_system=[2, 4])
     assert [len(s.staves) for s in systems] == [4, 4]
+
+
+def test_regrouping_the_staves_of_a_page_rewrites_its_untouched_row(tmp_path, capsys):
+    """A page of two systems of two staves and one of four; the work's systems have four staves."""
+    work = make_work(tmp_path, [page(systems=2, staves=4)])
+    (work / "work.yaml").write_text("staves: [S, A, T, B]\n", encoding="utf-8")
+    tsv = work / "work" / "pages.tsv"
+    tsv.write_text(tsv.read_text(encoding="utf-8").replace("0001.png\t1\t\t\t", "0001.png\t1\t2,2,4\t\t"), encoding="utf-8")
+    assert pages.main(["--work", str(work)]) == 0
+    assert load_measures(work / "work" / "measures.tsv").rows(1)[0].systems == [4, 4, 4]
+    assert "2 2 staves, where a system of this work has 4" not in capsys.readouterr().out     # the page says so itself
+    # put together as the detection would: the row, which nobody corrected, follows
+    tsv.write_text(tsv.read_text(encoding="utf-8").replace("\t2,2,4\t", "\t\t"), encoding="utf-8")
+    assert pages.main(["--work", str(work)]) == 0
+    assert load_measures(work / "work" / "measures.tsv").rows(1)[0].systems == [4, 4]

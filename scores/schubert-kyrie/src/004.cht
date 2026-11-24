@@ -1,0 +1,190 @@
+page 4
+movement 1
+lyrics la
+meta key=1 time=3/4 tempo=63
+system 1
+m 51
+S   | e5:2.
+S.la| Chris-
+A   | g4:2 g4:4
+A.la| Chris- te,
+T   | c4:2.
+T.la| lei-
+B   | R
+PR  | e5:2 g5:4
+PR2 | e4:8 g4:8 e4:8 g4:8 g4:8 e5:8
+PL  | <g3 c4>:8 <g2 g3>:4 <g2 g3>:4 <g2 g3>:8~
+m 52
+S   | d5:4 r:4 d#5:4
+S.la| te e-
+A   | R
+T   | b3:4 r:4 b3:4
+T.la| son, e-
+B   | g3:2 g3:4
+B.la| Chris- te,
+PR  | r:4 d5:4 d#5:4
+PR2 | b3:8 g4:8 d4:8 g4:8 d#4:8 g4:8
+PL  | <g2 g3>:4 b3:4 b3:4
+m 53
+S   | e5:2 e5:4
+S.la| lei- son,
+A   | g4:2 g4:4
+A.la| Chris- te,
+T   | c4:2 c4:4
+T.la| lei- son,
+B   | c3:2 c3:4
+B.la| Chris- te,
+PR  | e5:2 g5:4
+PR2 | e4:8 g4:8 e4:8 g4:8 g4:8 e5:8
+PL  | <c3 g3 c4>:8 <c3 g3 c4>:4 <c3 g3 c4>:4 <c3 g3 c4>:8
+m 54
+S   | e5:4. e5:8 e5:4
+S.la| Chris- te e-
+A   | g4:4. g4:8 g4:4
+A.la| Chris- te e-
+T   | e4:4. e4:8 e4:4
+T.la| Chris- te e-
+B   | b2:4. b2:8 b2:4
+B.la| Chris- te e-
+PR  | !cresc b5:2 e6:4
+PR2 | b4:8 e5:8 b4:8 e5:8 e5:8 g5:8
+PL  | <b2 g3 b3>:8 <b2 g3 b3>:4 <b2 g3 b3>:4 <b2 g3 b3>:8~
+m 55
+S   | f5:2.
+S.la| lei-
+A   | g4:2.
+A.la| lei-
+T   | d4:2.
+T.la| lei-
+B   | b2:2.
+B.la| lei-
+PR  | f6:2.
+PR2 | f5:8 g5:8 f5:8 g5:8 f5:8 g5:8
+PL  | <b2 g3 b3>:8 <b2 g3 b3>:4 <b2 g3 b3>:4 <b2 g3 b3>:8
+system 2
+m 56
+S   | e5:2 e5:4
+S.la| son, e-
+A   | g4:2 g4:4
+A.la| son, e-
+T   | e4:2 e3:4
+T.la| son, e-
+B   | c3:2 c3:4
+B.la| son, e-
+PR  | !p <e5 e6>:2.
+PL  | g3:8 e4:8 g3:8 e4:8 g3:8 e4:8
+PL2 | c3:2.~
+m 57
+S   | b4:2.
+S.la| lei-
+A   | g#4:2.
+A.la| lei-
+T   | e3:2.
+T.la| lei-
+B   | c3:2.
+B.la| lei-
+PR  | <b4 b5>:2.
+PL  | g#3:8 e4:8 g#3:8 e4:8 g#3:8 e4:8
+PL2 | c3:2.
+m 58
+S   | c5:2 r:4
+S.la| son,
+A   | a4:2 r:4
+A.la| son,
+T   | e3:2 r:4
+T.la| son,
+B   | c3:2 r:4
+B.la| son,
+PR  | !dim <c5 c6>:2 <g#4 g#5>:4
+PL  | a3:8 e4:8 a3:8 e4:8 d4:8 e4:8
+PL2 | c3:2.~
+m 59
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | <a4 a5>:4 <c5 c6>:4 <e5 e6>:4
+PL  | c4:8 e4:8 a4:8 e4:8 c4:8 b3:8
+PL2 | c3:2.
+m 60
+S   | !fp c5:2.
+S.la| Chris-
+A   | !fp a4:2.
+A.la| Chris-
+T   | R
+B   | R
+PR  | !pp g5:4 f#5:4 e5:4
+PL  | <a3 c4>:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8~
+PL2 | d3:4 r:4 r:4
+m 61
+S   | c5:4 r:4 r:8. c5:16
+S.la| te e-
+A   | a4:4 r:4 r:8. a4:16
+A.la| te e-
+T   | c4:2.
+T.la| Chris-
+B   | a3:2.
+B.la| Chris-
+PR  | d5:4 r:4 r:4
+PL  | <a3 c4>:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8~
+PL2 | !pp g3:4 f#3:4 e3:4
+system 3
+m 62
+S   | c5:2.
+S.la| lei-
+A   | a4:2.
+A.la| lei-
+T   | c4:4 r:4 r:8. c4:16
+T.la| te e-
+B   | a3:4 r:4 r:8. a3:16
+B.la| te e-
+PR  | g5:4 f#5:4 e5:4
+PL  | <a3 c4>:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8~
+PL2 | d3:4 r:4 r:4
+m 63
+S   | c5:4 r:4 r:4
+S.la| son.
+A   | a4:4 r:4 r:4
+A.la| son.
+T   | c4:2.
+T.la| lei-
+B   | a3:2.
+B.la| lei-
+PR  | d5:4 r:4 r:4
+PL  | <a3 c4>:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8
+PL2 | g3:4 f#3:4 e3:4
+m 64
+S   | R
+A   | R
+T   | c4:4 r:4 r:4
+T.la| son.
+B   | a3:4 r:4 r:4
+B.la| son.
+PR  | g4:4 f#4:4 eb4:4
+PR2 | r:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8~
+PL  | d3:4 r:4 r:4
+m 65
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | d4:4 r:4 r:4
+PR2 | <a3 c4>:8 <a3 c4>:4 <a3 c4>:4 <a3 c4>:8~
+PL  | g2:4 f#2:4 eb2:4
+m 66
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | d4:4 eb4:4 e4:4
+PR2 | <a3 c4>:2.~
+PL  | d2:2.~
+m 67
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | f#4:4 g4:4 a4:4
+PR2 | <a3 c4>:4 <b3 d4>:4 d4:4
+PL  | d2:2.
+PL2 | r:4 r:4 f#3:4

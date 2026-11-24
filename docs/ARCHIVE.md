@@ -31,7 +31,8 @@ scores/<oeuvre>/
 python pipeline/publish.py <oeuvre>      # -> packs/<oeuvre>.zip, contrôlée
 ```
 
-Le modèle complet est l'œuvre d'exemple, [`scores/deux-chorals/`](../scores/deux-chorals).
+Les modèles complets sont les œuvres d'exemple, [`scores/locus-iste/`](../scores/locus-iste) et
+[`scores/schubert-kyrie/`](../scores/schubert-kyrie).
 
 ### work.yaml
 
@@ -144,19 +145,19 @@ mesures, durées, paroles de chaque voix), d'après l'archive construite : lance
 ```jsonc
 {
   "version": 1,                       // l'app lit les versions 1.x
-  "id": "bach-deux-chorals", "title": "Deux chorals", "composer": "J. S. Bach",
-  "notice": "…", "defaultPart": "S", "fiche": "fiche.md",
+  "id": "bruckner-locus-iste", "title": "Locus iste", "composer": "Anton Bruckner",
+  "notice": "…", "defaultPart": null, "fiche": "fiche.md",
   "movements": [{
-    "id": "choral1", "title": "1. Wachet auf, ruft uns die Stimme", "mei": "choral1.mei",
-    "durationMs": 34000,
-    "parts": [{"id": "S", "name": "Soprano", "sourceName": "Soprano", "kind": "voice", "staves": [1], "range": [63, 79]}],
-    "lyricLines": [{"n": 1, "id": "de", "label": "Allemand", "lang": "de"}],
-    "measures": [{"id": "g47fd2z", "n": "1", "t": 0, "q": 0, "mark": null, "tonic": 3, "minor": false, "fifths": -3, "ts": [4, 4]}],
-    "notes": [{"id": "rgaivk0", "part": "S", "m": 0, "t": 0, "d": 500, "midi": 63, "sp": "mib"}],
+    "id": "mvt1", "title": "Locus iste", "mei": "mvt1.mei",
+    "durationMs": 173636,
+    "parts": [{"id": "S", "name": "Soprano", "sourceName": "Soprano", "kind": "voice", "staves": [1], "range": [59, 79]}],
+    "lyricLines": [{"n": 1, "id": "la", "label": "Latin", "lang": "la"}],
+    "measures": [{"id": "ahuh4dl", "n": "1", "t": 0, "q": 0, "mark": null, "tonic": 0, "minor": false, "fifths": 0, "ts": [4, 4]}],
+    "notes": [{"id": "w1ot39nd", "part": "A", "m": 0, "t": 0, "d": 2727, "midi": 64, "sp": "mi"}],
     "clefs": {"1": [{"m": 0, "sign": "G", "line": 2}]},
-    "tempos": [{"t": 0, "m": 0, "bpm": 120}]
+    "tempos": [{"t": 0, "m": 0, "bpm": 66, "text": "Allegro moderato"}]
   }],
-  "pages": [ /* comme pages.json, avec "img": "pages/p001.webp" et "mv": "choral1" */ ]
+  "pages": [ /* comme pages.json, avec "img": "pages/p008.webp" et "mv": "mvt1" */ ]
 }
 ```
 

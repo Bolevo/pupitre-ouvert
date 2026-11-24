@@ -133,8 +133,8 @@ def test_key_names_from_work_yaml():
 @pytest.fixture(scope="module")
 def bach_pack(tmp_path_factory):
     work = tmp_path_factory.mktemp("bach")
-    for f in ("work.yaml", "choral1.musicxml", "choral2.musicxml"):   # the example work, without its pages
-        shutil.copy(ROOT / "scores" / "deux-chorals" / f, work / f)
+    for f in ("work.yaml", "choral1.musicxml", "choral2.musicxml"):   # two chorales, without their pages
+        shutil.copy(Path(__file__).resolve().parent / "deux-chorals" / f, work / f)
     (work / "fiche.md").write_text("# Fiche\n\n## Choral\n", encoding="utf-8")
     out = build(work, work / "pack")
     return work, out, json.loads((out / "pack.json").read_text(encoding="utf-8"))

@@ -77,7 +77,7 @@ describe('migratePrefs', () => {
 });
 
 describe('startWorkId: the work opened at the start', () => {
-  const G = 'bach-deux-chorals';
+  const G = 'bruckner-locus-iste';
   const list = [{ id: 'ma-partition' }, { id: G }];
   it('a new device: the example, wherever it is in the list', () => {
     expect(startWorkId(list, null)).toBe(G);

@@ -26,6 +26,15 @@ main.creer {
   counter-reset: step;
 }
 
+/* a photo, and the page the app shows from it */
+.before-after {
+  max-width: 34rem;
+}
+.before-after img {
+  width: 100%;
+  height: auto;
+}
+
 /* the sentence to give to the AI */
 .prompt {
   max-width: var(--measure);

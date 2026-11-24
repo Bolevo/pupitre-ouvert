@@ -604,7 +604,7 @@ export function releaseNote() {
 /** The work shown when one arrives in the app: the example. Every device is shown it once, at
  *  its first visit (and again if this line names another work one day). After that the app
  *  reopens the work and the movement left last time. */
-const FIRST_WORK = 'bach-deux-chorals';
+const FIRST_WORK = 'bruckner-locus-iste';
 
 /** Which work to open at the start. `shown`: the FIRST_WORK this device has already been shown.
  *  Where FIRST_WORK is not there: the last work opened, else the first of the list. */

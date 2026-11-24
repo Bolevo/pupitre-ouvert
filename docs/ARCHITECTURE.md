@@ -54,9 +54,10 @@ position dans la mesure est interpolée.
   `scores/` comme œuvres livrées avec l'app (`app/public/packs/`).
 - `check_pack.py` : le contrôle d'une archive (mêmes règles que `app/src/pack/validate.ts`, et davantage).
 - `crosscheck.py` : les notes chantées que le clavier ne double pas (des endroits à relire).
-- `cht/` : le format texte de transcription (`parse.py`), ses contrôles (`check.py`), sa gravure
-  sous la page, portée par portée et barres alignées, pour la relecture (`render.py`), sa
-  compilation en MusicXML (`compile.py`, music21), `measures.tsv` (`measures.py`).
+- `cht/` : le format texte de transcription (`parse.py`), ses contrôles (`check.py` : ce qui se
+  compte ; `heads.py` : les têtes de note de la page à la hauteur écrite), sa gravure sous la
+  page, portée par portée et barres alignées, pour la relecture (`render.py`), sa compilation en
+  MusicXML (`compile.py`, music21), `measures.tsv` (`measures.py`).
 
 ## Les outils d'image (`tools/`)
 
@@ -80,7 +81,7 @@ position dans la mesure est interpolée.
 ```
 pip install -r pipeline/requirements-dev.txt
 python -m pytest pipeline/tests          # le pipeline et les outils
-python pipeline/publish.py               # l'exemple -> app/public/packs/
+python pipeline/publish.py               # les exemples -> app/public/packs/
 python tools/make_kit.py                 # -> app/public/kit.zip
 cd app && npm ci
 npm test                                 # Vitest

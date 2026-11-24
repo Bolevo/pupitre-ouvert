@@ -9,8 +9,8 @@ outils qui fabriquent ses archives. Deux raisons d'être ici, deux lectures.
 pas à lire pour cela. On travaille dans `scores/<id>/`, le résultat est `packs/<id>.zip`, et
 `python pipeline/publish.py <id>` se termine par son verdict (`OK`).
 
-- La méthode est libre : le chemin décrit, une variante, ou la vôtre. L'œuvre d'exemple
-  (`scores/deux-chorals/`) et les sources montrent ce qui est attendu.
+- La méthode est libre : le chemin décrit, une variante, ou la vôtre. Les œuvres d'exemple
+  (`scores/locus-iste/`, `scores/schubert-kyrie/`) et les sources montrent ce qui est attendu.
 - Les scripts font le mécanique (pages, découpes, contrôles, compilation, archive).
 - Ce qui reste incertain se dit à la personne : elle apprend sa partie sur cette archive.
 - Les partitions des personnes sont souvent des éditions protégées : elles ne vont pas dans ce
@@ -41,6 +41,7 @@ pas à lire pour cela. On travaille dans `scores/<id>/`, le résultat est `packs
 - `pipeline/` — dossier d'œuvre → archive (`build_pack.py`, `publish.py`, `check_pack.py`),
   format de transcription (`cht/`).
 - `tools/` — images des pages (`source.py`, `omr/`, `page_assets.py`), kit (`make_kit.py`).
-- `scores/deux-chorals/` — l'œuvre d'exemple, modèle d'un dossier d'œuvre.
+- `scores/locus-iste/`, `scores/schubert-kyrie/` — les œuvres d'exemple, modèles d'un dossier
+  d'œuvre : la numérisation (domaine public), la transcription, les pages, la fiche.
 - `docs/` — `CREER.md` (méthode ; `CREATE.md` en anglais), `ARCHIVE.md` (format), `TRANSCRIBE.md`,
   `CHT_FORMAT.md`, `ARCHITECTURE.md`.

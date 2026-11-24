@@ -1,0 +1,192 @@
+page 5
+movement 1
+lyrics la
+meta key=1 time=3/4 tempo=63
+system 1
+m 68
+S   | !p b4:2 c5:4
+S.la| Ky- ri-
+A   | !p g4:2 g4:4
+A.la| Ky- ri-
+T   | !p d4:2 d4:4
+T.la| Ky- ri-
+B   | !p g3:2 a3:4
+B.la| Ky- ri-
+PR  | !p b4:2 c5:4
+PR2 | d4:8 g4:8 d4:8 g4:8 d4:8 g4:8
+PL  | <g2 g3>:2 <a2 a3>:4
+m 69
+S   | d5:2 e5:4
+S.la| e e-
+A   | g4:2 g4:4
+A.la| e e-
+T   | d4:4 g4:4 e4:4
+T.la| e _ e-
+B   | b3:2 c4:4
+B.la| e e-
+PR  | d5:2 e5:4
+PR2 | d4:8 g4:8 d4:8 g4:8 e4:8 g4:8
+PL  | <b2 b3>:2 <c3 c4>:4
+m 70
+S   | a4:2 c5:8 b4:8
+S.la| lei- _ _
+A   | f#4:2 g4:4
+A.la| lei- _
+T   | d4:2.
+T.la| lei-
+B   | d4:2.
+B.la| lei-
+PR  | a4:2 c5:8 b4:8
+PR2 | f#4:8 d4:8 f#4:8 d4:8 g4:8 d4:8
+PL  | d3:2~ d3:4
+PL2 | s:2 g3:8 b3:8
+m 71
+S   | a4:2 r:4
+S.la| son,
+A   | f#4:2 r:4
+A.la| son,
+T   | d4:2 r:4
+T.la| son,
+B   | d3:2 r:4
+B.la| son,
+PR  | <f#4 a4>:8 <d4 d5>:8 <e4 c#5>:8 <f#4 c5>:8 <g4 b4>:8 <f#4 a4>:8
+PL  | d3:4 r:8 d3:4 d3:8
+PL2 | d4:8 s:8 s:2
+m 72
+S   | b4:2 c5:4
+S.la| Ky- ri-
+A   | g4:2 g4:4
+A.la| Ky- ri-
+T   | d4:2 d4:4
+T.la| Ky- ri-
+B   | g3:2 a3:4
+B.la| Ky- ri-
+PR  | b4:2 c5:4
+PR2 | g4:8 d4:8 d4:8 g4:8 d4:8 g4:8
+PL  | <g2 g3>:2 <a2 a3>:4
+system 2
+m 73
+S   | d5:2 e5:4
+S.la| e e-
+A   | g4:2 g4:4
+A.la| e e-
+T   | d4:4 g4:4 e4:4
+T.la| e _ e-
+B   | b3:2 c4:4
+B.la| e e-
+PR  | d5:2 e5:16 g5:16 e5:16 c5:16
+PR2 | d4:8 g4:8 f#4:8 f4:8 e4:8 g4:8
+PL  | <b2 b3>:2 <c3 c4>:4
+m 74
+S   | b4:2 a4:4
+S.la| lei- _
+A   | g4:2 f#4:4
+A.la| lei- _
+T   | d4:2.
+T.la| lei-
+B   | d4:2.
+B.la| lei-
+PR  | b4:2 a4:4
+PR2 | d4:8 g4:8 d4:8 g4:8 d4:8 f#4:8
+PL  | d3:2 <d2 d3>:4
+m 75
+S   | b4:4 b4:8. b4:16 b4:8 b4:8
+S.la| son, Ky- ri- e e-
+A   | f4:4 f4:8. f4:16 f4:8 f4:8
+A.la| son, Ky- ri- e e-
+T   | d4:4 d4:8. d4:16 d4:8 d4:8
+T.la| son, Ky- ri- e e-
+B   | g3:4 g3:8. g3:16 g3:8 g3:8
+B.la| son, Ky- ri- e e-
+PR  | !fp b4:4 d5:4 g5:4
+PR2 | f4:8 g4:8 b4:2
+PL  | <g2 g3>:4 clef:G f4:8 g4:8 f4:8 g4:8 clef:F
+PL2 | s:4 g3:2
+m 76
+S   | c5:4 c5:4 r:4
+S.la| lei- son,
+A   | e4:4 e4:4 r:4
+A.la| lei- son,
+T   | c4:4 c4:4 r:4
+T.la| lei- son,
+B   | g3:4 g3:4 r:4
+B.la| lei- son,
+PR  | !fp c5:4 e5:4 g5:4
+PR2 | e4:8 g4:8 c5:2
+PL  | <g2 g3>:4 clef:G e4:8 g4:8 e4:8 g4:8 clef:F
+PL2 | s:4 g3:2
+m 77
+S   | r:4 c5:8. c5:16 c5:8 c5:8
+S.la| Ky- ri- e e-
+A   | r:4 eb4:8. eb4:16 eb4:8 eb4:8
+A.la| Ky- ri- e e-
+T   | r:4 g3:8. g3:16 g3:8 g3:8
+T.la| Ky- ri- e e-
+B   | r:4 g2:8. g2:16 g2:8 g2:8
+B.la| Ky- ri- e e-
+PR  | !fp c5:4 g5:4 c6:4
+PR2 | eb4:8 g4:8 c5:2
+PL  | <g2 g3>:4 clef:G eb4:8 g4:8 eb4:8 g4:8
+PL2 | s:4 g3:2
+system 3
+m 78
+S   | b4:4 b4:4 d5:4
+S.la| lei- son, e-
+A   | d4:4 g4:4 g4:4
+A.la| lei- son, e-
+T   | g3:4 g3:4 g3:4
+T.la| lei- son, e-
+B   | g2:4 g2:4 b2:4
+B.la| lei- son, e-
+PR  | !fp <b4 b5>:4 d6:4 <g4 g5>:4
+PL  | d4:8 g4:8 d4:8 g4:8 clef:F g3:8 d4:8
+PL2 | g3:2 b2:4
+m 79
+S   | a4:2 c#5:4
+S.la| lei- _
+A   | f#4:2 e4:4
+A.la| lei- _
+T   | a3:2 g3:4
+T.la| lei- _
+B   | a2:2.
+B.la| lei-
+PR  | <f#4 f#5>:4 a5:4 <g4 c#5>:4
+PL  | a2:8 a3:8 f#4:8 a3:8 e4:8 a3:8
+PL2 | a2:2 s:4
+m 80
+S   | d5:2 r:4
+S.la| son,
+A   | d4:2 r:4
+A.la| son,
+T   | f#3:2 r:4
+T.la| son,
+B   | d3:2 r:4
+B.la| son,
+PR  | <f#4 d5>:4 <d5 d6>:4 <a4 a5>:4
+PL  | <d3 d4>:8 d4:8 f#4:8 a4:8 f#4:8 d4:8
+m 81
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | <f#4 f#5>:4 <a4 f#5 a5>:4 <g4 c#5>:4
+PL  | a3:8 d4:8 a2:8 a3:8 e4:8 a3:8
+m 82
+S   | R
+A   | R
+T   | R
+B   | R
+PR  | <f#4 d5>:8 <e4 c#5>:8 <g4 e5>:8 <f#4 d5>:8 <e4 c#5>:8 <f#4 c5>:8
+PL  | <d3 d4>:4 d3:4 r:4
+m 83
+S   | b4:2 c5:4
+S.la| Ky- ri-
+A   | g4:2 g4:4
+A.la| Ky- ri-
+T   | d4:2 d4:4
+T.la| Ky- ri-
+B   | g3:2 a3:4
+B.la| Ky- ri-
+PR  | !p b4:2 c5:4
+PR2 | g4:8 d4:8 d4:8 g4:8 d4:8 g4:8
+PL  | <g2 g3>:2 <a2 a3>:4

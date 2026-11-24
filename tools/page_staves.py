@@ -249,9 +249,10 @@ def annotate(pages: list[dict], pages_dir: Path, counts: dict[int, int],
                     if pg["page"] not in voices_only:
                         voices_only.append(pg["page"])
                 else:
-                    misses.append(f"{where}: {len(staves)} staves on the page, {counts[mvs[0]]} in the score: "
-                                  f"the staff of the voice followed is not shown on this system (staves of the work: work.yaml `staves`, "
-                                  f"of a page: work/pages.tsv)")
+                    misses.append(f"{where}: {len(staves)} staves on the page, {counts[mvs[0]]} in the score: the app shows "
+                                  f"this system without marking the staff of the voice followed. As it should be where a "
+                                  f"soloist or the keyboard is alone; else the staves of the work are in work.yaml (`staves`), "
+                                  f"those of a page in work/pages.tsv")
             else:
                 s["staves"] = staves
                 if agree < 0.5:

@@ -1,0 +1,11 @@
+# Measures per system, page by page: the numbers on the crops, in the .cht files and in the app come from here.
+# Written from the barlines found: check each page against work/img/pNNN_overlay.png.
+# To correct: `systems` (measures per system, e.g. 4,5,4), `movement`; a movement that starts with a pickup:
+# `first` = 0 on its first page. Then run tools/omr/pages.py again: count, first and last are recomputed.
+page	movement	systems	count	first	last	note
+1	1	5,5,5	15	1	15	from the barlines found: check the overlay
+2	1	5,5,5	15	16	30	from the barlines found: check the overlay
+3	1	5,5,5,5	20	31	50	from the barlines found: check the overlay
+4	1	5,6,6	17	51	67	from the barlines found: check the overlay
+5	1	5,5,6	16	68	83	from the barlines found: check the overlay
+6	1	5,5,6	16	84	99	from the barlines found: check the overlay

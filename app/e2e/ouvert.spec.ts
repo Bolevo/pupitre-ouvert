@@ -3,7 +3,8 @@ import { strToU8, unzipSync, zipSync } from 'fflate';
 import { readFileSync } from 'node:fs';
 import { FIXTURES } from './setup';
 
-const EXAMPLE = 'J. S. Bach — Deux chorals';
+const EXAMPLE = 'Anton Bruckner — Locus iste'; // the work the app opens on
+const EXAMPLES = [EXAMPLE, 'Franz Schubert — Messe en sol — Kyrie']; // the works that come with the app
 const IMPORT = '__import__';
 const REMOVE = '__remove__';
 
@@ -42,17 +43,33 @@ async function plays(page: Page, play = 'Lecture') {
 test('the app opens on the example: its pages, the line of a voice, and it plays', async ({ page }) => {
   const errors = await ready(page);
   await expect(page).toHaveTitle('Pupitre Ouvert');
-  await expect(page.locator('img[alt="Page 1"]')).toBeVisible();
+  await expect(page.locator('img[alt="Page 8"]')).toBeVisible(); // the pages keep the numbers printed on them
   await expect(page.locator('.lane-voice')).toHaveText('Ténor');
-  // a work can be added; the example, which comes with the app, cannot be removed
-  expect(await works(page)).toEqual([EXAMPLE, 'Ajouter une partition (.zip)…']);
+  // a work can be added; the examples, which come with the app, cannot be removed
+  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
   await plays(page);
-  await expect(page.locator('.pn-page')).toContainText('1');
+  await expect(page.locator('.pn-page')).toContainText('8');
   // nothing of the app is kept under the names of its sibling on the same site (bolevo.github.io/Pupitre)
   const keys = await page.evaluate(() => Object.keys(localStorage));
   expect(keys.length).toBeGreaterThan(0);
   for (const k of keys) expect(k).toMatch(/^pupitre-ouvert/);
   expect(await page.evaluate(() => indexedDB.databases().then((d) => d.map((x) => x.name)))).toContain('pupitre-ouvert');
+  expect(errors).toEqual([]);
+});
+
+test('the second example opens too: a soloist, the choir and the piano', async ({ page }) => {
+  const errors = await ready(page);
+  await page.locator('.work-select').selectOption({ label: EXAMPLES[1] });
+  await expect.poll(() => current(page)).toBe(EXAMPLES[1]);
+  await lane(page);
+  await expect(page.locator('img[alt="Page 1"]')).toBeVisible();
+  // four voices and the accompaniment, each with its track
+  await expect(page.locator('.track-rows .t-name')).toHaveText(['Soprano', 'Alto', 'Ténor', 'Basse', 'Piano']);
+  await plays(page);
+  // the work left open is the one found at the next visit
+  await page.reload();
+  await lane(page);
+  await expect.poll(() => current(page)).toBe(EXAMPLES[1]);
   expect(errors).toEqual([]);
 });
 
@@ -63,7 +80,7 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   await expect.poll(() => current(page)).toBe(mine);
   await lane(page);
   await expect(page.locator('img[alt="Page 1"]')).toBeVisible();
-  expect(await works(page)).toEqual([EXAMPLE, mine, 'Ajouter une partition (.zip)…', 'Retirer « Deux chorals (all) »…']);
+  expect(await works(page)).toEqual([...EXAMPLES, mine, 'Ajouter une partition (.zip)…', 'Retirer « Deux chorals (all) »…']);
   await plays(page);
 
   // kept in the browser: the work is there, and open, at the next visit
@@ -77,7 +94,7 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   pack.title = 'Deux chorals, corrigés';
   await add(page, { name: 'v2.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ ...files, 'pack.json': strToU8(JSON.stringify(pack)) })) });
   await expect.poll(() => current(page)).toBe('J. S. Bach — Deux chorals, corrigés');
-  expect((await works(page)).filter((w) => w.startsWith('J. S. Bach'))).toHaveLength(2);
+  expect((await works(page)).filter((w) => w.startsWith('J. S. Bach'))).toHaveLength(1);
 
   // declined: nothing happens; accepted: the work goes, the example is back, also after a reload
   page.once('dialog', (d) => d.dismiss());
@@ -90,10 +107,10 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   await page.locator('.work-select').selectOption(REMOVE);
   await expect.poll(() => current(page)).toBe(EXAMPLE);
   await lane(page);
-  expect(await works(page)).toEqual([EXAMPLE, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
   await page.reload();
   await lane(page);
-  expect(await works(page)).toEqual([EXAMPLE, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
   expect(errors).toEqual([]);
 });
 
@@ -133,7 +150,7 @@ test('an archive the app could not show is refused, with what to correct', async
   await expect(error).toContainText('Page 2 : l’image pages/p002.webp n’est pas dans l’archive.');
   // the example is still there, nothing was added
   expect(await current(page)).toBe(EXAMPLE);
-  expect(await works(page)).toEqual([EXAMPLE, 'Ajouter une partition (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, 'Ajouter une partition (.zip)…']);
   await error.getByRole('button', { name: 'Fermer' }).click();
   await expect(error).toHaveCount(0);
   // a file that is no archive at all
@@ -160,7 +177,7 @@ test('the help says how to add a score, and the page for an AI carries the metho
   const kit = await request.get('/kit.zip');
   expect(kit.ok()).toBe(true);
   const names = Object.keys(unzipSync(new Uint8Array(await kit.body())));
-  for (const f of ['docs/CREER.md', 'docs/CREATE.md', 'docs/ARCHIVE.md', 'LICENSE', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'scores/deux-chorals/work.yaml']) {
+  for (const f of ['docs/CREER.md', 'docs/CREATE.md', 'docs/ARCHIVE.md', 'LICENSE', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'pipeline/cht/heads.py', 'scores/locus-iste/work.yaml', 'scores/locus-iste/src/008.cht', 'scores/locus-iste/source.pdf', 'scores/schubert-kyrie/src/003.cht']) {
     expect(names).toContain(`pupitre-ouvert/${f}`);
   }
   expect(names.filter((n) => n.startsWith('pupitre-ouvert/app/'))).toEqual([]);
@@ -178,7 +195,7 @@ test('English: chosen in the settings, kept, asked by ?lang=en, and the pages of
   await expect(page.locator('.lane-voice')).toHaveText('Tenor');
   await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Play');
   await expect(page.locator('.tracks-help')).toHaveAttribute('href', 'help.html');
-  expect(await works(page)).toEqual([EXAMPLE, 'Add a score (.zip)…']);
+  expect(await works(page)).toEqual([...EXAMPLES, 'Add a score (.zip)…']);
   // an archive that is refused says why in the same language (the check runs in a worker)
   await add(page, { name: 'photo.zip', mimeType: 'application/zip', buffer: Buffer.from('not a zip') });
   await expect(page.locator('.error')).toContainText('This file is not a readable .zip archive.');

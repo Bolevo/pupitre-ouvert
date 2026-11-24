@@ -6,8 +6,8 @@ Learn your choir part with **your own score**: follow the pages, hear the voices
 by one, watch your line scroll, learn the text, record yourself.
 
 - **The app**: <https://bolevo.github.io/pupitre-ouvert/?lang=en> — free, no account, offline once
-  opened, on phones and computers. It opens on an example (two Bach chorales). In French or in
-  English (Settings).
+  opened, on phones and computers. It opens on two examples: Bruckner's *Locus iste* and the Kyrie
+  of Schubert's Mass in G, from scanned old editions. In French or in English (Settings).
 - **The help**: <https://bolevo.github.io/pupitre-ouvert/help.html>
 - **Adding your score**: it has to be made into a `.zip` archive. An AI that runs code can do it
   from your PDF or your photos: <https://bolevo.github.io/pupitre-ouvert/create.html>
@@ -21,11 +21,11 @@ Your scores stay on your device: nothing is sent.
 | The method, from the scanned score to the archive | [`docs/CREATE.md`](docs/CREATE.md) (French: [`docs/CREER.md`](docs/CREER.md)) |
 | What an archive holds, and the work folder | [`docs/ARCHIVE.md`](docs/ARCHIVE.md) (in French) |
 | Reading a page and writing it down | [`docs/TRANSCRIBE.md`](docs/TRANSCRIBE.md), [`docs/CHT_FORMAT.md`](docs/CHT_FORMAT.md) (in French) |
-| A complete work folder | [`scores/deux-chorals/`](scores/deux-chorals) |
+| Two complete work folders, from the scan to the archive | [`scores/locus-iste/`](scores/locus-iste), [`scores/schubert-kyrie/`](scores/schubert-kyrie) |
 
 ```
 pip install -r pipeline/requirements.txt
-python pipeline/publish.py deux-chorals      # -> packs/deux-chorals.zip   OK
+python pipeline/publish.py locus-iste        # -> packs/locus-iste.zip   OK
 ```
 
 ## For those who want to read or change the code

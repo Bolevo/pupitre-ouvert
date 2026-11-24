@@ -1,13 +1,16 @@
 # Pictures of the help page (`app/aide.html`, `app/help.html`)
 
-The screenshots and the short video of the help show the **example work** that comes with the
-app: two Bach chorales of the music21 corpus (BWV 140/7 and 244/54, public domain), with pages
-engraved by Verovio and a short sheet (`scores/deux-chorals/`). Redo them when the screen changes.
+The screenshots and the short video of the help show the **example work** the app opens on:
+Bruckner's *Locus iste* in its first edition (1886, public domain), from its scan
+(`scores/locus-iste/`). Redo them when the screen changes.
+
+`python tools/help/before_after.py` makes the picture « a photo, and the page the app shows » of
+the page « Créer l'archive » (`avant-apres.webp`), from the same scan.
 
 From `app/`, with a Chromium (`PW_CHROMIUM`, if Playwright's own is not installed):
 
 ```sh
-python ../pipeline/publish.py                     # the example, into public/packs/
+python ../pipeline/publish.py                     # the examples, into public/packs/
 npx vite build && (npx vite preview --port 4390 --strictPort &)
 node ../tools/help/shots.cjs 4390 /tmp/raw        # raw PNG; or only some: … /tmp/raw hero desk
 python ../tools/help/help_images.py /tmp/raw      # WebP and MP4 into app/src/aide/img/

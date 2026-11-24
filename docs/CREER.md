@@ -27,14 +27,17 @@ partie à l'oreille sur cette archive : une note fausse s'y apprend aussi bien q
 
 - **Le kit** : `git clone --depth 1 https://github.com/Bolevo/pupitre-ouvert`, ou
   [https://bolevo.github.io/pupitre-ouvert/kit.zip](https://bolevo.github.io/pupitre-ouvert/kit.zip)
-  (0,5 Mo ; sans réseau, la personne peut vous le joindre). Puis
+  (2 Mo ; sans réseau, la personne peut vous le joindre). Puis
   `pip install -r pipeline/requirements.txt` (Python ≥ 3.10).
 - **Des scripts pour tout ce qui est mécanique** : préparer et nettoyer les pages, les découper
   pour la lecture, contrôler une transcription, la graver sous la page pour les comparer,
   compiler, construire et vérifier l'archive. Ils sont courts et lisibles ; chacun dit ce qu'il
   fait avec `--help`.
-- **Un exemple complet** : [`scores/deux-chorals/`](../scores/deux-chorals) est un dossier
-  d'œuvre fini ; `python pipeline/publish.py deux-chorals` en fait l'archive.
+- **Deux exemples complets**, de la numérisation à l'archive :
+  [`scores/locus-iste/`](../scores/locus-iste) (chœur a cappella) et
+  [`scores/schubert-kyrie/`](../scores/schubert-kyrie) (soliste, chœur et piano). Chaque dossier
+  garde sa table des mesures, sa transcription `src/*.cht` et sa fiche ;
+  `python pipeline/publish.py locus-iste` en fait l'archive.
 
 Vous êtes libre de la méthode. Le chemin décrit ci-dessous a servi à transcrire des œuvres
 entières pour chœur et piano : prenez-le tel quel, adaptez-le, ou faites autrement si cette
@@ -122,28 +125,33 @@ système entier, sert de vue d'ensemble. Pour un doute :
 
 Écrivez chaque système dès qu'il est lu : ce qui est écrit ne dépend plus des images. Une fois
 `measures.tsv` établi, les pages sont indépendantes : si vous pouvez déléguer, elles se
-transcrivent en parallèle, chacune avec ses découpes et ses deux contrôles.
+transcrivent en parallèle, chacune avec ses découpes et ses contrôles.
 
-**Deux contrôles**, à lancer page par page :
+**Trois contrôles**, à lancer page par page :
 
 ```
 python pipeline/cht/check.py scores/<id> --pages <page>            # durées, syllabes, liaisons, tessitures
+python pipeline/cht/heads.py scores/<id> --pages <page>            # les têtes de note de la page sont-elles à la hauteur écrite ?
 python pipeline/cht/render.py scores/<id>/src/NNN.cht --compare    # work/render/NNN_cmp_sK.png, …_sK_pf.png
 ```
 
-`check.py` trouve ce qui se compte. `--compare` trouve le reste : pour chaque système, chaque
-portée de la page avec, juste dessous, la même portée gravée d'après votre texte, barres de mesure
-alignées. Une hauteur, un rythme ou une syllabe qui diffèrent s'y voient en place — c'est le seul
-contrôle qui attrape une note de bonne durée mais de mauvaise hauteur. Regardez chaque image ;
-les lectures les moins sûres sont les têtes sur lignes supplémentaires, les altérations et les
-silences des éditions anciennes. Marquez `# ?` ce qui reste incertain.
+`check.py` trouve ce qui se compte. `heads.py` cherche les têtes de note sur l'image de la page
+et liste les mesures où une note écrite n'a pas de tête à sa hauteur alors qu'il y en a une à un
+ou deux degrés : `p10 m41 A: g3 written, the head stands 1 step higher (a3?)`. Ce sont des
+endroits à relire au zoom, pas des verdicts ; il ne juge que les voix, et pas toutes les mesures.
+`--compare` montre le reste : pour chaque système, chaque portée de la page avec, juste dessous,
+la même portée gravée d'après votre texte, barres de mesure alignées. Une hauteur, un rythme ou
+une syllabe qui diffèrent s'y voient en place. Regardez chaque image ; les lectures les moins
+sûres sont les têtes sur lignes supplémentaires, les altérations et les silences des éditions
+anciennes. Marquez `# ?` ce qui reste incertain.
 
 **L'accompagnement.** Quand la partition en a un, il fait partie de l'archive : l'app le joue
 sous les voix, il donne le ton et le tempo. Un ordre qui marche bien : les voix de toute l'œuvre,
-puis étapes 5 à 7 (l'archive est déjà utilisable), puis le clavier, et de nouveau 5 à 7. Si vous
-remettez d'abord les voix seules, dites-le en clair et proposez la suite. Une fois le clavier
-écrit, `python pipeline/crosscheck.py <id>` liste les notes chantées que le clavier ne double
-pas : autant d'endroits à relire, dans la voix et au clavier.
+puis étapes 5 à 7 (l'archive est déjà utilisable), puis le clavier, et de nouveau 5 à 7. Sauf
+demande de la personne, l'archive attendue a son accompagnement ; si vous devez vous arrêter aux
+voix, dites-le en tête de votre message et proposez la suite. Une fois le clavier écrit,
+`python pipeline/crosscheck.py <id>` liste les notes chantées que le clavier ne double pas :
+autant d'endroits à relire, dans la voix et au clavier.
 
 ### 5. Compiler
 
@@ -249,6 +257,7 @@ python tools/source.py scores/<id> partition.pdf      # regarder work/apercu.png
 python tools/omr/pages.py --work scores/<id>          # regarder work/img/pNNN_overlay.png ; corriger work/measures.tsv, relancer
 # pour chaque page : écrire src/NNN.cht d'après les découpes de work/img/crops.txt, puis
 python pipeline/cht/check.py scores/<id> --pages N
+python pipeline/cht/heads.py scores/<id> --pages N
 python pipeline/cht/render.py scores/<id>/src/NNN.cht --compare
 python pipeline/cht/compile.py scores/<id>
 python tools/page_assets.py scores/<id>

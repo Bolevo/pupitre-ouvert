@@ -3,8 +3,10 @@
     python tools/make_kit.py [OUT.zip]        # default app/public/kit.zip (served beside the app)
 
 Holds the method and the formats (docs/), the tools (pipeline/, tools/: pages, checks, compiler,
-builder) and the example work (scores/deux-chorals/). Not the app, its sounds, nor the tools
-that only serve the app's own files.
+builder) and the example works: scores/locus-iste/ whole, from its scan to its pages, and the
+text of scores/schubert-kyrie/ (its transcription and tables, without the scan and the page
+images, to keep the kit light). Not the app, its sounds, nor the tools that only serve the
+app's own files.
 """
 from __future__ import annotations
 
@@ -14,10 +16,11 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KEEP = ("README.md", "README.en.md", "AGENTS.md", "LICENSE", "NOTICE.md", "docs/", "pipeline/", "scores/deux-chorals/",
+KEEP = ("README.md", "README.en.md", "AGENTS.md", "LICENSE", "NOTICE.md", "docs/", "pipeline/", "scores/",
         "tools/source.py", "tools/page_assets.py", "tools/page_staves.py", "tools/page_starts.py",
         "tools/fiche_data.py", "tools/make_kit.py", "tools/omr/")
-SKIP = ("/pack/", "/work/img/", "/work/zoom/", "/work/render/", "/work/source/", "__pycache__", ".pytest_cache")
+SKIP = ("/pack/", "/work/img/", "/work/zoom/", "/work/render/", "/work/source/", "/work/boxes/", "__pycache__", ".pytest_cache",
+        "/scores/schubert-kyrie/pages/", "/scores/schubert-kyrie/source.pdf")
 
 
 def files() -> list[Path]:

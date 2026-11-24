@@ -88,3 +88,36 @@ def test_the_margin_stops_where_the_grain_of_a_table_begins():
     assert y1 > 2100 + 16 * SP
     # without the table, the same page takes its full margin above the title
     assert frame.content_box(page(surroundings=False, number=False))[1] < edge - 4
+
+
+def test_dark_streaks_of_a_table_beside_the_sheet_are_not_taken_for_print():
+    """Below the footer the sheet ends and a wooden table begins: grey, with darker streaks that
+    do not reach the border of the photo. They stand in grey, not on paper: the frame stops at
+    the sheet."""
+    img = page(surroundings=False)
+    foot = 2100 + 16 * SP + 30                               # under the last lyrics
+    edge = foot + 3 * SP                                     # the sheet ends three staff spaces lower
+    plain = frame.content_box(img)
+    img[edge:edge + 200, 200:W - 200] = 185                  # the table, lit
+    for x in range(260, W - 300, 70):                        # its grain: short dark streaks
+        img[edge + 8:edge + 14, x:x + 40] = 120
+    box = frame.content_box(img)
+    assert box is not None and box[3] <= edge + 2            # nothing of the table
+    assert box[3] > 2100 + 16 * SP and box[:3] == plain[:3]
+
+
+def test_what_a_scanner_leaves_in_the_margins_is_cut():
+    """A library scan: a dark band along the bottom with a blot beside it, the shadow of the
+    binding down the left rim, a streak at the very top, a lone stain beside the staves. None
+    of it is print; the page number, the title and the name of the voice still are."""
+    clean = page(surroundings=False)
+    img = clean.copy()
+    img[H - 90:H - 40, 0:1100] = 0                            # the band, from the left border
+    cv2.ellipse(img, (160, H - 150), (45, 60), 0, 0, 360, 0, -1)       # a blot just above it
+    img[2000:2500, 60:72] = 0                                 # the binding's shadow
+    img[8:14, 200:260] = 0                                    # a streak under the top border
+    cv2.circle(img, (90, 1300), 9, 0, -1)                     # a stain in the left margin
+    box, plain = frame.content_box(img), frame.content_box(clean)
+    assert box is not None and plain is not None
+    assert box[0] > 72 and box[3] < H - 210                   # the shadow, the blot and the band are out
+    assert abs(box[0] - plain[0]) <= 2 and abs(box[1] - plain[1]) <= 2 and abs(box[3] - plain[3]) <= 2

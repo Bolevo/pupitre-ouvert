@@ -1,0 +1,192 @@
+# Bruckner, Locus iste (WAB 23) -- first edition, printed page 10
+page 10
+movement 1
+lyrics la
+meta key=0 time=4/4 tempo=66
+system 1
+m 28
+S   | f4:4. f4:8 e4:2
+S.la| si- bi- lis
+A   | c4:4 b3:4 c4:2
+A.la| si- bi- lis
+T   | d3:4. d3:8 e3:4 c3:4
+T.la| si- bi- lis _
+B   | R
+m 29
+S   | e4:4 d4:4 r:2
+S.la| est _
+A   | c4:4 b3:4 r:2
+A.la| est _
+T   | g3:2 r:2
+T.la| est
+B   | R
+m 30
+S   | !p c5:2. b4:4
+S.la| Lo- cus
+A   | !p e4:2. e4:4
+A.la| Lo- cus
+T   | !p g3:2. g3:4
+T.la| Lo- cus
+B   | !p c3:2. c3:4
+B.la| Lo- cus
+m 31
+S   | a4:2 g4:4 r:4
+S.la| i- ste
+A   | e4:2 e4:4 r:4
+A.la| i- ste
+T   | c4:2 c4:4 r:4
+T.la| i- ste
+B   | c3:2 c3:4 c3:4
+B.la| i- ste a
+system 2
+m 32
+S   | r:4 g4:4 a4:4 e4:4
+S.la| a De- o
+A   | r:4 e4:4 e4:4 e4:4
+A.la| a De- o
+T   | r:4 c4:4 c4:4 c4:4
+T.la| a De- o
+B   | c3:2. c3:4
+B.la| De- o
+m 33
+S   | !dim g4:4. g4:8 f4:4 r:4
+S.la| fac- tus est
+A   | !dim d4:4. d4:8 d4:4 r:4
+A.la| fac- tus est
+T   | !dim a3:4. a3:8 a3:4 r:4
+T.la| fac- tus est
+B   | !dim d3:4. d3:8 d3:4 r:4
+B.la| fac- tus est
+m 34
+S   | !mf d5:2. c5:4
+S.la| lo- cus
+A   | !mf f#4:2. f#4:4
+A.la| lo- cus
+T   | !mf a3:2. d4:4
+T.la| lo- cus
+B   | !mf d3:2. d3:4
+B.la| lo- cus
+m 35
+S   | c5:2 b4:4 r:4
+S.la| i- ste
+A   | f#4:2 g4:4 r:4
+A.la| i- ste
+T   | d4:2 d4:4 r:4
+T.la| i- ste
+B   | g2:2 g2:4 !ff g3:4
+B.la| i- ste a
+m 36
+S   | r:4 !f d5:4 e5:4 g5:4
+S.la| a De- o
+A   | r:4 !f g4:4 g4:4 g4:4
+A.la| a De- o
+T   | r:4 !f b3:4 c4:4 d4:4
+T.la| a De- o
+B   | f3:2 e3:4 b2:4
+B.la| De- _ o
+system 3
+m 37
+S   | f5:4. f5:8 e5:4 r:4
+S.la| fac- tus est
+A   | g4:4. g4:8 g4:4 r:4
+A.la| fac- tus est
+T   | d4:4. d4:8 c4:4 r:4
+T.la| fac- tus est
+B   | c3:4. c3:8 c3:4 !p c3:4
+B.la| fac- tus est a
+m 38
+S   | r:4 !p f5:4 f5:4 e5:4
+S.la| a De- o
+A   | r:4 !p g4:4 g4:4 g4:4
+A.la| a De- o
+T   | r:4 !p d4:4 d4:4 c4:4
+T.la| a De- o
+B   | b2:2 c3:2
+B.la| De- o
+m 39
+S   | r:4 f4:2 e4:4
+S.la| De- o
+A   | r:4 d4:2 c4:4
+A.la| De- o
+T   | r:4 g3:2 g3:4
+T.la| De- o
+B   | b2:2 c3:2
+B.la| De- o
+m 40
+S   | d4:2. !cresc e4:4
+S.la| De- _
+A   | c4:4 b3:4 !cresc bb3:2~
+A.la| De- _ _
+T   | !cresc g3:1
+T.la| De-
+B   | g2:2 !cresc g3:4 c#3:4
+B.la| De- _ _
+m 41
+S   | f4:2 !f f#4:2~
+S.la| _ _
+A   | bb3:4 a3:4 !f c4:2~
+A.la| _ _
+T   | f3:2 !f a3:2~
+T.la| _ _
+B   | d3:2. !f d#3:4
+B.la| _ _
+system 4
+m 42
+S   | f#4:2 g4:2
+S.la| o
+A   | c4:2 b3:2
+A.la| o
+T   | a3:2 g3:2
+T.la| o
+B   | e3:2 e3:2
+B.la| _ o
+m 43
+S   | R
+A   | R
+T   | R
+B   | R
+m 44
+S   | r:4 !pp g4:4 f4:4 e4:4
+S.la| a De- o
+A   | r:4 !pp c4:4 b3:4 c4:4
+A.la| a De- o
+T   | r:4 !pp g3:4 g3:4 g3:4
+T.la| a De- o
+B   | r:4 !pp e3:4 d3:4 c3:4
+B.la| a De- o
+m 45
+S   | f4:2 d4:2
+S.la| De- o
+A   | c4:2 c4:2
+A.la| De- o
+T   | a3:2 a3:2
+T.la| De- o
+B   | f2:2 f#2:2
+B.la| De- o
+m 46
+S   | d4:1~
+S.la| fac-
+A   | c4:1
+A.la| fac-
+T   | g3:1~
+T.la| fac-
+B   | g2:1~
+B.la| fac-
+m 47
+S   | d4:2 d4:2
+S.la| tus
+A   | b3:2 b3:2
+A.la| _ tus
+T   | g3:2 g3:2
+T.la| tus
+B   | g2:2 g2:2
+B.la| tus
+m 48
+S   | e4:2. r:4
+S.la| est.
+A   | c4:2. r:4
+A.la| est.
+T   | g3:2. r:4
+T.la| est.
+B   | c3:2. r:4
+B.la| est.

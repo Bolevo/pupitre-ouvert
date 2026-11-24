@@ -374,7 +374,11 @@ def process(raw: Path, page: int, out: Path, mtable, solo: list[str] | None = No
     for old in out.glob(f"p{page:03d}_*"):
         old.unlink()
     cv2.imwrite(str(out / f"p{page:03d}.png"), page_img)
-    if new_row is not None and page not in mtable:
+    rows = mtable.rows(page) if page in mtable else []
+    # a row still as the detection wrote it, for other systems than those found now (the staves of
+    # the page have been put together otherwise since): written again
+    stale = len(rows) == 1 and rows[0].note.startswith(AUTO_NOTE) and len(rows[0].systems) != len(systems)
+    if new_row is not None and (page not in mtable or stale):
         for k, sysm in enumerate(systems):                      # hand-placed barlines count from the start
             if (hand or {}).get(k + 1):
                 reconcile(sysm, len(set(sysm.barlines) | set(hand[k + 1])), hand[k + 1])
@@ -385,6 +389,13 @@ def process(raw: Path, page: int, out: Path, mtable, solo: list[str] | None = No
         remarks.insert(0, f"no line joins the staves at their left: put together by their spacing as {len(systems)} system(s) of "
                           f"{' '.join(str(len(sy.staves)) for sy in systems)} staves. If the page shows otherwise: its staves per "
                           f"system in work/pages.tsv (column `staves`, e.g. 3,3,3,6)")
+    sizes = [per_system] if isinstance(per_system, int) else list(per_system or [])
+    odd = [k + 1 for k, sy in enumerate(systems) if len(sy.staves) not in sizes]
+    if sizes and odd and not counts:
+        remarks.insert(0, f"system(s) {', '.join(map(str, odd))}: {' '.join(str(len(systems[k - 1].staves)) for k in odd)} staves, where a system "
+                          f"of this work has {' or '.join(map(str, sizes))} (work.yaml `staves`). A soloist with the keyboard, the keyboard "
+                          f"alone? Look at the overlay: if the staves are put together otherwise on the page, its staves per system "
+                          f"in work/pages.tsv (column `staves`, e.g. 3,3,3,6)")
     d = lay.to_dict(systems)
     d.update(page=page, measures=[len(s.barlines) for s in systems], absolute_numbers=absolute,
              first_measure=nums[0][0] if nums and nums[0] else None,
@@ -406,6 +417,8 @@ def parse_range(spec: str | None, available) -> list[int]:
         res.extend(range(int(a), int(b or a) + 1))
     return [p for p in res if p in available]
 
+
+AUTO_NOTE = "from the barlines found"     # the note of a row of measures.tsv nobody has corrected yet
 
 TSV_HELP = [
     "# Measures per system, page by page: the numbers on the crops, in the .cht files and in the app come from here.",
@@ -441,8 +454,12 @@ def main(argv=None) -> int:
     added: list[int] = []
 
     def new_row(page: int, counts: list[int]) -> None:
-        earlier = [r for r in mtable.all_rows() if r.page < page]
-        mtable.add(PageRow(page, earlier[-1].movement if earlier else 1, counts, 1, "from the barlines found: check the overlay"))
+        if page in mtable:                                      # (written again: see process)
+            row = mtable.rows(page)[0]
+            row.systems = list(counts)
+        else:
+            earlier = [r for r in mtable.all_rows() if r.page < page]
+            mtable.add(PageRow(page, earlier[-1].movement if earlier else 1, counts, 1, f"{AUTO_NOTE}: check the overlay"))
         added.append(page)
         numbered()
 

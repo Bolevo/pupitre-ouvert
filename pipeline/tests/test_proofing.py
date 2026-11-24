@@ -111,3 +111,72 @@ def test_voices_are_cross_checked_against_the_keyboard():
     lines, compared = crosscheck.misses(mv)
     assert compared == 2 and len(lines) == 1
     assert "m  1 beat 3.00  S   d5" in lines[0]
+
+
+def page_with_notes(notes, hollow=()):
+    """One system of four staves, two measures; `notes`: {staff index: [(x, half spaces above the
+    bottom line)]} drawn as noteheads with a stem; `hollow`: the (staff, x) drawn as white notes."""
+    import numpy as np
+    img = page(systems=1, staves=4, bars=(800,))
+    sp, top0, inner = 16, 160, 150
+    for i, heads in notes.items():
+        bot = top0 + i * inner + 4 * sp
+        for x, pos in heads:
+            y = int(bot - pos * sp / 2)
+            for ledger in range(-2, pos - 1, -2):                       # ledger lines below the staff
+                cv2.line(img, (x - 18, bot - ledger * sp // 2), (x + 18, bot - ledger * sp // 2), 0, 2)
+            cv2.ellipse(img, (x, y), (11, 8), -20, 0, 360, 0, -1)
+            if (i, x) in hollow:
+                cv2.ellipse(img, (x, y), (7, 3), -20, 0, 360, 255, -1)
+            cv2.line(img, (x + 10, y), (x + 10, y - 3 * sp), 0, 2)
+    return img
+
+
+HEADS = {0: [(300, 5), (500, 6), (950, 7), (1200, 5)],                  # S: c5 d5 | e5 c5
+         1: [(300, 0), (500, 0), (950, 2), (1200, -2)],                 # A: e4 e4 | g4 c4 (on a ledger line)
+         2: [(300, 4), (500, 4), (950, 5), (1200, 5)],                  # T: b3 b3 | c4 c4 (sounding)
+         3: [(300, 4), (500, 3), (950, 2), (1200, 0)]}                  # B: d3 c3 | b2 g2
+
+VOICES = """\
+page 1
+movement 1
+meta key=0 time=4/4 tempo=60
+system 1
+m 1
+S   | c5:2 d5:2
+A   | e4:2 e4:2
+T   | b3:2 b3:2
+B   | d3:2 c3:2
+m 2
+S   | e5:2 c5:2
+A   | g4:2 c4:2
+T   | c4:2 c4:2
+B   | b2:2 g2:2
+"""
+
+
+@pytest.fixture()
+def sung(tmp_path):
+    hollow = {(i, x) for i, heads in HEADS.items() for x, _ in heads}   # half notes
+    w = make_work(tmp_path, [page_with_notes(HEADS, hollow)])
+    assert pages.main(["--work", str(w)]) == 0
+    (w / "src").mkdir()
+    return w
+
+
+def test_noteheads_at_the_heights_written_are_not_reported(sung, capsys):
+    from pipeline.cht import heads
+    (sung / "src" / "001.cht").write_text(VOICES, encoding="utf-8")
+    assert heads.main([str(sung)]) == 0
+    assert "0 measure(s) to read again; 8 measures compared" in capsys.readouterr().out
+
+
+def test_a_note_written_a_step_from_its_head_is_a_place_to_read_again(sung, capsys):
+    from pipeline.cht import heads
+    (sung / "src" / "001.cht").write_text(VOICES.replace("A   | g4:2 c4:2", "A   | g4:2 b3:2").replace("B   | d3:2 c3:2", "B   | d3:2 e3:2"),
+                                          encoding="utf-8")
+    assert heads.main([str(sung)]) == 0
+    out = capsys.readouterr().out
+    assert "p1 m2 A: b3 written, the head stands 1 step higher (c4?)" in out
+    assert "p1 m1 B: e3 written, the head stands 2 steps lower (c3?)" in out
+    assert "2 measure(s) to read again" in out

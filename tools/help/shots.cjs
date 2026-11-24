@@ -1,5 +1,5 @@
 // Screenshots and the short video of the help page (app/aide.html, and app/help.html in English),
-// taken on the built app, whose only work is the example (scores/deux-chorals). Usage, from app/
+// taken on the built app, on the work it opens on (scores/locus-iste). Usage, from app/
 // (the build served on PORT):
 //   PW_CHROMIUM=<chrome> [SHOTS_LANG=en] node ../tools/help/shots.cjs <port> <out dir> [names…]
 // Writes <out>/<name>.png (raw; help_images.py makes the WebP and the video of the page).
@@ -25,19 +25,15 @@ async function open(kind, { video, init } = {}) {
   return { ctx, p };
 }
 
-/** The demo as shown on the help: the soprano followed (the only voice with words in this chorale),
- *  words of verse 1. */
-async function setUp(p, phone) {
-  if (phone) await p.locator('.tracks-toggle').click();
-  await p.locator('.track .t-eye').first().click();
-  await p.locator('.tracks-lyrics select').selectOption('de');
-  if (phone) await p.locator('.tracks-toggle').click();
+/** The demo as shown on the help: the work the app opens on, as it opens - the voice it follows
+ *  at first (the tenor), its words under the line. */
+async function setUp(p) {
   await p.waitForTimeout(600);
 }
 
 /** Clicks the middle of printed measure n on the page shown (box from the pack). */
 async function clickMeasure(p, n) {
-  const pack = await p.evaluate(() => fetch('packs/deux-chorals/pack.json').then((r) => r.json()));
+  const pack = await p.evaluate(() => fetch('packs/locus-iste/pack.json').then((r) => r.json()));
   const pg = pack.pages.find((x) => x.measures.some((b) => b.n === n));
   const b = pg.measures.find((x) => x.n === n);
   const sheet = p.locator('.sheet', { has: p.locator(`img[alt$=" ${pg.page}"]`) });
@@ -91,7 +87,7 @@ const shots = {
     await p.locator('.memo .memo-input').waitFor();
     await p.waitForTimeout(300);
     await p.locator('.memo .memo-input').focus();
-    await p.keyboard.type('warudsdwsh', { delay: 60 });
+    await p.keyboard.type('liadfe', { delay: 60 });
     await p.waitForTimeout(400);
     await p.screenshot({ path: `${out}/memo.png` });
     await ctx.close();

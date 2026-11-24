@@ -1,0 +1,12 @@
+# Deux chorals gravés, pour les tests : des œuvres de toutes les formes en sont tirées
+# (pipeline/tests/layouts.py), que le constructeur et l'app doivent accepter.
+id: bach-deux-chorals
+title: "Deux chorals"
+composer: "J. S. Bach"
+notice: "Chorals BWV 140/7 et 244/54 (corpus music21, domaine public). Pages gravées par Verovio."
+defaultPart: S
+movements:
+  - {file: choral1.musicxml, id: choral1, title: "1. Wachet auf, ruft uns die Stimme"}
+  - {file: choral2.musicxml, id: choral2, title: "2. O Haupt voll Blut und Wunden"}
+lyrics:
+  1: {id: de, label: "Allemand", lang: de}
