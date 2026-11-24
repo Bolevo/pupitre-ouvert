@@ -9,8 +9,8 @@ Parts: "Soprano", "Alto", "Tenor" (treble-8 clef, sounding pitches), "Bass",
 (soloists). A movement only gets the vocal parts that sing in it, and the piano
 only if it plays in it (none: a cappella).
 Lyrics: one verse per line of the 'lyrics' header, in order, named by its
-code (default 'lyrics ru tr': verse 1 name="ru", verse 2 name="translit";
-'lyrics la': verse 1 name="la"). Stressed syllables ('*') are prefixed with
+code ('lyrics la': verse 1 name="la"; 'lyrics ru tr': verse 1 name="ru",
+verse 2 name="translit"). Stressed syllables ('*') are prefixed with
 U+02C8.
 """
 from __future__ import annotations
@@ -180,7 +180,7 @@ class Builder:
             self.staves["PR"].partName = "Piano"
             self.staves["PR"].insert(0, instrument.Piano())
         self.ctx = Context()
-        self.langs: tuple[str, ...] = ("ru", "tr")
+        self.langs: tuple[str, ...] = ()
         self.first = True
         self.skipped = False
         self.top = opts.parts[0]

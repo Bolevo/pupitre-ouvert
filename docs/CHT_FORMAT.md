@@ -36,9 +36,8 @@ m 13
 - `page`, `movement`, puis une ligne `meta` donnant **key, time, tempo** (contexte complet, même si inchangé).
 - `lyrics la` (en-tête) : les lignes de paroles de la page, dans l'ordre des couplets ou des
   langues (codes de 2 à 8 lettres minuscules, à votre choix : `la`, `fr`, `de`, `v1 v2`…).
-  `lyrics la` → lignes `S.la |`, `T.la |`… Une ligne `X.fr` non déclarée est une erreur.
-  **Déclarez-la toujours** (sans elle, l'ancien défaut `ru tr` s'applique). Le libellé montré par
-  l'app se donne dans `work.yaml` (`lyrics: {1: {id: la, label: "Latin"}}`).
+  `lyrics la` → lignes `S.la |`, `T.la |`… Une ligne `X.fr` non déclarée est une erreur. Le
+  libellé montré par l'app se donne dans `work.yaml` (`lyrics: {1: {id: la, label: "Latin"}}`).
 - `part S "Soprano I"` (en-tête, facultatif, une par voix S/A/T/B) : nom de la partie (solistes,
   voix d'hommes écrites dans les lignes `S A T B`…). Le nom donne aussi la clé et la tessiture
   contrôlée (`part A "Soprano II"` → soprano ; `part S "Ténor I"` → clé de sol octaviée ;

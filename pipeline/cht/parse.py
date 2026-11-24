@@ -14,7 +14,7 @@ from pathlib import Path
 VOICES = ("S", "A", "T", "B", "PR", "PL")
 ALL_VOICES = VOICES + tuple(v + "2" for v in VOICES)
 CHOIR = ("S", "A", "T", "B")
-LYRIC_LANGS = ("ru", "tr")          # default lyric lines (Taneyev) when no 'lyrics' header
+LYRIC_LANGS: tuple[str, ...] = ()   # lyric lines when the page has no 'lyrics' header: none
 _LANG = re.compile(r"^[a-z]{2,8}$")
 DYNAMICS = {"ppp", "pp", "p", "mp", "mf", "f", "ff", "fff", "sf", "sfz", "fz", "fp", "cresc", "dim"}
 CLEFS = {"G": "treble", "F": "bass", "G8": "treble8vb"}
@@ -309,8 +309,9 @@ def parse_text(text: str, path: str = "?") -> Page:
                     raise ValueError(f"unknown voice '{voice}'")
                 if lang:
                     if lang not in page.lyric_langs:
-                        raise ValueError(f"unknown lyric line '{head}' (this page declares "
-                                         f"'lyrics {' '.join(page.lyric_langs)}')")
+                        declared = (f"this page declares 'lyrics {' '.join(page.lyric_langs)}'" if page.lyric_langs
+                                    else f"add 'lyrics {lang}' to the header of the page")
+                        raise ValueError(f"unknown lyric line '{head}' ({declared})")
                     if (voice, lang) in cur.lyrics:
                         raise ValueError(f"duplicate line '{head}'")
                     cur.lyrics[(voice, lang)] = parse_lyrics(body, lang)

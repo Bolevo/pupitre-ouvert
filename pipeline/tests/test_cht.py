@@ -17,6 +17,7 @@ from pipeline.cht.parse import ChtError, Pitch, parse_text, voice_duration  # no
 PAGE = """\
 page 5
 movement 1
+lyrics ru tr
 meta key=3 time=4/4 tempo=56
 system 1
 m 12 mark=2
@@ -51,6 +52,14 @@ def page(text=PAGE, path="t/005.cht"):
 
 
 # ------------------------------------------------------------------ parse
+
+def test_lyric_line_must_be_declared():
+    """No lyric line exists by default: an undeclared one says what to add to the header."""
+    with pytest.raises(ChtError, match="add 'lyrics la' to the header"):
+        parse_text("page 1\nmovement 1\nmeta key=0 time=4/4 tempo=60\nm 1\nS | c4:1\nS.la| Ky-\n")
+    with pytest.raises(ChtError, match="this page declares 'lyrics fr'"):
+        parse_text("page 1\nmovement 1\nlyrics fr\nmeta key=0 time=4/4 tempo=60\nm 1\nS | c4:1\nS.la| Ky-\n")
+
 
 def test_pitch_midi():
     assert Pitch.parse("c4").midi == 60

@@ -7,7 +7,8 @@ printed page from work/pages.tsv (or --offset N: printed page = image number + N
 
 For every page listed in <work>/work/measures.tsv:
   - straightens the photo at full resolution (white background, deskew, one smooth surface:
-    tools/omr/surface.py), then reduces it once
+    tools/omr/surface.py), frames it (what surrounds the printed page is cut away:
+    tools/omr/frame.py; --no-frame keeps the whole image), then reduces it once
   - detects systems and barlines, reconciles them with the measure counts of measures.tsv
   - writes <work>/pages/pNNN.webp (grayscale, WIDTH px wide) and <work>/pages/pages.json:
     [{page, img, w, h, systems:[{top,bottom}], measures:[{mv, n, x0, x1, y0, y1, sys}]}]
@@ -27,11 +28,13 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.omr import imgproc as ip, layout as lay  # noqa: E402
 from tools.omr import dewarp  # noqa: E402
+from tools.omr.frame import content_box  # noqa: E402
 from tools.omr.pages import reconcile  # noqa: E402
 from tools.omr.surface import ANALYSIS_W, lines_of, rectify  # noqa: E402
 from pipeline.cht.measures import load_measures  # noqa: E402
@@ -43,11 +46,16 @@ WIDTH = 1300
 
 
 def process(args):
-    img_path, page, rows, out, counts = args
+    img_path, page, rows, out, counts, frame = args
     gray = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
     # straightened once at full resolution with one smooth surface (tools/omr/surface.py);
     # the layout detector is tuned for ~1100 px wide pages: it works on a reduced copy
     flat, surf, _angle = rectify(gray)
+    if frame:
+        # framed: what surrounds the printed page (margins, the table, a shadow) is cut away
+        box = content_box(flat)
+        if box:
+            flat = np.ascontiguousarray(flat[box[1]:box[3], box[0]:box[2]])
     H, W = flat.shape
     norm = cv2.resize(flat, (ANALYSIS_W, round(H * ANALYSIS_W / W)), interpolation=cv2.INTER_AREA)
     # the layout is found on a copy flattened further by the local dewarp (exactly straight staff
@@ -123,6 +131,7 @@ def main():
     ap.add_argument("--images", type=Path, help="folder of page images (default: <work>/work/source)")
     ap.add_argument("--offset", type=int, help="printed page = image number + OFFSET (instead of work/pages.tsv)")
     ap.add_argument("--jobs", type=int, default=2)
+    ap.add_argument("--no-frame", action="store_true", help="keep the whole image (default: cut to what is printed)")
     a = ap.parse_args()
     mt = load_measures(a.work / "work" / "measures.tsv")
     tsv = load_pages_tsv(a.work / "work")
@@ -131,7 +140,7 @@ def main():
     jobs = []
     for page, img in sorted(page_images(a.work / "work", a.images, a.offset).items()):
         if page in mt:
-            jobs.append((img, page, mt.rows(page), out, tsv.get(page, {}).get("staves")))
+            jobs.append((img, page, mt.rows(page), out, tsv.get(page, {}).get("staves"), not a.no_frame))
     if not jobs:
         raise SystemExit("no page to prepare: work/measures.tsv lists no page that has an image")
     with ProcessPoolExecutor(a.jobs) as ex:
