@@ -9,7 +9,8 @@ to proof-read a transcription.
 --compare writes, for every system K of the page, work/render/004_cmp_sK.png (the voices) and
 004_cmp_sK_pf.png (the keyboard): each staff of the page (white) with, right under it, the
 same staff engraved from the transcription (tinted), stretched so that its barlines stand under
-those of the page. A pitch, a rhythm, a syllable that differs is seen in place. K is the page
+those of the page. A pitch, a rhythm, a syllable that differs is seen in place. A system too
+wide to be compared in one picture gets several (004_cmp_sK_m12-14.png, …_m15-17.png). K is the page
 system number given by the 'system K' lines of the file (a page shared by two movements:
 009b.cht starts at 'system 2'). --parts keeps some staves only (one picture per system).
 Where the barlines of the page do not match the measures written (see tools/omr/pages.py),
@@ -224,11 +225,40 @@ def _fit(strip: np.ndarray, xs: list[float], to: list[float], width: int) -> np.
     return out
 
 
+COMPARE_WIDTH = 1500      # a picture a model sees without reducing it
+LEAST_SPACE = 11.0        # px per staff space under which a system is shown in several pictures
+
+
+def compare_ranges(work: Path, page: int, k: int, lo: int, hi: int, width: int = COMPARE_WIDTH) -> list[tuple[int, int]]:
+    """The measures of each comparison picture of system k: all of them in one, unless the
+    staves would then be too small to compare noteheads (a wide system of a large page)."""
+    lay = _layout(work, page)
+    if lay is None or k > len(lay["systems"]):
+        return [(lo, hi)]
+    sysd = lay["systems"][k - 1]
+    edges = [sysd["start_x"]] + list(sysd["barlines"])
+    st = sysd["staves"][0]["lines"]
+    sp = (st[4] - st[0]) / 4
+    if len(edges) - 1 != hi - lo + 1:
+        return [(lo, hi)]
+    shown = sp * (width - 70) / max(1.0, edges[-1] - edges[0] + 6 * sp)
+    n = min(hi - lo + 1, int(np.ceil(LEAST_SPACE / shown))) if shown < LEAST_SPACE else 1
+    out, a = [], 0
+    for c in range(1, n + 1):                 # cuts at the barlines nearest to equal widths
+        goal = edges[0] + (edges[-1] - edges[0]) * c / n
+        b = max(a + 1, min(range(1, len(edges)), key=lambda i: abs(edges[i] - goal))) if c < n else len(edges) - 1
+        out.append((lo + a, lo + b - 1))
+        a = b
+    return [r for r in out if r[0] <= r[1]]
+
+
 def compare_system(work: Path, page_file: Path, page: int, k: int, lo: int, hi: int,
-                   parts: tuple[str, ...], width: int = 1900) -> np.ndarray | None:
-    """System k of the page, staff by staff: the page, and under it the transcription engraved
-    and stretched measure by measure to the barlines of the page. None when the page's layout
-    is not there or its barlines do not match the measures (the caller then stacks them)."""
+                   parts: tuple[str, ...], width: int = COMPARE_WIDTH,
+                   only: tuple[int, int] | None = None) -> np.ndarray | None:
+    """System k of the page (measures lo..hi; `only`: some of them), staff by staff: the page,
+    and under it the transcription engraved and stretched measure by measure to the barlines of
+    the page. None when the page's layout is not there or its barlines do not match the
+    measures (the caller then stacks them)."""
     lay = _layout(work, page)
     im_path = work / "img" / f"p{page:03d}.png"
     if lay is None or not im_path.exists() or k > len(lay["systems"]):
@@ -238,6 +268,9 @@ def compare_system(work: Path, page_file: Path, page: int, k: int, lo: int, hi: 
     edges = [sysd["start_x"]] + list(sysd["barlines"])
     if len(edges) - 1 != hi - lo + 1:
         return None
+    first = lo
+    lo, hi = only or (lo, hi)
+    edges = edges[lo - first:hi - first + 2]
     img = cv2.imread(str(im_path), cv2.IMREAD_GRAYSCALE)
     staves = sysd["staves"]
     sp = (staves[0]["lines"][4] - staves[0]["lines"][0]) / 4
@@ -252,7 +285,7 @@ def compare_system(work: Path, page_file: Path, page: int, k: int, lo: int, hi: 
     # no further up or down than half-way to the neighbouring systems
     above = staves[0]["lines"][0] - lay["systems"][k - 2]["staves"][-1]["lines"][4] if k > 1 else 99 * sp
     below = lay["systems"][k]["staves"][0]["lines"][0] - staves[-1]["lines"][4] if k < len(lay["systems"]) else 99 * sp
-    left = max(0, int(edges[0] - 5 * sp))
+    left = max(0, int(edges[0] - (5 if lo == first else 1) * sp))
     right = min(img.shape[1], int(edges[-1] + sp))
     f = (width - 70) / (right - left)                      # page pixels -> picture pixels
     to = [70 + (x - left) * f for x in edges]
@@ -339,19 +372,22 @@ def main(argv=None) -> int:
         keys = tuple(p for p in sparts if p in ("PR", "PL"))
         sets = [(sparts, "")] if a.parts or not (voices and keys) else [(voices, ""), (keys, "_pf")]
         for group, tag in sets:
-            out = outdir / f"{stem}_cmp_s{k}{tag}.png"
-            pic = compare_system(work, page_file, target.page or 0, k, lo, hi, group)
-            if pic is None:           # no layout, or barlines that do not match: one above the other
-                ren = render_png(compile_range(page_file, group, (lo, hi), breaks=False), a.width, one_system=True)
-                src = source_crop(work, target.page or 0, k, group)
-                blocks = []
-                if src is not None:
-                    src = cv2.resize(src, (a.width, int(src.shape[0] * a.width / src.shape[1])))
-                    blocks.append(_label(src, f"SOURCE p{target.page} system {k} (its barlines do not match the measures written: not aligned)"))
-                blocks.append(_label(ren, f"RENDER m{lo}-{hi}  parts {','.join(group)}"))
-                pic = np.vstack(blocks)
-            cv2.imwrite(str(out), pic)
-            print(f"wrote {out}")
+            ranges = compare_ranges(work, target.page or 0, k, lo, hi)
+            for only in ranges:
+                part = "" if len(ranges) == 1 else f"_m{only[0]}-{only[1]}"
+                out = outdir / f"{stem}_cmp_s{k}{tag}{part}.png"
+                pic = compare_system(work, page_file, target.page or 0, k, lo, hi, group, only=only)
+                if pic is None:           # no layout, or barlines that do not match: one above the other
+                    ren = render_png(compile_range(page_file, group, (lo, hi), breaks=False), a.width, one_system=True)
+                    src = source_crop(work, target.page or 0, k, group)
+                    blocks = []
+                    if src is not None:
+                        src = cv2.resize(src, (a.width, int(src.shape[0] * a.width / src.shape[1])))
+                        blocks.append(_label(src, f"SOURCE p{target.page} system {k} (its barlines do not match the measures written: not aligned)"))
+                    blocks.append(_label(ren, f"RENDER m{lo}-{hi}  parts {','.join(group)}"))
+                    pic = np.vstack(blocks)
+                cv2.imwrite(str(out), pic)
+                print(f"wrote {out}")
     return 0
 
 

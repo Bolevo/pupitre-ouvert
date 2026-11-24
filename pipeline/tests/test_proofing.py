@@ -58,7 +58,7 @@ def work(tmp_path):
 
 def test_each_staff_of_the_page_stands_above_its_transcription(work):
     pic = render.compare_system(work / "work", work / "src" / "001.cht", 1, 1, 1, 2, ("S", "A", "T", "B"))
-    assert pic is not None and pic.shape[1] == 1900
+    assert pic is not None and pic.shape[1] == render.COMPARE_WIDTH
     # the page strips are white, the transcription strips tinted: four of each
     tinted = (pic[:, 2, 0].astype(int) < pic[:, 2, 2].astype(int) - 10)
     runs = sum(1 for a, b in zip(tinted, tinted[1:]) if b and not a)
@@ -67,6 +67,14 @@ def test_each_staff_of_the_page_stands_above_its_transcription(work):
 
 def test_a_system_whose_barlines_do_not_match_is_not_stretched(work):
     assert render.compare_system(work / "work", work / "src" / "001.cht", 1, 1, 1, 3, ("S", "A", "T", "B")) is None
+
+
+def test_a_system_too_wide_to_compare_in_one_picture_is_cut_at_its_barlines(work, monkeypatch):
+    assert render.compare_ranges(work / "work", 1, 1, 1, 2) == [(1, 2)]
+    monkeypatch.setattr(render, "LEAST_SPACE", 30.0)          # as if the page were twice as large
+    assert render.compare_ranges(work / "work", 1, 1, 1, 2) == [(1, 1), (2, 2)]
+    pic = render.compare_system(work / "work", work / "src" / "001.cht", 1, 1, 1, 2, ("S", "A"), only=(2, 2))
+    assert pic is not None
 
 
 def test_compare_writes_one_picture_per_system(work):
