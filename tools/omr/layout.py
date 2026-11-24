@@ -121,6 +121,18 @@ def staves_at(lines: np.ndarray, centres: list[tuple[float, float]]) -> list[Sta
         present = np.stack([hl[y - 2:y + 3].any(axis=0) for y in best]).sum(axis=0)
         cols = np.where(present >= 4)[0]
         x0, x1 = (int(cols.min()), int(cols.max())) if cols.size else (0, w - 1)
+        # a beam, a slur one staff space above or below can be tracked as a line of the staff: the
+        # five lines are then found one line off. A staff line is inked from end to end: the least
+        # inked of the true five is more so than that of the five shifted by one
+        inked = lambda ys: min(float((lines[y - 2:y + 3, x0:x1 + 1] > 0).any(axis=0).mean()) for y in ys)  # noqa: E731
+        step = (best[4] - best[0]) / 4
+        for d in (-1, 1):
+            alt = [int(round(y + d * step)) for y in best]
+            if alt[0] < 3 or alt[-1] >= h - 3:
+                continue
+            alt = [y + int(np.argmax(prof[y - 1:y + 2])) - 1 for y in alt]
+            if inked(alt) > 1.1 * inked(best):
+                best = alt
         out.append(Staff(best, x0, x1))
     return out
 

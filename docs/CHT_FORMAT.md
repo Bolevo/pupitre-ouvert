@@ -76,7 +76,7 @@ Les solistes s'écrivent dans les voix `S A T B` existantes, nommées par `part`
 | Soprano I et II | `S`, `A` | `part S "Soprano I"` + `part A "Soprano II"` |
 | Alto solo | `A` | `part A "Alto solo"` |
 | Alto solo **sur la portée d'alto du chœur** (« Solo »/« Tutti ») | `A` | aucun `part` ; `# Solo` / `# Tutti` en commentaire de la ligne `A` |
-| Soliste sur **sa propre portée**, le chœur se taisant | la voix de son nom (`S` pour un soprano) | `part S "Soprano solo"` sur ces pages ; leurs systèmes dans `work/pages.tsv` (`staves`, `solo`) |
+| Soliste sur **sa propre portée**, le chœur se taisant | la voix de son nom (`S` pour un soprano) | aucun `part` si le chœur chante aussi cette voix ailleurs (`part` renomme la voix pour tout le mouvement) : `# Solo` en commentaire ; les systèmes de ces pages dans `work/pages.tsv` (`staves`) |
 
 Le nom du soliste peut aussi figurer en commentaire. Une voix qui ne chante dans aucune mesure du
 mouvement n'apparaît pas dans le MusicXML compilé.

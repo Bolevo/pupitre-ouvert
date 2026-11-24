@@ -178,7 +178,7 @@ def check_pages(pages: list[Page], mtable=None, focus: set[str] | None = None,
                                 last_top = top
                         else:
                             if pending:
-                                add("E", tpage, tline, tm, f"{v}: tie '~' followed by a rest")
+                                add("E", tpage, tline, tm, f"{v}: tie '~' followed by a rest (a tie goes on in the same voice: {v} -> {v}, also across the barline)")
                             pending = set()
                     if last_top is not None:
                         last_tops[v] = last_top

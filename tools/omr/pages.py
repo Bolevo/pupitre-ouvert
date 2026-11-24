@@ -173,7 +173,8 @@ GUTTER = 120
 # the staff space of the page: a working crop shows it at CROP_SPACE px (a 7 px staff space of
 # a small photo x4, an 18 px one of a 300 dpi scan x1.5), a zoom at ZOOM_SPACE px.
 CROP_SPACE = 28
-KEYS_SPACE = 40        # a keyboard's chords and inner voices need more than a vocal line
+KEYS_SPACE = 34        # a keyboard's chords and inner voices need more than a vocal line
+KEYS_WIDTH = 1568      # ... and a wider crop, so that two measures still go together
 ZOOM_SPACE = 49
 CROP_WIDTH = 1440      # widest working crop, margin included (px)
 SYSTEM_WIDTH = 2200    # widest system overview (px)
@@ -337,7 +338,7 @@ def save_crops(page_img: np.ndarray, systems, page: int, nums, absolute: bool, o
             gt, gb = _group_bounds(systems, k, staves, h)
             roles = roles_of(gnames)
             scale = scale_for(s.staves[0].space, KEYS_SPACE if gname == "pf" else CROP_SPACE, 4)
-            max_w = (CROP_WIDTH - GUTTER) / scale
+            max_w = ((KEYS_WIDTH if gname == "pf" else CROP_WIDTH) - GUTTER) / scale
             edges = bars
             if not fitted:      # barlines and numbers do not match: the system in equal parts, each named after all of it
                 parts = max(1, int(np.ceil((bars[-1] - bars[0]) / max_w)))

@@ -61,3 +61,20 @@ def test_dict_roundtrip():
     systems = analyse(synthetic_page())
     back = lay.from_dict(lay.to_dict(systems))
     assert back[0].barlines == systems[0].barlines
+
+
+def test_a_beam_above_the_staff_is_not_taken_for_its_first_line():
+    """Repeated chords under one long beam, a staff space above the staff: the tracking can take
+    the beam and the first four lines for the staff. The five lines kept are the five full ones."""
+    img = np.full((400, 1000), 255, np.uint8)
+    top, sp = 200, 16
+    for k in range(5):
+        cv2.line(img, (80, top + sp * k), (900, top + sp * k), 0, 2)
+    for x0 in range(110, 860, 190):                                     # the beams: most of the width, not all
+        cv2.line(img, (x0, top - sp), (x0 + 160, top - sp), 0, 5)
+    ink = (img < 128).astype(np.uint8) * 255
+    wrong_centre = top + 2 * sp - sp                                    # as if the beam were the first line
+    staff = lay.staves_at(ink, [(wrong_centre, sp)])[0]
+    assert [abs(y - (top + sp * k)) <= 1 for k, y in enumerate(staff.lines)] == [True] * 5
+    right = lay.staves_at(ink, [(top + 2 * sp, sp)])[0]                 # and a staff found right stays
+    assert right.lines == staff.lines

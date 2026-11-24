@@ -383,3 +383,23 @@ def test_a_renamed_staff_takes_the_clef_and_the_range_of_its_name():
     assert out.count("<sign>F</sign>") == 2                                         # baritone and bass
     assert [check.range_voice(page, v) for v in "SATB"] == ["T", "T", "B", "B"]
     assert not [i for i in check.check_pages([page]) if "range" in i.msg and "S:" in i.msg]
+
+
+def test_a_clef_at_the_start_of_a_measure_holds_when_the_staff_has_two_voices():
+    """The left hand goes up into the treble clef and comes back to the bass clef at the next
+    barline, under a held note written as a second voice."""
+    import xml.etree.ElementTree as ET
+    text = (
+        "page 1\nmovement 1\nmeta key=1 time=3/4 tempo=63\n"
+        "m 1\nS | g4:2.\nPR | g4:2.\nPL | g2:4 clef:G g4:8 a4:8 g4:8 a4:8\nPL2 | g2:2.\n"
+        "m 2\nS | g4:2.\nPR | g4:2.\nPL | clef:F g2:4 clef:G g4:8 a4:8 g4:8 a4:8\nPL2 | g2:2.\n"
+        "m 3\nS | g4:2.\nPR | g4:2.\nPL | clef:F g2:2.\nPL2 | s:2.\n"
+    )
+    xml = comp.to_musicxml(comp.build([parse_text(text, "t/001.cht")], comp.Options(parts=("S", "PR", "PL"))))
+    piano = [p for p in ET.fromstring(xml.encode()).iter("part")][-1]
+    for number in ("2", "3"):
+        measure = next(m for m in piano.iter("measure") if m.get("number") == number)
+        # the first thing said of the lower staff in the measure, before any time has passed: its clef
+        first = next(el for el in measure if el.tag in ("attributes", "forward") or el.findtext("staff") == "2")
+        clefs = [c.findtext("sign") for c in first.iter("clef") if c.get("number", "1") == "2"]
+        assert first.tag == "attributes" and clefs == ["F"], f"measure {number}: the lower staff does not start in the bass clef"

@@ -187,12 +187,17 @@ class Builder:
 
     # -- one measure of one staff
     def _voice_into(self, container, voice: str, evs: list[Event], mdur: Fraction, m: Measure,
-                    vocal: bool) -> None:
+                    vocal: bool, meas=None) -> None:
+        """`meas`: the measure, when `container` is one of its voices: a change of clef belongs
+        to the staff, not to a voice (written inside a voice it is lost at the start of a measure)."""
         queues = _lyric_queues(m, voice, self.langs)
         prev_tied = self.ties.open.get(voice, set())
         for ev in evs:
             if ev.kind == "clef":
-                container.append(CLEF_NAMES[ev.clef]())
+                if meas is None:
+                    container.append(CLEF_NAMES[ev.clef]())
+                else:
+                    meas.insert(container.highestTime, CLEF_NAMES[ev.clef]())
                 continue
             n = _make_event(ev, mdur)
             for d in ev.dynamics:
@@ -267,7 +272,7 @@ class Builder:
                 if evs is None:
                     continue
                 vo = stream.Voice(id=str(vid))
-                self._voice_into(vo, name, evs, mdur, m, vocal)
+                self._voice_into(vo, name, evs, mdur, m, vocal, meas)
                 meas.insert(0, vo)
         else:
             self._voice_into(meas, v, v1, mdur, m, vocal)

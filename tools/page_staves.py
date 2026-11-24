@@ -256,7 +256,8 @@ def annotate(pages: list[dict], pages_dir: Path, counts: dict[int, int],
             else:
                 s["staves"] = staves
                 if agree < 0.5:
-                    misses.append(f"{where}: kept, but only {agree:.0%} of the strips agree (check the image)")
+                    misses.append(f"{where}: staves kept, though only {agree:.0%} of the strips of the system agree on them: look at "
+                                  f"this system in work/boxes/ (right when each coloured band lies on its staff; nothing to do then)")
     if voices_only:
         misses.insert(0, f"page(s) {', '.join(map(str, voices_only))}: the accompaniment printed on the page is not in the score; "
                          f"the vocal staves are those of the score")

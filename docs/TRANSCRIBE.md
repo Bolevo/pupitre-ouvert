@@ -136,9 +136,11 @@ listées par `heads.py` ont été relues, que chaque système concorde avec sa g
   d'ornement, doigtés, pédale. Un soufflet s'écrit `!cresc` ou `!dim` à son début, ou pas du tout.
 - **Nombres imprimés** : en haut de la page, c'est le numéro de page ; au-dessus d'un système, un
   chiffre ou une lettre de répétition (`mark=`) ; en début de système, parfois le numéro de mesure.
-- **Soliste sur sa propre portée** : une voix `S A T B` nommée par `part S "Soprano solo"` ; les
-  pages où les systèmes changent (soliste et piano, puis chœur et piano) se décrivent dans
-  `work/pages.tsv` (colonnes `staves` et `solo`).
+- **Soliste sur sa propre portée** : il s'écrit dans la voix de son nom (`S` pour une soprano),
+  avec `# Solo` en commentaire ; `part S "Soprano solo"` renomme la voix pour tout le mouvement, à
+  garder pour une œuvre sans chœur. Les pages où les systèmes changent (soliste et piano, puis
+  chœur et piano) se décrivent dans `work/pages.tsv` (colonne `staves`, par exemple `3,3,3,6`) ;
+  l'exemple `scores/schubert-kyrie` en a une.
 - **Silence de mesure** d'une voix : `R` (aussi dans les pages où le chœur se tait).
 - **Tempo** : sans métronome imprimé, estimer et le dire (`tempo=60  # estimated`) ;
   `meta text="…"` juste après `m N` pour une indication à cette mesure.
