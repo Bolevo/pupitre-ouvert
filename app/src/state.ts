@@ -3,13 +3,14 @@ import { computed, effect, signal, untracked } from '@preact/signals';
 import { Engine, type ChannelState } from './audio/engine';
 import type { InstId } from './audio/instruments';
 import { clicksFor, type MetroSub } from './audio/metronome';
-import { hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, withWork, type LibraryWork } from './pack/library';
+import { exportWorkZip, hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, withWork, type LibraryWork } from './pack/library';
 import type { LoadedPack, Movement, Part } from './pack/types';
 import { measureIndexAt } from './ui/timing';
 import { canHover, lowScreen, onHoverChange, onLayoutChange, onLowScreenChange, phoneLayout } from './ui/media';
 import { RATE_MAX, RATE_MIN } from './score/info';
 import { cacheEarlySamples } from './offline';
 import { NS } from './site';
+import { saveBlob } from './util/download';
 import { isLang, lang, tt, type Lang } from './i18n';
 
 export const BASE = import.meta.env.BASE_URL;
@@ -648,18 +649,20 @@ export async function boot() {
   booted.value = true;
 }
 
-/** Add a work from its .zip archive (docs/ARCHIVE.md); it stays in this browser. */
-export async function importZip(file: File) {
+/** Add a work from its .zip archive (docs/ARCHIVE.md); it stays in this browser. Says whether
+ *  it was added (and opened); when not, `error` says why. */
+export async function importZip(file: File): Promise<boolean> {
   try {
     error.value = null;
     const w = await importWorkZip(file);
     library.value = withWork(library.value, { ...w, source: 'imported' });
     await openWork(w.id);
-    libraryOpen.value = false; // the work added is on the screen
     engine();
     keepStorage();
+    return true;
   } catch (e) {
     error.value = `${tt('Import impossible.')} ${e instanceof Error ? e.message : e}`;
+    return false;
   }
 }
 
@@ -683,6 +686,18 @@ export async function removeImportedWork(id: string) {
     if (open) await openAnother(id);
   } catch (e) {
     error.value = `${tt('Retrait impossible.')} ${e instanceof Error ? e.message : e}`;
+  }
+}
+
+/** Saves the archive of a work added in this browser as a file (<id>.zip): what was added, with
+ *  its sources when it came with them. To give to whoever corrects it, or to keep. */
+export async function saveWork(id: string) {
+  try {
+    error.value = null;
+    const zip = await exportWorkZip(id);
+    if (zip) saveBlob(zip, `${id}.zip`);
+  } catch (e) {
+    error.value = `${tt('Enregistrement impossible.')} ${e instanceof Error ? e.message : e}`;
   }
 }
 

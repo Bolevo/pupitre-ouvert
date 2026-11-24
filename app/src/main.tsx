@@ -81,7 +81,7 @@ function App() {
           ) : (
             <>
               <p>{tt('Aucune partition dans cette app pour l’instant.')}</p>
-              <button class="ctl wide" onClick={pickZip}>
+              <button class="ctl wide" onClick={() => pickZip()}>
                 {tt('Ajouter une partition (.zip)')}
               </button>
               {hiddenExamples.value.length > 0 && (

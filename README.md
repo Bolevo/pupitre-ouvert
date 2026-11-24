@@ -20,7 +20,7 @@ anglais (Réglages).
 
 | | |
 |---|---|
-| La méthode, de la partition numérisée à l'archive | [`docs/CREER.md`](docs/CREER.md) |
+| La méthode, de la partition numérisée à l'archive ; corriger une archive | [`docs/CREER.md`](docs/CREER.md) |
 | Ce que contient une archive, et le dossier d'œuvre | [`docs/ARCHIVE.md`](docs/ARCHIVE.md) |
 | Lire une page et l'écrire | [`docs/TRANSCRIBE.md`](docs/TRANSCRIBE.md), [`docs/CHT_FORMAT.md`](docs/CHT_FORMAT.md) |
 | Deux dossiers d'œuvre complets, de la numérisation à l'archive | [`scores/locus-iste/`](scores/locus-iste), [`scores/schubert-kyrie/`](scores/schubert-kyrie) |

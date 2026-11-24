@@ -1244,8 +1244,10 @@ button.lane-voice > svg:last-child {
   flex: 1;
   min-width: 0;
 }
-/* pinned at the left of the movements (it does not scroll away with them) */
-.fiche-btn {
+/* pinned at the left of the movements (they do not scroll away with them): the work's sheet, and
+   beside it, the same size, « Copier où j'en suis » (ui/Where.tsx) */
+.fiche-btn,
+.where-btn {
   flex: none;
   display: grid;
   place-items: center;
@@ -1258,7 +1260,8 @@ button.lane-voice > svg:last-child {
   padding: 0;
 }
 @media (hover: hover) {
-  .fiche-btn:hover {
+  .fiche-btn:hover,
+  .where-btn:hover {
     color: var(--chrome-text);
     background: var(--stand-3);
   }
@@ -1371,7 +1374,8 @@ button.lane-voice > svg:last-child {
     font-size: 13px;
     text-decoration: none;
   }
-  .fiche-btn {
+  .fiche-btn,
+  .where-btn {
     width: 40px;
     height: 40px;
   }
@@ -3580,4 +3584,38 @@ button.lane-voice > svg:last-child {
 /* the empty screen: « Ajouter une partition », « Remettre les exemples » side by side or stacked */
 .loading .ctl {
   margin: 4px 5px;
+}
+
+/* ---------- « Copier où j'en suis » (ui/Where.tsx): beside the sheet button, the same size ---------- */
+.where {
+  position: relative;
+  flex: none;
+  display: flex;
+}
+.where-hint {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 32px));
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px #0006;
+}
+/* « Mes partitions »: save the archive (an arrow into a tray), then remove */
+.lib-acts {
+  display: flex;
+  gap: 6px;
+}
+.lib-save {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  padding: 0;
 }

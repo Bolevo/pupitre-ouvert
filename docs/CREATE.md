@@ -194,10 +194,45 @@ Give `packs/<id>.zip` to the person, with:
   yet;
 - what was checked, and how: the pages whose comparison you looked at, those you did not;
 - the uncertain passages (`grep -n "# ?" scores/<id>/src/*.cht`), so that they can check them
-  by ear, score in hand.
+  by ear, score in hand;
+- how to report a mistake: in the app, the small “copy” button, to the right of the work notes
+  button, puts in the clipboard where they are (work, measure, page, notes); they paste it to
+  you, with the archive.
 
-A fuller or corrected version replaces the earlier one in the app (same `id`). A correction is
-made in `src/NNN.cht`, then steps 5 and 7; so keep the folder `scores/<id>/`.
+A fuller or corrected version replaces the earlier one in the app (same `id`).
+
+## Correcting an archive
+
+The person comes back with a mistake: a note, a rhythm, a word. You need the archive (`.zip`):
+the one they received, or the one the app saves (list of works → “Manage my scores…” → the
+downward arrow). It carries what it was made from, in its `source/` folder: the transcription,
+the tables, the MusicXML.
+
+```
+python pipeline/reopen.py path/to/<work>.zip                            # -> scores/<id>/
+python tools/omr/zoom.py <page> <measure> --staff T --work scores/<id>  # the measure on the page, enlarged
+# correct scores/<id>/src/<page>.cht
+python pipeline/cht/check.py scores/<id> --pages <page>
+python pipeline/cht/render.py scores/<id>/src/<page>.cht --compare
+python pipeline/cht/compile.py scores/<id>
+python pipeline/publish.py <id>                                         # -> packs/<id>.zip   OK
+```
+
+- The text copied from the app says where to look: the measure, the page (the file
+  `src/<page>.cht`), the voice, and the notes the archive holds in that measure, written as in
+  the transcription (`c4` = middle C, the length in quarter notes in brackets).
+- The page is the reference: look at the measure (`zoom.py`) before changing a note. What the
+  person hears as wrong may be right on the page; tell them so.
+- A wrong rhythm shifts what follows: read the whole measure and its neighbours again, and
+  compare (`render.py --compare`).
+- The reopened folder has the pages of the archive, not the scan: steps 1, 3 and 6 are not redone
+  there (the pages and their boxes are kept as they are); the checks of step 4 work there.
+- **A MusicXML the person corrected** (in MuseScore, for instance, from `source/mvtN.musicxml`
+  of the archive): put it in place of `scores/<id>/mvtN.musicxml`, add `source: musicxml` to that
+  movement in `work.yaml` (`compile.py` will no longer overwrite it), then `publish.py`.
+- The new archive keeps the work's `id`: added in the app, it replaces the old one.
+- An archive without `source/` (made before archives carried it, or by other means) cannot be
+  reopened: the original folder `scores/<id>/` is needed, or a new transcription.
 
 The archive holds the images of the score: it is made for the person's own use, not to be
 published if the edition is under copyright.

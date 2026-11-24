@@ -14,6 +14,7 @@
 import { computed, effect, signal, untracked } from '@preact/signals';
 import { del, get, keys, set } from './pack/db';
 import { capture, inputLatency, listMics, MicError, openMic, stop as stopStream } from './audio/recorder';
+import { saveBlob } from './util/download';
 import { encodeWav, MIN_TAKE_MS, safeFileName, takeFromFloat, takeFromWav, takeKey, TakeBuilder, type Take, type TakeMeta } from './audio/take';
 import { BASE, clampOffset, engine, hasEngine, movement, myPart, onEngine, onMove, parked, pause, play, playing, position, prefs, setPrefs, work } from './state';
 import { tt, ttKey } from './i18n';
@@ -320,17 +321,7 @@ export function exportTake() {
   const blob = new Blob([bytes as BlobPart], { type: 'audio/wav' });
   const part = mv.parts.find((p) => p.id === t.part)?.name;
   const name = safeFileName(['Pupitre', shortWorkTitle(w.pack.title), mv.title, part].filter(Boolean).join(' – ')) + '.wav';
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  window.setTimeout(() => {
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, 30_000);
+  saveBlob(blob, name);
 }
 
 function shortWorkTitle(t: string) {

@@ -18,7 +18,7 @@ Your scores stay on your device: nothing is sent.
 
 | | |
 |---|---|
-| The method, from the scanned score to the archive | [`docs/CREATE.md`](docs/CREATE.md) (French: [`docs/CREER.md`](docs/CREER.md)) |
+| The method, from the scanned score to the archive; correcting an archive | [`docs/CREATE.md`](docs/CREATE.md) (French: [`docs/CREER.md`](docs/CREER.md)) |
 | What an archive holds, and the work folder | [`docs/ARCHIVE.md`](docs/ARCHIVE.md) (in French) |
 | Reading a page and writing it down | [`docs/TRANSCRIBE.md`](docs/TRANSCRIBE.md), [`docs/CHT_FORMAT.md`](docs/CHT_FORMAT.md) (in French) |
 | Two complete work folders, from the scan to the archive | [`scores/locus-iste/`](scores/locus-iste), [`scores/schubert-kyrie/`](scores/schubert-kyrie) |

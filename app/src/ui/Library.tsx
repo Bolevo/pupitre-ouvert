@@ -1,9 +1,10 @@
 // « Mes partitions »: the works of this device, opened from the list of works. Open one, add one
-// from its .zip, remove one that was added (confirmed in place), hide an example or put it back.
+// from its .zip, save the archive of one that was added, remove it (confirmed in place), hide an
+// example or put it back.
 // A modal dialog of the browser: the rest of the app waits behind it, the focus stays inside,
 // Escape or a press beside it closes it.
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { error, hiddenExamples, hideExample, libraryOpen, openWork, removeImportedWork, restoreExamples, work, works } from '../state';
+import { error, hiddenExamples, hideExample, libraryOpen, openWork, removeImportedWork, restoreExamples, saveWork, work, works } from '../state';
 import { pickZip } from './Bars';
 import { Icon } from './Icon';
 import { tt } from '../i18n';
@@ -72,9 +73,19 @@ export function Library() {
                   </button>
                 ) : (
                   asked !== x.id && (
-                    <button class="lib-act" aria-label={tt('Retirer « {title} »', { title: x.title })} onClick={() => setAsked(x.id)}>
-                      {tt('Retirer')}
-                    </button>
+                    <span class="lib-acts">
+                      <button
+                        class="lib-act lib-save"
+                        aria-label={tt('Enregistrer l’archive (.zip) de « {title} »', { title: x.title })}
+                        title={tt('Enregistrer l’archive (.zip) : pour la garder, ou la donner à corriger')}
+                        onClick={() => void saveWork(x.id)}
+                      >
+                        <Icon name="download" size={18} />
+                      </button>
+                      <button class="lib-act" aria-label={tt('Retirer « {title} »', { title: x.title })} onClick={() => setAsked(x.id)}>
+                        {tt('Retirer')}
+                      </button>
+                    </span>
                   )
                 )}
                 {asked === x.id && (
@@ -120,7 +131,8 @@ export function Library() {
           )}
         </div>
         <footer class="lib-foot">
-          <button class="pop-action" onClick={pickZip}>
+          {/* the work added is on the screen: the panel has done its job */}
+          <button class="pop-action" onClick={() => pickZip(close)}>
             {tt('Ajouter une partition (.zip)…')}
           </button>
           <p>{tt('Les partitions ajoutées restent sur cet appareil, dans ce navigateur.')}</p>

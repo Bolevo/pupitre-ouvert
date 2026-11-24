@@ -17,6 +17,10 @@ export interface StoredPack {
   pack: Pack;
   texts: Record<string, string>;
   blobs: Record<string, Blob>;
+  /** What the archive was made from (its `source/` folder: the transcription, the tables), by
+   *  file name. Kept as it came and never read here: given back with the archive when it is
+   *  saved again (library.ts exportWorkZip), so that it can be corrected. */
+  source?: Record<string, Uint8Array>;
 }
 
 export const summary = (p: Pack): WorkSummary => ({ id: p.id, title: p.title, composer: p.composer ?? '' });
@@ -25,6 +29,8 @@ export function check(p: Pack) {
   if (Math.floor(p.version) !== PACK_MAJOR) throw new Error(tt('Version de pack non prise en charge ({version})', { version: p.version }));
 }
 
+/** The folder of an archive that holds what it was made from (docs/ARCHIVE.md). */
+export const SOURCE = 'source/';
 const MIME: Record<string, string> = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
 
 /** Reads an archive and checks it (validate.ts). Throws an Error whose message says, in French,
@@ -43,11 +49,13 @@ export function unpackZip(zip: Uint8Array): StoredPack {
   const root = main.slice(0, -'pack.json'.length);
   const texts: Record<string, string> = {};
   const blobs: Record<string, Blob> = {};
+  const source: Record<string, Uint8Array> = {};
   for (const full of names) {
     if (!full.startsWith(root)) continue;
     const name = full.slice(root.length);
     const ext = name.split('.').pop()!.toLowerCase();
-    if (ext === 'json' || ext === 'mei' || ext === 'md') texts[name] = strFromU8(files[full]);
+    if (name.startsWith(SOURCE)) source[name] = files[full];
+    else if (ext === 'json' || ext === 'mei' || ext === 'md') texts[name] = strFromU8(files[full]);
     else if (MIME[ext]) blobs[name] = new Blob([files[full] as Uint8Array<ArrayBuffer>], { type: MIME[ext] }); // fflate's output is a fresh buffer: no copy needed
   }
   let pack: Pack;
@@ -59,7 +67,7 @@ export function unpackZip(zip: Uint8Array): StoredPack {
   delete texts['pack.json'];
   const wrong = problems(pack, texts, Object.keys(blobs));
   if (wrong.length) throw new Error(wrong.length === 1 ? wrong[0] : `${tt('L’archive est à corriger :')}\n${wrong.map((w) => `• ${w}`).join('\n')}`);
-  return { pack, texts, blobs };
+  return Object.keys(source).length ? { pack, texts, blobs, source } : { pack, texts, blobs };
 }
 
 /** Unpacks a work and stores it in IndexedDB (with its summary, read when listing the works). */

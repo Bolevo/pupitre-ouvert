@@ -1,4 +1,5 @@
 // Work library: built-in packs (served with the app) + packs imported from zip files.
+import { strToU8, zipSync, type Zippable } from 'fflate';
 import { del, get, set, keys } from './db';
 import { check, summary, unpackAndStore, type StoredPack, type WorkSummary } from './unpack';
 import type { LoadedPack, Pack } from './types';
@@ -146,6 +147,20 @@ function inWorker(zip: ArrayBuffer): Promise<WorkSummary | 'no-worker'> {
     };
     w.postMessage({ zip, lang: lang.value });
   });
+}
+
+/** The archive of an imported work, made again from what this browser keeps of it: the files the
+ *  app reads and, when the archive came with them, its sources (`source/`), without which it could
+ *  not be corrected. Null: no such work here. */
+export async function exportWorkZip(id: string): Promise<Blob | null> {
+  const sp = (await get(`pack:${id}`)) as StoredPack | undefined;
+  if (!sp) return null;
+  const files: Zippable = { 'pack.json': strToU8(JSON.stringify(sp.pack)) };
+  for (const [name, text] of Object.entries(sp.texts)) files[name] = strToU8(text);
+  // the images are compressed already: stored as they are
+  for (const [name, blob] of Object.entries(sp.blobs)) files[name] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
+  for (const [name, bytes] of Object.entries(sp.source ?? {})) files[name] = bytes;
+  return new Blob([zipSync(files) as Uint8Array<ArrayBuffer>], { type: 'application/zip' });
 }
 
 /** Removes an imported work from this browser, with what was kept about it: the recordings of

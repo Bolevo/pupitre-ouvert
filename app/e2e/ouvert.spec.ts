@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { strToU8, unzipSync, zipSync } from 'fflate';
 import { readFileSync } from 'node:fs';
-import { FIXTURES } from './setup';
+import { EXAMPLE_ZIP, FIXTURES } from './setup';
 
 const EXAMPLE = 'Anton Bruckner — Locus iste'; // the work the app opens on
 const EXAMPLES = [EXAMPLE, 'Franz Schubert — Messe en sol — Kyrie']; // the works that come with the app
@@ -110,7 +110,7 @@ test('a work added stays: there after a reload, replaced by a new version, remov
   const rows = panel.locator('.lib-list > li');
   await expect(rows.locator('.lib-work b')).toHaveText(['Locus iste', 'Messe en sol — Kyrie', 'Deux chorals, corrigés']);
   await expect(rows.nth(2).locator('.lib-work')).toHaveAttribute('aria-current', 'true');
-  await expect(rows.locator('.lib-act')).toHaveText(['Masquer', 'Masquer', 'Retirer']);
+  await expect(rows.locator('.lib-act')).toHaveText(['Masquer', 'Masquer', '', 'Retirer']); // (the third: save its archive)
   // declined: nothing happens; accepted: the work goes, the example is on the screen, also after a reload
   await panel.getByRole('button', { name: 'Retirer « Deux chorals, corrigés »' }).click();
   await expect(panel.locator('.lib-ask')).toContainText('Retirer « Deux chorals, corrigés » de cet appareil ?');
@@ -208,6 +208,65 @@ test('« Mes partitions »: an example is hidden on this device and put back; a 
   expect(errors).toEqual([]);
 });
 
+test('« Copier où j’en suis » puts the place in the clipboard: the work, the measure, the page, the notes', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  const errors = await ready(page);
+  const copy = page.getByRole('button', { name: 'Copier où j’en suis' });
+  // beside the sheet button, and no larger
+  const [sheet, mine] = [await page.locator('.fiche-btn').boundingBox(), await copy.boundingBox()];
+  expect(mine!.x).toBeGreaterThan(sheet!.x + sheet!.width - 1);
+  expect([mine!.width, mine!.height]).toEqual([sheet!.width, sheet!.height]);
+  await copy.click();
+  await expect(page.locator('.where-hint')).toHaveText('Copié : mesure 1, page 8. À coller à votre IA.');
+  let text = (await page.evaluate(() => navigator.clipboard.readText())).split('\n');
+  expect(text.slice(0, 6)).toEqual([
+    'Pupitre Ouvert : où j’en suis dans la partition',
+    'Œuvre : Locus iste (Anton Bruckner)',
+    'Mesure 1, page 8 de la partition',
+    'Voix suivie : Ténor',
+    'Tonalité : do majeur ; mesure à 4/4',
+    'Archive : bruckner-locus-iste, mouvement mvt1',
+  ]);
+  // what the archive holds there, as the transcription writes it (scores/locus-iste/src/008.cht, m 1)
+  expect(text).toContain('S (Soprano) : c5 (3), b4 (1)');
+  expect(text).toContain('T (Ténor) : g3 (3), g3 (1)');
+  expect(text.join('\n')).toContain('« Corriger une archive » de https://bolevo.github.io/pupitre-ouvert/creer.html');
+  // further in the score: three measures on (the arrow keys go by measure), on the same page
+  await page.locator('.play').focus();
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
+  await copy.click();
+  await expect(page.locator('.where-hint')).toHaveText('Copié : mesure 4, page 8. À coller à votre IA.');
+  text = (await page.evaluate(() => navigator.clipboard.readText())).split('\n');
+  expect(text[2]).toBe('Mesure 4, page 8 de la partition');
+  expect(errors).toEqual([]);
+});
+
+test('an archive added with its sources is saved again with them, from « Mes partitions »', async ({ page }) => {
+  const errors = await ready(page);
+  // the example as its archive: it takes the place of the one that comes with the app
+  await add(page, EXAMPLE_ZIP);
+  const panel = await manage(page);
+  const mine = panel.locator('.lib-list > li', { hasText: 'Locus iste' });
+  await expect(mine.locator('.lib-act')).toHaveCount(2); // save, remove: it is a work one has added
+  const download = page.waitForEvent('download');
+  await mine.getByRole('button', { name: 'Enregistrer l’archive (.zip) de « Locus iste »' }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe('bruckner-locus-iste.zip');
+  const saved = unzipSync(readFileSync(await file.path()));
+  const given = unzipSync(readFileSync(EXAMPLE_ZIP));
+  expect(Object.keys(saved).sort()).toEqual(Object.keys(given).sort());
+  expect(Object.keys(saved)).toContain('source/src/008.cht');
+  for (const name of Object.keys(given)) {
+    if (name !== 'pack.json') expect(Buffer.from(saved[name]).equals(Buffer.from(given[name])), name).toBe(true);
+  }
+  expect(JSON.parse(Buffer.from(saved['pack.json']).toString('utf8'))).toEqual(JSON.parse(Buffer.from(given['pack.json']).toString('utf8')));
+  // removed: the example that comes with the app is back, which is hidden, not saved
+  await mine.getByRole('button', { name: 'Retirer « Locus iste »' }).click();
+  await panel.locator('.lib-ask').getByRole('button', { name: 'Retirer' }).click();
+  await expect(mine.locator('.lib-act')).toHaveText(['Masquer']);
+  expect(errors).toEqual([]);
+});
+
 for (const [name, voice] of [
   ['solo', 'Ténor'],
   ['duo', 'Soprano'],
@@ -279,7 +338,7 @@ test('the help says how to add a score, and the page for an AI carries the metho
   const kit = await request.get('/kit.zip');
   expect(kit.ok()).toBe(true);
   const names = Object.keys(unzipSync(new Uint8Array(await kit.body())));
-  for (const f of ['docs/CREER.md', 'docs/CREATE.md', 'docs/ARCHIVE.md', 'LICENSE', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'pipeline/cht/heads.py', 'scores/locus-iste/work.yaml', 'scores/locus-iste/src/008.cht', 'scores/locus-iste/source.pdf', 'scores/schubert-kyrie/src/003.cht']) {
+  for (const f of ['docs/CREER.md', 'docs/CREATE.md', 'docs/ARCHIVE.md', 'LICENSE', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/reopen.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'pipeline/cht/heads.py', 'scores/locus-iste/work.yaml', 'scores/locus-iste/src/008.cht', 'scores/locus-iste/source.pdf', 'scores/schubert-kyrie/src/003.cht']) {
     expect(names).toContain(`pupitre-ouvert/${f}`);
   }
   expect(names.filter((n) => n.startsWith('pupitre-ouvert/app/'))).toEqual([]);

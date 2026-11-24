@@ -1,8 +1,8 @@
 import 'fake-indexeddb/auto';
-import { strToU8, zipSync } from 'fflate';
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import { get, set } from '../src/pack/db';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, type LibraryWork } from '../src/pack/library';
+import { exportWorkZip, hiddenWorks, importWorkZip, loadLibrary, loadWork, removeWork, shownWorks, type LibraryWork } from '../src/pack/library';
 import { problems } from '../src/pack/validate';
 
 const listWorks = loadLibrary;
@@ -94,6 +94,37 @@ describe('importWorkZip', () => {
     const bad = archive({ id: 'incomplete', movements: [movement({ mei: 'absent.mei' })], pages: [{ page: 7, img: 'pages/p007.webp', w: 10, h: 10, systems: [], measures: [] }] });
     await expect(importWorkZip(bad)).rejects.toThrow(/L’archive est à corriger :\n• Mouvement 1 : le fichier absent\.mei n’est pas dans l’archive\.\n• Page 7 : l’image pages\/p007\.webp n’est pas dans l’archive\./);
     expect(await get('pack:incomplete')).toBeUndefined();
+  });
+});
+
+describe('exportWorkZip: the archive of a work added, made again from what the browser keeps', () => {
+  const CHT = 'page 1\nmovement 1\nm 1\nT   | c4:1\n';
+  const sources = { 'source/work.yaml': 'id: with-sources\n', 'source/src/001.cht': CHT, 'source/pages/pages.json': '[]', 'source/mvt1.musicxml': '<score-partwise/>' };
+  const names = async (id: string) => unzipSync(new Uint8Array(await (await exportWorkZip(id))!.arrayBuffer()));
+  it('gives back what was added: what the app reads, and the sources the archive came with', async () => {
+    await importWorkZip(archive({ id: 'with-sources', fiche: 'fiche.md' }, { 'fiche.md': '# Fiche', ...sources, 'notes.txt': 'not kept' }));
+    const out = await names('with-sources');
+    expect(Object.keys(out).sort()).toEqual(['fiche.md', 'mvt1.mei', 'pack.json', 'pages/p001.webp', ...Object.keys(sources)].sort());
+    expect(JSON.parse(strFromU8(out['pack.json']))).toEqual(pack({ id: 'with-sources', fiche: 'fiche.md' }));
+    expect(strFromU8(out['mvt1.mei'])).toBe(MEI);
+    expect([...out['pages/p001.webp']]).toEqual([...IMG]);
+    expect(strFromU8(out['source/src/001.cht'])).toBe(CHT);
+    // the sources are not what the app reads: a JSON file among them is no file of the pack
+    expect(await (await loadWork('with-sources')).getFile('source/pages/pages.json')).toBe('');
+  });
+  it('the archive saved is one the app takes again, with its sources', async () => {
+    const saved = await (await exportWorkZip('with-sources'))!.arrayBuffer();
+    await removeWork('with-sources');
+    expect(await exportWorkZip('with-sources')).toBeNull();
+    expect((await importWorkZip(saved)).id).toBe('with-sources');
+    expect(Object.keys(await names('with-sources')).filter((n) => n.startsWith('source/')).sort()).toEqual(Object.keys(sources).sort());
+  });
+  it('an archive that came without sources, or zipped in a folder: saved without, or at the root', async () => {
+    await importWorkZip(archive({ id: 'bare' }));
+    expect(Object.keys(await names('bare')).sort()).toEqual(['mvt1.mei', 'pack.json', 'pages/p001.webp']);
+    expect(((await get('pack:bare')) as { source?: unknown }).source).toBeUndefined();
+    await importWorkZip(zip({ 'dossier/pack.json': JSON.stringify(pack({ id: 'in-a-folder' })), 'dossier/mvt1.mei': MEI, 'dossier/pages/p001.webp': IMG, 'dossier/source/work.yaml': 'id: in-a-folder\n' }));
+    expect(Object.keys(await names('in-a-folder')).sort()).toEqual(['mvt1.mei', 'pack.json', 'pages/p001.webp', 'source/work.yaml']);
   });
 });
 

@@ -34,7 +34,7 @@ partition numérisée ──► scores/<oeuvre>/ ──► packs/<oeuvre>.zip �
 | `src/state.ts` | l'état (signaux Preact) : œuvre, mouvement, voix suivie, pistes, lecture, réglages gardés |
 | `src/audio/` | le moteur : une horloge (`AudioContext`), une piste par partie (`engine.ts`), ce qu'il faut jouer et quand (`plan.ts`, pur et testé), instruments échantillonnés (`sfont.ts`, `instruments.ts`), nom des notes (`solfege.ts`), métronome, enregistrement de sa voix (`recorder.ts`, `take.ts`) |
 | `src/score/` | la ligne de la voix : Verovio (WebAssembly) dans un worker (`verovio.worker.ts`, `renderer.ts`) dessine la seule portée suivie, tirée du MEI (`meiFilter.ts`) |
-| `src/ui/` | l'écran : pages et cases des mesures (`PageView.tsx`), ligne (`Lane.tsx`), barres (`Bars.tsx`), « Mes partitions » (`Library.tsx`), pistes (`Tracks.tsx`), fiche et apprentissage du texte (`Fiche.tsx`, `Memo.tsx`), enregistrement (`Rec.tsx`) |
+| `src/ui/` | l'écran : pages et cases des mesures (`PageView.tsx`), ligne (`Lane.tsx`), barres (`Bars.tsx`), « Mes partitions » (`Library.tsx`), « Copier où j'en suis » (`Where.tsx`, `score/where.ts`), pistes (`Tracks.tsx`), fiche et apprentissage du texte (`Fiche.tsx`, `Memo.tsx`), enregistrement (`Rec.tsx`) |
 | `src/memo/` | « Apprendre le texte » : le texte de la fiche (`text.ts`), l'exercice (`drill.ts`), la progression (`store.ts`) |
 | `src/site.ts` | le nom de l'app et le préfixe de tout ce qu'elle garde dans le navigateur |
 | `src/i18n.ts`, `src/i18n-en.ts` | la langue : `tt('Texte en français')` rend le texte dans la langue choisie ; la table anglaise a le texte français pour clé (`tests/i18n.test.ts` vérifie qu'aucun texte n'y manque) |
@@ -53,6 +53,7 @@ position dans la mesure est interpolée.
 - `publish.py` : construit, zippe, contrôle ; sans argument, installe aussi les œuvres de
   `scores/` comme œuvres livrées avec l'app (`app/public/packs/`).
 - `check_pack.py` : le contrôle d'une archive (mêmes règles que `app/src/pack/validate.ts`, et davantage).
+- `reopen.py` : une archive redevient un dossier d'œuvre (son dossier `source/`, ses pages), pour la corriger.
 - `crosscheck.py` : les notes chantées que le clavier ne double pas (des endroits à relire).
 - `cht/` : le format texte de transcription (`parse.py`), ses contrôles (`check.py` : ce qui se
   compte ; `heads.py` : les têtes de note de la page à la hauteur écrite), sa gravure sous la

@@ -40,6 +40,10 @@ const P: Record<string, string> = {
   'view-line': 'M3 8.5h18v7H3zM7 12h10',
   'view-page': 'M7 3.5h10v17H7zM10.5 8.5h3M10.5 12h3M10.5 15.5h3',
   'view-both': 'M3 5h7.5v14H3zM14 8.5h7v7h-7zM16.5 12h2',
+  // two sheets, one over the other: copy; a tick: done; an arrow into a tray: save a file
+  copy: 'M10.5 8.5h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM5.5 15.5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
+  download: 'M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14',
   more: 'M5 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM12 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM19 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5z',
 };
 const FILLED = new Set(['play', 'pause', 'stop', 'more']);

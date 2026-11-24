@@ -17,6 +17,8 @@ For every page listed in <work>/work/measures.tsv:
     tools/page_staves.py, which can also be rerun alone on the webp files
   - adds xn to the first measure of every system (where its music starts, after the clef
     and the signatures: the playhead's start) with tools/page_starts.py, same remark
+  - writes <work>/pages/staves.json: every staff printed in each system (first and fifth line,
+    in the webp's pixels) - kept with the sources of the archive (pipeline/reopen.py)
   - draws <work>/work/boxes/<work>_pNNN.png: the page as the app has it, the box of every
     measure in grey, the staff of each part of the score in colour - what to look at
 Barlines are fitted to the counts of measures.tsv as tools/omr/pages.py does (doubtful strokes
@@ -27,6 +29,7 @@ place the barlines in work/bars.tsv, then rerun).
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -94,7 +97,7 @@ def process(args):
         k0 += len(r.systems)
     if len(systems) != len(sys_counts):
         warn.append(f"p{page}: {len(systems)} systems detected, {len(sys_counts)} expected")
-    measures, sys_out = [], []
+    measures, sys_out, printed = [], [], []
     n = rows[0].first
     for k, want in enumerate(sys_counts):
         if k in sys_first:
@@ -114,7 +117,10 @@ def process(args):
             else:
                 edges = [s.start_x] + list(s.barlines)
             top, bottom = back(s, s.top), back(s, s.bottom)
+            # every staff printed in the system, first and fifth line (pages/staves.json)
+            printed.append([[round(back(s, st.top) * scale), round(back(s, st.bottom) * scale)] for st in s.staves])
         else:  # system missing: share the remaining height
+            printed.append([])
             top = sys_out[-1]["bottom"] / scale + 40 if sys_out else 80
             bottom = h - 60
             edges = [60 + i * (w - 120) / want for i in range(want + 1)]
@@ -131,7 +137,7 @@ def process(args):
             })
             n += 1
     return {"page": page, "img": f"p{page:03d}.webp", "w": small.shape[1], "h": small.shape[0],
-            "systems": sys_out, "measures": measures}, warn
+            "systems": sys_out, "measures": measures}, warn, printed
 
 
 def hand_shares(work: Path, page: int, bars: dict[int, list[int]]) -> dict[int, list[float]]:
@@ -140,7 +146,6 @@ def hand_shares(work: Path, page: int, bars: dict[int, list[int]]) -> dict[int, 
     js = work / "img" / f"p{page:03d}.json"
     if not bars or not js.exists():
         return {}
-    import json
     systems = json.loads(js.read_text())["systems"]
     out: dict[int, list[float]] = {}
     for k, xs in bars.items():
@@ -174,6 +179,10 @@ def main():
     with ProcessPoolExecutor(a.jobs) as ex:
         results = list(ex.map(process, jobs))
     pages, warns = [r[0] for r in results], [w for r in results for w in r[1]]
+    # where every printed staff is, system by system: not for the app (its own are systems[].staves,
+    # those of the score only); pipeline/reopen.py reads it when the archive is opened again
+    staves = sorted(({"page": r[0]["page"], "systems": r[2]} for r in results), key=lambda p: p["page"])
+    (out / "staves.json").write_text(json.dumps(staves, separators=(",", ":")), encoding="utf-8")
     pages.sort(key=lambda p: p["page"])
     layout, detected = score_staves(a.work), {}
     staff_notes = annotate(pages, out, {m: n for m, (n, _) in layout.items()}, detected,   # systems[].staves, from the webp files

@@ -5,6 +5,7 @@ import { TempoControl } from './Tempo';
 import { Icon } from './Icon';
 import { Volume } from './Volume';
 import { useDismiss } from './popover';
+import { WhereButton } from './Where';
 import { now } from './now';
 import type { MetroSub } from '../audio/metronome';
 import { helpPage, partLabel, tt, ttKey } from '../i18n';
@@ -62,6 +63,7 @@ export function TopBar() {
               <Icon name="book" size={19} />
             </button>
           )}
+          <WhereButton />
           {w.pack.movements.length > 1 && (
             <nav class="movements" aria-label={tt('Mouvements')} ref={nav}>
               {w.pack.movements.map((m) => (
@@ -202,12 +204,13 @@ function EndModeControl() {
   );
 }
 
-/** Opens the file picker for a work's .zip. */
-export function pickZip() {
+/** Opens the file picker for a work's .zip. `added`: called once the work chosen is added and
+ *  on the screen. */
+export function pickZip(added?: () => void) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.zip,application/zip';
-  input.onchange = () => input.files?.[0] && void importZip(input.files[0]);
+  input.onchange = () => input.files?.[0] && void importZip(input.files[0]).then((ok) => ok && added?.());
   input.click();
 }
 

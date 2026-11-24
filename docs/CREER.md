@@ -198,10 +198,47 @@ Donnez `packs/<id>.zip` à la personne, avec :
 - ce qui a été vérifié, et comment : les pages dont vous avez regardé la comparaison, celles que
   vous n'avez pas regardées ;
 - les passages incertains (`grep -n "# ?" scores/<id>/src/*.cht`), pour qu'elle les vérifie à
-  l'écoute, partition en main.
+  l'écoute, partition en main ;
+- comment signaler une erreur : dans l'app, le petit bouton « copier », à droite de celui de la
+  fiche, met dans le presse-papiers l'endroit où elle se trouve (œuvre, mesure, page, notes) ;
+  elle vous le colle, avec l'archive.
 
-Une version plus complète, ou corrigée, remplace la précédente dans l'app (même `id`). Une
-correction se fait dans `src/NNN.cht`, puis étapes 5 et 7 ; gardez donc le dossier `scores/<id>/`.
+Une version plus complète, ou corrigée, remplace la précédente dans l'app (même `id`).
+
+## Corriger une archive
+
+La personne revient avec une erreur : une note, un rythme, une parole. Il vous faut l'archive
+(`.zip`) — celle qu'elle a reçue, ou celle que l'app enregistre (liste des œuvres → « Gérer mes
+partitions… » → la flèche vers le bas). Elle porte ce dont elle est faite, dans son dossier
+`source/` : la transcription, les tables, le MusicXML.
+
+```
+python pipeline/reopen.py chemin/vers/<oeuvre>.zip                      # -> scores/<id>/
+python tools/omr/zoom.py <page> <mesure> --staff T --work scores/<id>   # la mesure sur la page, agrandie
+# corriger scores/<id>/src/<page>.cht
+python pipeline/cht/check.py scores/<id> --pages <page>
+python pipeline/cht/render.py scores/<id>/src/<page>.cht --compare
+python pipeline/cht/compile.py scores/<id>
+python pipeline/publish.py <id>                                         # -> packs/<id>.zip   OK
+```
+
+- Le texte copié depuis l'app dit où regarder : la mesure, la page (le fichier `src/<page>.cht`),
+  la voix, et les notes que l'archive contient à cette mesure, écrites comme dans la
+  transcription (`c4` = do central, la durée en noires entre parenthèses).
+- La page fait foi : regardez la mesure (`zoom.py`) avant de changer une note. Ce que la personne
+  entend faux peut être juste sur la page ; dites-le-lui alors.
+- Une erreur de rythme décale ce qui suit : relisez la mesure entière et ses voisines, et
+  comparez (`render.py --compare`).
+- Le dossier rouvert a les pages de l'archive, pas la numérisation : les étapes 1, 3 et 6 ne s'y
+  refont pas (les pages et leurs cases sont gardées telles quelles) ; les contrôles de l'étape 4
+  y fonctionnent.
+- **Un MusicXML corrigé par la personne** (dans MuseScore, par exemple, à partir de
+  `source/mvtN.musicxml` de l'archive) : posez-le à la place de `scores/<id>/mvtN.musicxml`,
+  ajoutez `source: musicxml` à ce mouvement dans `work.yaml` (`compile.py` ne l'écrasera plus),
+  puis `publish.py`.
+- La nouvelle archive garde l'`id` de l'œuvre : ajoutée dans l'app, elle remplace l'ancienne.
+- Une archive sans `source/` (faite avant que les archives ne l'emportent, ou autrement) ne se
+  rouvre pas : il faut le dossier `scores/<id>/` d'origine, ou transcrire de nouveau.
 
 L'archive contient les images de la partition : elle est faite pour l'usage personnel de la
 personne, pas pour être publiée si l'édition est protégée.

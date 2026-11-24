@@ -7,7 +7,8 @@ outils qui fabriquent ses archives. Deux raisons d'être ici, deux lectures.
 
 [`docs/CREER.md`](docs/CREER.md) décrit le but, les outils et un chemin éprouvé ; l'app n'est
 pas à lire pour cela. On travaille dans `scores/<id>/`, le résultat est `packs/<id>.zip`, et
-`python pipeline/publish.py <id>` se termine par son verdict (`OK`).
+`python pipeline/publish.py <id>` se termine par son verdict (`OK`). Pour corriger une archive
+existante : `python pipeline/reopen.py <archive>.zip`, puis « Corriger une archive » de la méthode.
 
 - La méthode est libre : le chemin décrit, une variante, ou la vôtre. Les œuvres d'exemple
   (`scores/locus-iste/`, `scores/schubert-kyrie/`) et les sources montrent ce qui est attendu.
@@ -38,7 +39,7 @@ pas à lire pour cela. On travaille dans `scores/<id>/`, le résultat est `packs
 ## Arborescence
 
 - `app/` — l'app (Vite + Preact + TypeScript) ; `app/public/packs/` est généré.
-- `pipeline/` — dossier d'œuvre → archive (`build_pack.py`, `publish.py`, `check_pack.py`),
+- `pipeline/` — dossier d'œuvre → archive (`build_pack.py`, `publish.py`, `check_pack.py`), et retour (`reopen.py`),
   format de transcription (`cht/`).
 - `tools/` — images des pages (`source.py`, `omr/`, `page_assets.py`), kit (`make_kit.py`).
 - `scores/locus-iste/`, `scores/schubert-kyrie/` — les œuvres d'exemple, modèles d'un dossier

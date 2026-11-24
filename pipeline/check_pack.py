@@ -260,6 +260,16 @@ def check(files: dict[str, bytes]) -> tuple[list[str], list[str], list[str]]:
         err(f"fiche: {fiche!r} is not in the archive")
     elif fiche is None:
         info.append("no sheet (fiche.md): optional, the text of the work and its translation")
+    # what the archive was made from (pipeline/publish.py puts it there): the app keeps it without
+    # reading it; pipeline/reopen.py makes a work folder of it again
+    src = [n for n in files if n.startswith("source/")]
+    if "source/work.yaml" in src:
+        m = re.search(r"^id:\s*[\"']?([^\s\"'#]+)", files["source/work.yaml"].decode("utf-8", "replace"), re.M)
+        if m and m.group(1) != pack.get("id"):
+            warn(f"source/work.yaml is that of another work (id {m.group(1)!r}, the archive is {pack.get('id')!r})")
+        info.append(f"sources: {len(src)} file(s) (pipeline/reopen.py opens the archive again to correct it)")
+    else:
+        info.append("no sources (source/work.yaml): the archive cannot be corrected from itself")
     size = sum(len(b) for b in files.values())
     info.append(f"{len(files)} file(s), {size / 1e6:.1f} MB unpacked")
     if size > 150e6:

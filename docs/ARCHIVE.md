@@ -24,6 +24,7 @@ scores/<oeuvre>/
   mvt1.musicxml …       un MusicXML par mouvement (écrit par pipeline/cht/compile.py, ou apporté)
   pages/pNNN.webp       les pages de la partition         } écrits par tools/page_assets.py
   pages/pages.json      les cases des mesures sur ces pages }  (facultatifs)
+  pages/staves.json     chaque portée imprimée de chaque système (pour rouvrir l'archive)
   fiche.md              texte chanté et traduction (facultative)
 ```
 
@@ -139,6 +140,13 @@ mesures, durées, paroles de chaque voix), d'après l'archive construite : lance
 | `<mouvement>.mei` | la partition du mouvement (MEI écrit par Verovio), dessinée par l'app |
 | `pages/pNNN.webp` | les pages (webp, png ou jpg) |
 | `fiche.md` | la fiche |
+| `source/…` | ce dont l'archive est faite : `work.yaml`, `src/NNN.cht`, `mvtN.musicxml`, `pages/pages.json`, `pages/staves.json`, `work/*.tsv` |
+
+`source/` n'est pas lu par l'app : elle le garde tel quel et le rend avec l'archive
+(« Enregistrer l'archive »). `pipeline/publish.py` l'y met ; `python pipeline/reopen.py
+<oeuvre>.zip` en refait un dossier d'œuvre, pour corriger (voir [`CREER.md`](CREER.md), « Corriger
+une archive »). La numérisation n'y est pas. Une archive sans `source/` est valable ; elle ne
+peut simplement pas être corrigée à partir d'elle-même.
 
 `pack.json` (UTF-8) :
 
@@ -188,5 +196,10 @@ et ses identifiants viennent de Verovio 6.3.0, la version que l'app embarque).
 - Retrait : même liste → « Gérer mes partitions… » → « Retirer » (efface aussi les
   enregistrements et la progression du texte de cette œuvre). Les exemples livrés avec l'app s'y
   masquent, sur cet appareil, et s'y remettent.
+- Enregistrer l'archive : dans « Gérer mes partitions… », la flèche vers le bas d'une œuvre
+  ajoutée rend son archive (`<id>.zip`), avec ses sources si elle en avait.
+- « Copier où j'en suis » (à droite du bouton de la fiche) : met dans le presse-papiers l'œuvre,
+  le mouvement, la mesure, la page, la voix suivie et les notes de la mesure, pour signaler une
+  erreur à qui corrigera l'archive.
 - La voix suivie est celle que le chanteur a choisie (Ténor au départ) ; si l'œuvre ne l'a pas,
   la voix de la même famille, sinon la première.
