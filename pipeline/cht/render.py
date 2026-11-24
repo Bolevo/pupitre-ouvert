@@ -190,7 +190,8 @@ def _engraved(xml: str, width_px: int = 2600) -> tuple[np.ndarray, list[float], 
         raise RuntimeError("verovio could not load the MusicXML")
     ensure_fonts()
     svg = tk.renderToSVG(1).replace('font-family="Times, serif"', f'font-family="{TEXT_FONT}"')
-    svg = re.sub(r'<g [^>]*class="mNum[^"]*"[^>]*>.*?</g>', "", svg, flags=re.S)   # the ruler has the numbers
+    # the ruler has the measure numbers; a tempo is not something a staff is compared on
+    svg = re.sub(r'<g [^>]*class="(?:mNum|tempo)[^"]*"[^>]*>.*?</g>', "", svg, flags=re.S)
     vb = re.search(r'class="definition-scale"[^>]*viewBox="0 0 ([\d.]+) ([\d.]+)"', svg)
     mg = re.search(r'class="page-margin" transform="translate\(([\d.]+), ([\d.]+)\)"', svg)
     k = width_px / float(vb.group(1))
