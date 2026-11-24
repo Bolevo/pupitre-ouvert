@@ -4,6 +4,7 @@ import { check, summary, unpackAndStore, type StoredPack, type WorkSummary } fro
 import type { LoadedPack, Pack } from './types';
 import { takeKey } from '../audio/take';
 import { forgetProgress } from '../memo/store';
+import { lang, tt } from '../i18n';
 
 export type { WorkSummary };
 
@@ -71,7 +72,7 @@ export async function loadWork(id: string): Promise<LoadedPack> {
   const dir = builtinDirs.get(id);
   let lp: LoadedPack;
   if (!sp) {
-    if (!dir) throw new Error(`Œuvre introuvable : ${id}`);
+    if (!dir) throw new Error(tt('Œuvre introuvable : {id}', { id }));
     const url = `${BASE}packs/${dir}/`;
     const pack = (await (await fetch(`${url}pack.json`)).json()) as Pack;
     check(pack);
@@ -123,7 +124,7 @@ function inWorker(zip: ArrayBuffer): Promise<WorkSummary | 'no-worker'> {
       console.warn('import worker', e.message);
       resolve('no-worker');
     };
-    w.postMessage({ zip });
+    w.postMessage({ zip, lang: lang.value });
   });
 }
 

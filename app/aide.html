@@ -7,6 +7,7 @@
     <meta name="description" content="Comment se servir de Pupitre Ouvert pour apprendre sa partie de chœur : écouter, apprendre, chanter, vérifier une note." />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="alternate" hreflang="en" href="https://bolevo.github.io/pupitre-ouvert/help.html" />
     <title>Aide de Pupitre Ouvert</title>
     <link rel="stylesheet" href="./src/aide/aide.css" />
   </head>
@@ -44,7 +45,10 @@
         <img src="./icon.svg" alt="" width="32" height="32" />
         <span>Pupitre Ouvert</span>
       </a>
-      <a class="open-app" href="./">Ouvrir l’app</a>
+      <span class="masthead-links">
+        <a class="other-lang" href="./help.html" lang="en" hreflang="en">English</a>
+        <a class="open-app" href="./">Ouvrir l’app</a>
+      </span>
     </header>
 
     <section class="hero" aria-labelledby="titre">
@@ -312,7 +316,7 @@
               <div><dt>H</dt><dd><b>Ligne de ma voix</b> : votre partie seule, avec le texte ; touchez une note pour l’entendre.</dd></div>
               <div><dt>I</dt><dd><span class="ctl icon-only" role="img" aria-label="Réécouter"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> réécouter, <span class="ctl icon-only" role="img" aria-label="Lecture"><svg class="ic" aria-hidden="true"><use href="#i-play" /></svg></span> lecture et pause, <span class="ctl">♩ = 120</span> le tempo.</dd></div>
               <div><dt>J</dt><dd><b>Ma voix</b> : <svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg> Entendre, <svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg> Muet, <svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg> Seul, <svg class="ic" aria-hidden="true"><use href="#i-support" /></svg> Soutien.</dd></div>
-              <div><dt>K</dt><dd><span class="ctl icon-only" role="img" aria-label="Réglages"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> <b>Réglages</b> : chaque voix et le piano (suivre, solo, muet, volume, instrument), l’affichage, et l’aide.</dd></div>
+              <div><dt>K</dt><dd><span class="ctl icon-only" role="img" aria-label="Réglages"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> <b>Réglages</b> : chaque voix et le piano (suivre, solo, muet, volume, instrument), l’affichage, la langue, et l’aide.</dd></div>
             </dl>
           </div>
           <figure class="shot wide">
@@ -386,6 +390,7 @@
                 <li><b>L’instrument</b> de chaque voix (voir ci-dessous).</li>
                 <li><b>Tout entendre</b> enlève les solos et les muets ; <b>Réglages par défaut</b> remet aussi les instruments, les volumes, le tempo et l’affichage.</li>
                 <li><b>A A A</b> : la taille de la ligne du bas. <b>Paroles</b> : quel texte afficher, quand l’œuvre en a plusieurs.</li>
+                <li><b>Français / English</b> : la langue de l’app.</li>
                 <li>Sur téléphone, c’est aussi là qu’est l’<span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-help" /></svg>Aide</span>.</li>
               </ul>
             </div>
@@ -609,7 +614,7 @@
           </p>
           <p>
             Pupitre Ouvert est gratuit et sans but commercial. C’est la version ouverte de Pupitre, l’app d’un chœur : la même app, où chacun
-            apporte ses partitions. Son code et ses outils sont publics :
+            apporte ses partitions. Son code et ses outils sont publics, sous licence MIT :
             <a href="https://github.com/Bolevo/pupitre-ouvert">github.com/Bolevo/pupitre-ouvert</a>.
           </p>
           <h4>Comment c’est fait</h4>

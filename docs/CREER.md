@@ -1,33 +1,42 @@
-# Créer l'archive d'une partition pour Pupitre Ouvert — méthode pour une IA
+# Créer l'archive d'une partition pour Pupitre Ouvert
 
-Vous êtes une IA à qui quelqu'un a confié sa partition numérisée (PDF ou photos). Vous allez en
-faire une **archive `.zip`** qu'il ajoutera dans [Pupitre Ouvert](https://bolevo.github.io/pupitre-ouvert/)
+Pour une IA à qui quelqu'un a confié sa partition numérisée (PDF ou photos) : vous en faites une
+**archive `.zip`** qu'il ajoutera dans [Pupitre Ouvert](https://bolevo.github.io/pupitre-ouvert/)
 pour suivre la partition, écouter les voix et apprendre la sienne.
 
-Le travail a deux natures. Les **scripts** de ce dépôt font ce qui est mécanique (pages,
-découpes, contrôles, compilation, archive) : lancez-les, ne les réécrivez pas. **Vous** lisez la
-musique, mesure par mesure, et vous vérifiez. Tout le reste de ce document sert à ce que vous
-dépensiez votre attention là, et nulle part ailleurs.
+(English version: [`CREATE.md`](CREATE.md).)
 
-## Avant de commencer
+## Le but
 
-1. **Il vous faut** : exécuter du code (Python ≥ 3.10, `pip`) et voir les images que vous
-   produisez. Sans cela, dites-le simplement : on ne fabrique pas cette archive « de tête ».
-2. **Le kit** (scripts, documentation, œuvre d’exemple, 0,5 Mo) :
-   `git clone --depth 1 https://github.com/Bolevo/pupitre-ouvert` ou
-   [https://bolevo.github.io/pupitre-ouvert/kit.zip](https://bolevo.github.io/pupitre-ouvert/kit.zip). Si votre environnement n'a pas de réseau,
-   demandez à la personne de télécharger `kit.zip` et de vous le joindre.
-   Puis `pip install -r pipeline/requirements.txt`.
-3. **Dites à la personne ce qui l'attend** : la lecture est lente (comptez 20 à 60 minutes par
-   page pour quatre voix et piano) ; une œuvre longue se fait en plusieurs séances, mouvement par
-   mouvement. Proposez de commencer par les pages dont elle a besoin. **Les voix d'abord** :
-   l'accompagnement peut venir ensuite, ou jamais (voir « Aller plus vite »).
-4. L'archive contient les images de la partition : elle est faite pour l'usage personnel de celui
-   qui possède la partition, pas pour être publiée.
+Une archive que `pipeline/check_pack.py` déclare `OK`, et dont la musique est juste. Elle contient :
 
-Toutes les commandes se lancent depuis la racine du kit. `<id>` est le nom du dossier de l'œuvre.
+- la **musique** de chaque voix (notes, rythmes, paroles), et l'accompagnement s'il y en a ;
+- les **pages** de la partition, nettoyées, avec la place de chaque mesure ;
+- facultativement, une **fiche** : le texte chanté et sa traduction.
 
-## Les huit étapes
+Le format est décrit dans [`ARCHIVE.md`](ARCHIVE.md). Ce qui fait la valeur de l'archive pour un
+choriste, dans l'ordre : la justesse des voix, la lisibilité des pages, l'accompagnement.
+
+## Ce dont vous disposez
+
+- **Le kit** : `git clone --depth 1 https://github.com/Bolevo/pupitre-ouvert`, ou
+  [https://bolevo.github.io/pupitre-ouvert/kit.zip](https://bolevo.github.io/pupitre-ouvert/kit.zip)
+  (0,5 Mo ; sans réseau, la personne peut vous le joindre). Puis
+  `pip install -r pipeline/requirements.txt` (Python ≥ 3.10).
+- **Des scripts pour tout ce qui est mécanique** : préparer et nettoyer les pages, les découper
+  pour la lecture, contrôler une transcription, la graver pour la comparer à la page, compiler,
+  construire et vérifier l'archive. Ils sont courts et lisibles.
+- **Un exemple complet** : [`scores/deux-chorals/`](../scores/deux-chorals) est un dossier
+  d'œuvre fini ; `python pipeline/publish.py deux-chorals` en fait l'archive.
+
+Vous êtes libre de la méthode. Le chemin décrit ci-dessous a servi à transcrire deux œuvres
+entières pour chœur et piano : prenez-le tel quel, adaptez-le, ou faites autrement si cette
+partition s'y prête mieux — lire les sources, modifier un script, en écrire un. Ce qui compte est
+le résultat : une archive `OK` et une musique fidèle à la page.
+
+Toutes les commandes se lancent depuis la racine du kit ; `<id>` est le nom du dossier de l'œuvre.
+
+## Le chemin éprouvé
 
 ### 1. Les pages
 
@@ -35,13 +44,12 @@ Toutes les commandes se lancent depuis la racine du kit. `<id>` est le nom du do
 python tools/source.py scores/<id> partition.pdf          # ou des photos, dans l'ordre : p1.jpg p2.jpg …
 ```
 
-Écrit `scores/<id>/work/source/NNNN.png` et `work/pages.tsv` (image → numéro de page imprimé,
-1, 2, 3… par défaut : `--first-page 2` si le PDF commence à la page 2, `--pages 3-40` pour laisser
-les couvertures). Regardez une image : droite, lisible, une page par image.
+Écrit `scores/<id>/work/source/NNNN.png` et `work/pages.tsv` (image → numéro de page imprimé :
+`--first-page 2` si le document commence à la page 2, `--pages 3-40` pour laisser les couvertures).
 
 ### 2. work.yaml
 
-`scores/<id>/work.yaml` — titre et compositeur lus sur la première page :
+`scores/<id>/work.yaml` — titre et compositeur se lisent sur la première page :
 
 ```yaml
 id: faure-cantique                 # = <id> : lettres, chiffres, tirets
@@ -53,53 +61,50 @@ lyrics:
   1: {id: fr, label: "Français", lang: fr}
 ```
 
-Un mouvement par morceau séparé (chacun recommence à la mesure 1). `staves` seulement si les
+Un mouvement par morceau séparé (chacun recommence à la mesure 1). Ajoutez `staves` si les
 systèmes ne sont pas « S A T B + piano » (voir « Autres dispositions »).
 
-### 3. Compter les mesures
+### 3. Les mesures de chaque page
 
 ```
-python tools/omr/pages.py --work scores/<id>              # ~4 s par page
-python pipeline/cht/measures.py init scores/<id>          # premier work/measures.tsv, d'après la détection
+python tools/omr/pages.py --work scores/<id>
+python pipeline/cht/measures.py init scores/<id>          # work/measures.tsv, d'après la détection
 ```
 
-Ouvrez chaque `work/img/pNNN_overlay.png` : barres détectées en rouge. Corrigez dans
-`work/measures.tsv` la colonne `systems` (mesures **par système**, ex. `4,4,5`) là où la
-détection s'est trompée (une hampe prise pour une barre, une barre pâle manquée), et la colonne
-`movement`. Chaque segment entre deux barres est une mesure ; une levée est la mesure 0 (mettez
-`first` à 0 sur la première page du mouvement). Une page sans musique : supprimez sa ligne. Puis :
+`work/img/pNNN_overlay.png` montre les barres détectées. `work/measures.tsv` dit, page par page,
+combien de mesures compte chaque système : corrigez-y ce que la détection a manqué (une hampe
+prise pour une barre, une barre pâle), et le numéro du mouvement. Une levée est la mesure 0
+(`first` = 0 sur la première page du mouvement) ; une page sans musique n'a pas de ligne. Puis :
 
 ```
 python pipeline/cht/measures.py renumber scores/<id>
-python tools/omr/pages.py --work scores/<id>              # les découpes portent maintenant les vrais numéros
+python tools/omr/pages.py --work scores/<id>              # les découpes portent les vrais numéros
 ```
 
-`pages.py` ne doit plus signaler « local numbers ». Les numéros imprimés en début de système
-sont votre preuve : ils doivent tomber juste.
+Les numéros imprimés en début de système permettent de vérifier le compte.
 
-### 4. Transcrire, page par page
+### 4. La transcription
 
-Un fichier `scores/<id>/src/NNN.cht` par page imprimée. Le format est dans
-[`CHT_FORMAT.md`](CHT_FORMAT.md) (court : lisez-le en entier), la manière de lire et les pièges
-dans [`TRANSCRIBE.md`](TRANSCRIBE.md). L'essentiel :
+Un fichier `scores/<id>/src/NNN.cht` par page : un format texte, une ligne par voix et par
+mesure, décrit dans [`CHT_FORMAT.md`](CHT_FORMAT.md) ; les pièges de lecture connus sont dans
+[`TRANSCRIBE.md`](TRANSCRIBE.md).
 
-- **Jamais une page d'un coup.** Mesure par mesure, sur les découpes
-  `work/img/pNNN_sK_ch_mA-B.png` (voix) et `…_pf_…` (piano) : la marge donne la hauteur
-  **réelle** de chaque ligne de portée. Au moindre doute :
-  `python tools/omr/zoom.py <page> <mesure> --staff T --work scores/<id>`.
-- Pour chaque mesure : comptez les temps, écrivez les notes, puis les paroles.
-- Ce qui reste incertain reçoit `# ?` et sa raison. Ne devinez pas en silence.
+Les découpes `work/img/pNNN_sK_ch_mA-B.png` (voix) et `…_pf_…` (piano) montrent quelques mesures
+agrandies, avec dans la marge la hauteur **réelle** de chaque ligne de portée ;
+`python tools/omr/zoom.py <page> <mesure> --staff T --work scores/<id>` agrandit une mesure
+davantage. Lire mesure par mesure sur ces découpes donne de bien meilleurs résultats que lire la
+page entière.
 
-Après chaque page, **la boucle de contrôle** :
+Deux contrôles, à lancer quand vous voulez :
 
 ```
-python pipeline/cht/check.py scores/<id> --pages <page>            # 0 erreur exigé ; lisez chaque avertissement
+python pipeline/cht/check.py scores/<id> --pages <page>            # durées, syllabes, liaisons, tessitures
 python pipeline/cht/render.py scores/<id>/src/NNN.cht --compare    # work/render/NNN_cmp_sK.png
 ```
 
-`--compare` empile, système par système, la page (en haut) et votre transcription gravée (en
-bas). Regardez chaque image, mesure par mesure : hauteurs, rythmes, liaisons, syllabes. Corrigez,
-relancez, jusqu'à concordance. C'est ici que se joue la justesse de l'archive.
+`--compare` empile, système par système, la page et votre transcription gravée : c'est le
+contrôle le plus efficace, il montre d'un coup d'œil une hauteur, un rythme ou une syllabe qui
+diffèrent. Marquez `# ?` ce qui reste incertain.
 
 ### 5. Compiler
 
@@ -114,13 +119,13 @@ python tools/page_assets.py scores/<id>                   # -> pages/pNNN.webp +
 python tools/page_staves.py scores/<id> --dry-run --draw scores/<id>/work/boxes
 ```
 
-Lisez le rapport (`WARN` : un système dont les barres n'ont pas pu être accordées à
-`measures.tsv`), et regardez une ou deux images de `work/boxes/` : les cases grises doivent
-épouser les mesures, les bandes de couleur les portées.
+Les pages sont recadrées sur ce qui est imprimé, redressées et nettoyées (fond blanc, encre
+rétablie), puis chaque mesure reçoit sa case (`--no-frame` garde les images entières). Les images de `work/boxes/` montrent les cases et les portées trouvées ;
+`WARN` signale un système dont les barres n'ont pas pu être accordées à `measures.tsv`.
 
-### 7. La fiche (facultative, appréciée)
+### 7. La fiche (facultative)
 
-`scores/<id>/fiche.md` : le texte chanté, vers par vers, et sa traduction française — format dans
+`scores/<id>/fiche.md` : le texte chanté, vers par vers, et sa traduction — format dans
 [`ARCHIVE.md`](ARCHIVE.md#fichemd-facultative). Elle sert aussi à « Apprendre le texte ».
 
 ### 8. L'archive
@@ -129,36 +134,42 @@ Lisez le rapport (`WARN` : un système dont les barres n'ont pas pu être accord
 python pipeline/publish.py <id>                           # -> packs/<id>.zip
 ```
 
-La dernière ligne doit être `OK` (ou `OK with N warning(s)` : lisez-les, ce sont souvent de
-vraies erreurs — une octave, une durée). `FAILED` : corrigez ce qui est dit.
+La dernière ligne est le verdict : `OK`, `OK with N warning(s)` (à lire : une octave ou une
+durée douteuse s'y signale) ou `FAILED` avec ce qu'il faut corriger.
 
-**Remettez à la personne** le fichier `packs/<id>.zip`, avec :
+## Remettre l'archive
 
-- comment l'ajouter : ouvrir [https://bolevo.github.io/pupitre-ouvert/](https://bolevo.github.io/pupitre-ouvert/), liste des œuvres en haut
-  à gauche → « Ajouter une partition (.zip)… » ;
-- ce que l'archive couvre (pages, mouvements, voix, accompagnement ou non) ;
-- ce qui reste douteux, mesure par mesure (`grep -n "# ?" scores/<id>/src/*.cht`), pour qu'elle
-  le vérifie à l'écoute. Une archive annoncée juste et qui ne l'est pas fait apprendre des fautes.
+Donnez `packs/<id>.zip` à la personne, avec :
 
-Gardez le dossier `scores/<id>/` (ou remettez-en une copie) : une correction se fait dans
-`src/NNN.cht`, puis étapes 5 et 8 ; la nouvelle archive remplace l'ancienne dans l'app.
+- comment l'ajouter : ouvrir [https://bolevo.github.io/pupitre-ouvert/](https://bolevo.github.io/pupitre-ouvert/),
+  liste des œuvres en haut à gauche → « Ajouter une partition (.zip)… » ;
+- ce que l'archive couvre (pages, mouvements, voix, accompagnement) ;
+- les passages incertains (`grep -n "# ?" scores/<id>/src/*.cht`), pour qu'elle les vérifie à
+  l'écoute, partition en main.
 
-## Aller plus vite, sans perdre la justesse
+Une archive peut ne couvrir qu'une partie de l'œuvre : une version plus complète, ou corrigée,
+remplace la précédente dans l'app (même `id`). Une correction se fait dans `src/NNN.cht`, puis
+étapes 5 et 8 ; gardez donc le dossier `scores/<id>/`.
 
-- **Les voix seules d'abord.** N'écrivez pas les lignes `PR`/`PL` : l'archive est valable sans
-  accompagnement, et quatre voix se lisent bien plus vite qu'un piano. Proposez le piano ensuite.
-- **Le piano, simplifié s'il est touffu** : la basse et les accords suffisent pour se repérer ;
-  dites-le dans ce que vous remettez.
-- **Musique répétée** : une mesure identique se recopie (vérifiez-la tout de même au rendu).
-- **Un brouillon automatique** (`tools/omr/draft.py`, avec Audiveris) existe ; il se trompe
-  souvent sur les durées et les voix et ne lit pas les paroles : un indice de hauteurs, rien de plus.
-- **N'ouvrez que les images utiles** : la découpe de la mesure que vous lisez, pas la page entière.
+L'archive contient les images de la partition : elle est faite pour l'usage personnel de la
+personne, pas pour être publiée si l'édition est protégée.
+
+## Choix possibles
+
+- **Les voix sans l'accompagnement** : sans lignes `PR`/`PL`, l'archive est complète pour
+  apprendre sa partie. L'accompagnement peut s'ajouter ensuite, entier ou réduit à la basse et aux
+  accords.
+- **Un MusicXML existe déjà** (MuseScore, autre source) : posez-le en `mvtN.musicxml` et passez
+  les étapes 4 et 5 ; ce qu'il doit contenir est dans [`ARCHIVE.md`](ARCHIVE.md).
+- **Sans pages** : l'archive est valable sans `pages/` ; l'app montre alors la ligne de la voix.
+- **Un brouillon automatique** : `tools/omr/draft.py` (avec Audiveris) donne des hauteurs
+  indicatives ; durées, voix et paroles restent à lire.
 
 ## Autres dispositions que « quatre voix et piano »
 
 Les portées d'un système portent des noms : `S A T B` (voix), `PR PL` (piano, main droite et
 gauche). Par défaut : 6 portées = `S A T B PR PL`, 4 = `S A T B` (a cappella), 2 = `PR PL`, 3 à 5
-= les premières voix puis `PR PL`. Si ce n'est pas votre partition, dites-le dans `work.yaml` :
+= les premières voix puis `PR PL`. Pour une autre disposition, `staves` dans `work.yaml` :
 
 | Partition | `staves:` | Dans les fichiers `.cht` |
 |---|---|---|
@@ -171,21 +182,19 @@ gauche). Par défaut : 6 portées = `S A T B PR PL`, 4 = `S A T B` (a cappella),
 
 Une page dont les systèmes diffèrent du reste : colonne `solo` de `work/pages.tsv`
 (`pipeline/cht/workdir.py`). La marge des découpes suppose les clés habituelles (`S A` : sol ;
-`T` : sol octaviée ; `B` et `PL` : fa) : si la page imprime une autre clé, lisez la clé, pas la marge.
+`T` : sol octaviée ; `B` et `PL` : fa) ; ailleurs, c'est la clé imprimée qui fait foi.
 
-Le format CHT s'arrête à quatre portées vocales et un clavier. Au-delà (double chœur, orgue avec
-pédalier, orchestre), ou si la personne a déjà un MusicXML : sautez les étapes 4 et 5 et
-fournissez vous-même `mvtN.musicxml` (ce qu'il doit contenir : [`ARCHIVE.md`](ARCHIVE.md)). Les
-étapes 3, 6 et 8 restent les mêmes — ou sans pages du tout : l'archive vaut aussi sans elles.
+Le format CHT couvre quatre portées vocales et un clavier. Pour davantage (double chœur, orgue
+avec pédalier, orchestre), produisez `mvtN.musicxml` par un autre moyen : les étapes 3, 6 et 8
+restent les mêmes.
 
-## Quand quelque chose résiste
+## Si un outil ne convient pas
 
-- Les scripts sont lisibles et courts : lisez celui qui échoue, adaptez-le à cette partition.
-  Vous êtes là pour cela.
-- Photos gondolées, pages pâles, barres mal détectées : `measures.tsv` fait foi ; au pire, les
-  cases de ce système seront réparties régulièrement (l'app marche quand même).
-- Un défaut de ces outils, ou de l'app ? Signalez-le, ou proposez la correction :
-  [https://github.com/Bolevo/pupitre-ouvert/issues](https://github.com/Bolevo/pupitre-ouvert/issues).
+Photos gondolées, pages pâles, mise en page inhabituelle : les scripts sont faits pour être lus
+et adaptés. `measures.tsv` fait foi pour les mesures ; là où les barres ne se laissent pas
+détecter, les cases sont réparties régulièrement et l'app fonctionne quand même. Un défaut des
+outils ou de l'app se signale, ou se corrige, sur
+[https://github.com/Bolevo/pupitre-ouvert/issues](https://github.com/Bolevo/pupitre-ouvert/issues).
 
 ## En une page
 
@@ -193,7 +202,7 @@ fournissez vous-même `mvtN.musicxml` (ce qu'il doit contenir : [`ARCHIVE.md`](A
 python tools/source.py scores/<id> partition.pdf
 # écrire scores/<id>/work.yaml
 python tools/omr/pages.py --work scores/<id>
-python pipeline/cht/measures.py init scores/<id>      # corriger work/measures.tsv, puis :
+python pipeline/cht/measures.py init scores/<id>      # ajuster work/measures.tsv, puis :
 python pipeline/cht/measures.py renumber scores/<id>
 python tools/omr/pages.py --work scores/<id>
 # pour chaque page : écrire src/NNN.cht, puis

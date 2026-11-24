@@ -711,6 +711,11 @@ button:disabled {
   border: 1px solid var(--stand-3);
   padding: 3px 10px;
 }
+/* the language of the app (Français / English), with the other options of the footer */
+.tracks-foot .tracks-lang button {
+  padding: 3px 9px;
+  font-size: 13px;
+}
 .tracks-lyrics {
   margin-left: auto;
   display: flex;
@@ -942,6 +947,7 @@ button:disabled {
     padding-top: 8px;
   }
   .tracks-foot .tracks-reset,
+  .tracks-foot .tracks-lang button,
   .tracks-lyrics select {
     min-height: 40px;
   }

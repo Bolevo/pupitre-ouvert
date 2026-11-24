@@ -11,6 +11,7 @@ import { movementNumber } from './Bars';
 import { dropStrayCaret } from './popover';
 import { parseFiche } from '../memo/text';
 import { Memo } from './Memo';
+import { tt } from '../i18n';
 
 const texts = new WeakMap<LoadedPack, Promise<string>>();
 function ficheText(w: LoadedPack): Promise<string> {
@@ -89,7 +90,7 @@ export function Fiche() {
   const close = () => (ficheOpen.value = false);
   if (memo && sections.length)
     return (
-      <section class="fiche" role="dialog" aria-label="Fiche de l’œuvre">
+      <section class="fiche" role="dialog" aria-label={tt('Fiche de l’œuvre')}>
         <Memo
           sections={sections}
           workId={w.pack.id}
@@ -103,24 +104,24 @@ export function Fiche() {
       </section>
     );
   return (
-    <section class="fiche" role="dialog" aria-label="Fiche de l’œuvre">
+    <section class="fiche" role="dialog" aria-label={tt('Fiche de l’œuvre')}>
       <header class="fiche-head">
         <Icon name="book" size={18} />
         <div class="fiche-title">
-          <b>Fiche de l’œuvre</b>
+          <b>{tt('Fiche de l’œuvre')}</b>
           <span>
             {w.pack.composer} — {w.pack.title}
           </span>
         </div>
         {sections.length > 0 && (
-          <button class="fiche-memo" ref={memoBtn} aria-label="Apprendre le texte" title="Apprendre le texte par cœur : texte à trous, au clavier" onClick={() => setMemo(true)}>
+          <button class="fiche-memo" ref={memoBtn} aria-label={tt('Apprendre le texte')} title={tt('Apprendre le texte par cœur : texte à trous, au clavier')} onClick={() => setMemo(true)}>
             <Icon name="memo" size={18} />
             <span>
-              Apprendre<span class="fiche-memo-long"> le texte</span>
+              {tt('Apprendre')}<span class="fiche-memo-long"> {tt('le texte')}</span>
             </span>
           </button>
         )}
-        <button class="fiche-close" ref={closeBtn} aria-label="Fermer la fiche" title="Fermer (Échap)" onClick={close}>
+        <button class="fiche-close" ref={closeBtn} aria-label={tt('Fermer la fiche')} title={tt('Fermer (Échap)')} onClick={close}>
           <Icon name="close" size={18} />
         </button>
       </header>
@@ -146,11 +147,11 @@ export function Fiche() {
         }}
       >
         {failed ? (
-          <p class="fiche-empty">La fiche n’a pas pu être lue.</p>
+          <p class="fiche-empty">{tt('La fiche n’a pas pu être lue.')}</p>
         ) : html === null ? (
-          <p class="fiche-empty">Chargement…</p>
+          <p class="fiche-empty">{tt('Chargement…')}</p>
         ) : html === '' ? (
-          <p class="fiche-empty">La fiche n’est pas disponible sur cet appareil : rechargez la page.</p>
+          <p class="fiche-empty">{tt('La fiche n’est pas disponible sur cet appareil : rechargez la page.')}</p>
         ) : (
           <article class="md" dangerouslySetInnerHTML={content!} />
         )}

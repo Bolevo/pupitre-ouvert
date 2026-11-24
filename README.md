@@ -1,5 +1,7 @@
 # Pupitre Ouvert
 
+*[English](README.en.md)*
+
 Apprendre sa partie de chœur avec **sa propre partition** : suivre les pages, écouter les voix
 ensemble ou séparément, voir défiler sa ligne, apprendre le texte, s'enregistrer.
 
@@ -10,7 +12,8 @@ ensemble ou séparément, voir défiler sa ligne, apprendre le texte, s'enregist
   sait le faire à partir de votre PDF ou de vos photos :
   <https://bolevo.github.io/pupitre-ouvert/creer.html>
 
-Vos partitions restent sur votre appareil : rien n'est envoyé.
+Vos partitions restent sur votre appareil : rien n'est envoyé. L'app est en français ou en
+anglais (Réglages).
 
 ## Pour une IA (ou quiconque fabrique une archive)
 
@@ -38,4 +41,10 @@ bienvenus : [issues](https://github.com/Bolevo/pupitre-ouvert/issues), pull requ
 Pupitre a été créé par Alexis Michenaud-Rague pour son chœur, et développé avec Claude,
 l'intelligence artificielle d'Anthropic, et ses agents. Pupitre Ouvert en est la version ouverte :
 la même app, sans les partitions du chœur, où chacun apporte les siennes. Projet gratuit, sans but
-commercial. Les bibliothèques, sons et polices utilisés, et leurs licences : [`NOTICE.md`](NOTICE.md).
+commercial.
+
+## Licence
+
+Le code, les outils et les documents de ce dépôt sont sous licence [MIT](LICENSE). Les
+bibliothèques, sons et polices livrés avec l'app gardent leurs propres licences :
+[`NOTICE.md`](NOTICE.md) (les sons du « nom des notes » sont réservés à un usage non commercial).

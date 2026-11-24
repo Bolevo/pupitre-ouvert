@@ -8,16 +8,18 @@ import { SfInstrument, type ZoneDef } from './sfont';
 import { MalletVoice } from './mallet';
 import { ReedVoice } from './reed';
 import { SolfegeVoice } from './solfege';
+import { ttKey } from '../i18n';
 
 export type InstId = 'aahs' | 'solfege' | 'clarinet' | 'marimba' | 'strings' | 'piano';
 
+/** `label`: the instrument's name in French, shown through `tt` (i18n.ts). */
 export const INSTRUMENTS: { id: InstId; label: string }[] = [
-  { id: 'aahs', label: 'Chœur « ah »' },
-  { id: 'solfege', label: 'Nom des notes (do, ré…)' },
-  { id: 'clarinet', label: 'Clarinette' },
-  { id: 'marimba', label: 'Marimba' },
-  { id: 'strings', label: 'Cordes' },
-  { id: 'piano', label: 'Piano' },
+  { id: 'aahs', label: ttKey('Chœur « ah »') },
+  { id: 'solfege', label: ttKey('Nom des notes (do, ré…)') },
+  { id: 'clarinet', label: ttKey('Clarinette') },
+  { id: 'marimba', label: ttKey('Marimba') },
+  { id: 'strings', label: ttKey('Cordes') },
+  { id: 'piano', label: ttKey('Piano') },
 ];
 
 /** Stops a note early: fading out from audio time `at` (default: now), with time constant `tau`

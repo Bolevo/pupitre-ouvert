@@ -1,12 +1,14 @@
-// Screenshots and the short video of the help page (app/aide.html), taken on the built app, whose
-// only work is the example (scores/deux-chorals). Usage, from app/ (the build served on PORT):
-//   PW_CHROMIUM=<chrome> node ../tools/help/shots.cjs <port> <out dir> [names…]
+// Screenshots and the short video of the help page (app/aide.html, and app/help.html in English),
+// taken on the built app, whose only work is the example (scores/deux-chorals). Usage, from app/
+// (the build served on PORT):
+//   PW_CHROMIUM=<chrome> [SHOTS_LANG=en] node ../tools/help/shots.cjs <port> <out dir> [names…]
 // Writes <out>/<name>.png (raw; help_images.py makes the WebP and the video of the page).
+// The controls are found by their class, not by their name: the same script serves both languages.
 const { chromium } = require('playwright');
 const { mkdirSync } = require('node:fs');
 
 const [port, out, ...only] = process.argv.slice(2);
-const URL = `http://localhost:${port}/`;
+const URL = `http://localhost:${port}/${process.env.SHOTS_LANG === 'en' ? '?lang=en' : ''}`;
 mkdirSync(out, { recursive: true });
 
 const PHONE = { viewport: { width: 360, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
@@ -26,10 +28,10 @@ async function open(kind, { video, init } = {}) {
 /** The demo as shown on the help: the soprano followed (the only voice with words in this chorale),
  *  words of verse 1. */
 async function setUp(p, phone) {
-  if (phone) await p.getByRole('button', { name: 'Réglages', exact: true }).click();
-  await p.getByRole('button', { name: 'Suivre Soprano' }).first().click();
-  await p.locator('.tracks-lyrics select').selectOption({ label: 'Allemand' });
-  if (phone) await p.getByRole('button', { name: 'Réglages', exact: true }).click();
+  if (phone) await p.locator('.tracks-toggle').click();
+  await p.locator('.track .t-eye').first().click();
+  await p.locator('.tracks-lyrics select').selectOption('de');
+  if (phone) await p.locator('.tracks-toggle').click();
   await p.waitForTimeout(600);
 }
 
@@ -38,7 +40,7 @@ async function clickMeasure(p, n) {
   const pack = await p.evaluate(() => fetch('packs/deux-chorals/pack.json').then((r) => r.json()));
   const pg = pack.pages.find((x) => x.measures.some((b) => b.n === n));
   const b = pg.measures.find((x) => x.n === n);
-  const sheet = p.locator('.sheet', { has: p.locator(`img[alt="Page ${pg.page}"]`) });
+  const sheet = p.locator('.sheet', { has: p.locator(`img[alt$=" ${pg.page}"]`) });
   const box = await sheet.boundingBox();
   const k = box.width / pg.w;
   await sheet.click({ position: { x: ((b.x0 + b.x1) / 2) * k, y: (b.y0 + 40) * k } });
@@ -61,7 +63,7 @@ const shots = {
     await p.waitForTimeout(2600);
     await p.screenshot({ path: `${out}/hero.png` });
     // the tracks, open (the music goes on)
-    await p.getByRole('button', { name: 'Réglages', exact: true }).click();
+    await p.locator('.tracks-toggle').click();
     await p.waitForTimeout(500);
     await p.screenshot({ path: `${out}/tracks.png` });
     await ctx.close();
@@ -75,7 +77,7 @@ const shots = {
     await p.locator('.play').click();
     await p.waitForTimeout(300);
     // the metronome's menu and the end of the movement (top right)
-    await p.getByRole('button', { name: 'Réglage du métronome' }).click();
+    await p.locator('.metro-more').click();
     await p.waitForTimeout(300);
     const menu = await p.locator('.metro-menu').boundingBox();
     const tb = await p.locator('.topbar').boundingBox();
@@ -83,9 +85,9 @@ const shots = {
     await p.screenshot({ path: `${out}/metro.png`, clip: { x, y: 0, width: tb.width - x, height: menu.y + menu.height + 12 } });
     await p.keyboard.press('Escape');
     // the work's sheet, then « Apprendre le texte »
-    await p.getByRole('button', { name: 'Fiche de l’œuvre' }).click();
+    await p.locator('.fiche-btn').click();
     await p.waitForTimeout(500);
-    await p.getByRole('button', { name: 'Apprendre le texte' }).click();
+    await p.locator('.fiche-memo').click();
     await p.locator('.memo .memo-input').waitFor();
     await p.waitForTimeout(300);
     await p.locator('.memo .memo-input').focus();
@@ -117,9 +119,9 @@ const shots = {
     await p.screenshot({ path: `${out}/goto.png` });
     await p.keyboard.press('Escape');
     // « Enregistrer ma voix » switched on: its panel under the bar
-    await p.getByRole('button', { name: 'Réglages', exact: true }).click();
-    await p.getByText('Enregistrer ma voix').click();
-    await p.getByRole('button', { name: 'Réglages', exact: true }).click();
+    await p.locator('.tracks-toggle').click();
+    await p.locator('.tracks-rec').click();
+    await p.locator('.tracks-toggle').click();
     await p.waitForTimeout(500);
     await p.screenshot({ path: `${out}/rec.png` });
     await ctx.close();

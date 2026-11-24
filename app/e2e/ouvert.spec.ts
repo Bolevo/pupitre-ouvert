@@ -30,13 +30,13 @@ async function add(page: Page, file: string | { name: string; mimeType: string; 
 }
 
 /** The music goes on: the line of the voice keeps moving left under the playhead. */
-async function plays(page: Page) {
+async function plays(page: Page, play = 'Lecture') {
   await page.locator('.play').click();
   await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Pause');
   const l0 = await laneLeft(page);
   await expect.poll(() => laneLeft(page), { timeout: 10000 }).toBeLessThan(l0 - 10);
   await page.locator('.play').click();
-  await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Lecture');
+  await expect(page.locator('.play')).toHaveAttribute('aria-label', play);
 }
 
 test('the app opens on the example: its pages, the line of a voice, and it plays', async ({ page }) => {
@@ -149,7 +149,7 @@ test('the help says how to add a score, and the page for an AI carries the metho
   await expect(page).toHaveURL(/creer\.html$/);
   await expect(page.locator('h1')).toHaveText('Créer l’archive de votre partition');
   // the method of docs/CREER.md, rendered in the page itself (no script needed to read it)
-  await expect(page.locator('#methode h2', { hasText: 'Les huit étapes' })).toBeVisible();
+  await expect(page.locator('#methode h2', { hasText: 'Le chemin éprouvé' })).toBeVisible();
   await expect(page.locator('#methode pre', { hasText: 'python pipeline/publish.py <id>' }).first()).toBeAttached();
   const html = await (await request.get('/creer.html')).text();
   expect(html).toContain('python tools/source.py scores/&lt;id&gt; partition.pdf');
@@ -160,8 +160,60 @@ test('the help says how to add a score, and the page for an AI carries the metho
   const kit = await request.get('/kit.zip');
   expect(kit.ok()).toBe(true);
   const names = Object.keys(unzipSync(new Uint8Array(await kit.body())));
-  for (const f of ['docs/CREER.md', 'docs/ARCHIVE.md', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'scores/deux-chorals/work.yaml']) {
+  for (const f of ['docs/CREER.md', 'docs/CREATE.md', 'docs/ARCHIVE.md', 'LICENSE', 'pipeline/publish.py', 'pipeline/check_pack.py', 'pipeline/requirements.txt', 'tools/source.py', 'tools/omr/pages.py', 'scores/deux-chorals/work.yaml']) {
     expect(names).toContain(`pupitre-ouvert/${f}`);
   }
   expect(names.filter((n) => n.startsWith('pupitre-ouvert/app/'))).toEqual([]);
+});
+
+test('English: chosen in the settings, kept, asked by ?lang=en, and the pages of the site in English', async ({ page }) => {
+  const errors = await ready(page);
+  // French unless asked otherwise
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+  await expect(page.locator('.lane-voice')).toHaveText('Ténor');
+  await expect(page.locator('.tracks-help')).toHaveAttribute('href', 'aide.html');
+  // the choice is in the settings, each language named in itself
+  await page.getByRole('radio', { name: 'English' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('.lane-voice')).toHaveText('Tenor');
+  await expect(page.locator('.play')).toHaveAttribute('aria-label', 'Play');
+  await expect(page.locator('.tracks-help')).toHaveAttribute('href', 'help.html');
+  expect(await works(page)).toEqual([EXAMPLE, 'Add a score (.zip)…']);
+  // an archive that is refused says why in the same language (the check runs in a worker)
+  await add(page, { name: 'photo.zip', mimeType: 'application/zip', buffer: Buffer.from('not a zip') });
+  await expect(page.locator('.error')).toContainText('This file is not a readable .zip archive.');
+  await page.locator('.error').getByRole('button', { name: 'Close' }).click();
+  // kept on this device
+  await page.reload();
+  await lane(page);
+  await expect(page.locator('.lane-voice')).toHaveText('Tenor');
+  await plays(page, 'Play');
+  // and back
+  await page.getByRole('radio', { name: 'Français' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+  await expect(page.locator('.lane-voice')).toHaveText('Ténor');
+  // a link can ask for English (the English pages do); the parameter does not stay in the address
+  await page.goto('/?lang=en');
+  await lane(page);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('.lane-voice')).toHaveText('Tenor');
+  expect(errors).toEqual([]);
+
+  // the help and the page for an AI, in English, each one step from its French twin
+  await page.goto('/help.html');
+  await expect(page).toHaveTitle('Pupitre Ouvert help');
+  await expect(page.locator('#scores h2')).toHaveText('Your scores');
+  await page.locator('#scores a', { hasText: 'Make the archive of my score' }).click();
+  await expect(page).toHaveURL(/create\.html$/);
+  await expect(page.locator('h1')).toHaveText('Make the archive of your score');
+  await expect(page.locator('#method h2', { hasText: 'The proven path' })).toBeVisible();
+  await expect(page.locator('#method pre', { hasText: 'python pipeline/publish.py <id>' }).first()).toBeAttached();
+  await expect(page.locator('#phrase')).toContainText('https://bolevo.github.io/pupitre-ouvert/create.html');
+  await page.locator('.other-lang').click();
+  await expect(page).toHaveURL(/creer\.html$/);
+  await page.locator('.other-lang').click();
+  await expect(page).toHaveURL(/create\.html$/);
+  await page.locator('.masthead .open-app').click();
+  await lane(page);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 });

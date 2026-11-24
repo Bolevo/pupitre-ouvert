@@ -14,6 +14,7 @@ import { Fiche } from './ui/Fiche';
 import { startNow } from './ui/now';
 import { startMediaKeys } from './mediaKeys';
 import { startInsetScale } from './ui/insets';
+import { tt } from './i18n';
 
 startInsetScale(); // before the first render: the bars clear of the status bar from the start
 
@@ -53,7 +54,7 @@ function App() {
         <div class="error" role="alert">
           {error.value}
           <button class="ctl wide" onClick={() => (error.value = null)}>
-            Fermer
+            {tt('Fermer')}
           </button>
         </div>
       )}
@@ -74,15 +75,15 @@ function App() {
       ) : (
         <div class="loading">
           {!booted.value ? (
-            'Chargement de la partition…'
+            tt('Chargement de la partition…')
           ) : (
             <>
-              <p>Aucune partition dans cette app pour l’instant.</p>
+              <p>{tt('Aucune partition dans cette app pour l’instant.')}</p>
               <button class="ctl wide" onClick={pickZip}>
-                Ajouter une partition (.zip)
+                {tt('Ajouter une partition (.zip)')}
               </button>
               <p>
-                <HelpLink text="Comment se servir de Pupitre Ouvert ?" />
+                <HelpLink text={tt('Comment se servir de Pupitre Ouvert ?')} />
               </p>
             </>
           )}

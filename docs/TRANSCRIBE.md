@@ -1,11 +1,13 @@
 # TRANSCRIRE — lire une page et l'écrire en `.cht`
 
 Étape 4 de [`CREER.md`](CREER.md). Le format : [`CHT_FORMAT.md`](CHT_FORMAT.md).
-Cette méthode a servi à transcrire deux œuvres entières (80 pages, chœur et piano) ; les pièges
-ci-dessous sont ceux qui ont réellement coûté des erreurs.
+Ce qui suit vient de la transcription de deux œuvres entières (80 pages, chœur et piano) : ce
+qui a bien marché, et les pièges qui ont réellement coûté des erreurs. À prendre comme une
+expérience, pas comme un règlement.
 
-Priorité de justesse : **les voix (notes, rythme, paroles)**, puis l'accompagnement.
-On ne transcrit **jamais une page d'un coup** : on lit l'image, mesure par mesure.
+Ce qui compte le plus : **les voix (notes, rythme, paroles)**, puis l'accompagnement. La lecture
+la plus sûre se fait mesure par mesure, sur les découpes agrandies : une page lue d'un seul
+regard donne des erreurs que rien ne signale.
 
 ## 1. Ce qui est déjà là
 
@@ -29,8 +31,8 @@ la première mesure de chaque système, puis pour chaque mesure : les voix (`R` 
 mesure), les paroles sous chaque voix qui chante, le piano (`PR`, `PL`, + `PR2`/`PL2` s'il a deux
 voix sur une portée).
 
-Ordre conseillé par mesure : **compter les temps** de chaque portée → les notes → les paroles.
-Tout ce qui reste incertain : `# ?` et la raison, sur la ligne.
+Un ordre qui marche bien, par mesure : compter les temps de chaque portée, puis les notes, puis
+les paroles. Ce qui reste incertain se marque `# ?`, avec la raison, sur la ligne.
 
 Un exemple complet (une voix et piano, avec levée) :
 
@@ -60,25 +62,22 @@ S   | c#5:8. b4:16 b4:16 d5:16 f#4:16 g#4:16
 S.de| Wun- der- schö- nen Mo- nat
 ```
 
-## 3. La boucle de vérification (obligatoire)
+## 3. Vérifier
 
 ```
-python pipeline/cht/check.py scores/<id> --pages 13-20              # 0 erreur exigé (< 1 s)
+python pipeline/cht/check.py scores/<id> --pages 13-20              # durées, syllabes, liaisons (< 1 s)
 python pipeline/cht/render.py scores/<id>/src/013.cht --compare      # work/render/013_cmp_sK.png
 python pipeline/cht/render.py scores/<id>/src/013.cht --compare --parts T
 ```
 
 `--compare` empile, système par système, la page (haut) et le rendu de votre texte (bas) :
-lisez-les mesure par mesure (hauteurs, rythmes, liaisons, syllabes). Corrigez, relancez, jusqu'à
-concordance. Avec `--parts T`, la page est recadrée sur la portée du ténor et ses paroles : faites-le
-pour la voix de la personne. Pages sans chœur : `--parts PR,PL`.
+hauteurs, rythmes, liaisons et syllabes s'y comparent d'un coup d'œil. Avec `--parts T`, la page
+est recadrée sur la portée du ténor et ses paroles : utile pour la voix de la personne. Pages
+sans chœur : `--parts PR,PL`.
 
-Fini quand :
-
-- `check.py` : 0 erreur ; chaque avertissement lu (tessiture, saut de plus d'une octave : souvent
-  une erreur d'octave ou de clé) ;
-- chaque système comparé ;
-- `grep -n "# ?" scores/<id>/src/NNN.cht` court et justifié.
+Une page est au point quand `check.py` ne signale plus d'erreur (ses avertissements — tessiture,
+saut de plus d'une octave — désignent souvent une erreur d'octave ou de clé), que chaque système
+concorde avec son rendu, et que `grep -n "# ?" scores/<id>/src/NNN.cht` ne liste que de vrais doutes.
 
 ## 4. Pièges observés
 
@@ -109,9 +108,3 @@ Fini quand :
 - **Page partagée entre deux mouvements** : deux fichiers, `009a.cht` et `009b.cht`, et deux
   lignes dans `measures.tsv` (voir `CHT_FORMAT.md`).
 - **Annotations au crayon** sur les photos (respirations, accents) : à ignorer.
-
-## 5. Ordres de grandeur
-
-Une page de piano seul et dense (47 mesures) : environ 75 minutes de lecture attentive ; une page
-de chœur et piano : 30 à 60 minutes ; quatre voix seules : bien moins. Ce temps est celui de la
-justesse : une archive vite faite et fausse fait apprendre des fautes.

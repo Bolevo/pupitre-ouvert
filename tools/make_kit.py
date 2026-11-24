@@ -14,7 +14,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KEEP = ("README.md", "AGENTS.md", "LICENSE", "NOTICE.md", "docs/", "pipeline/", "scores/deux-chorals/",
+KEEP = ("README.md", "README.en.md", "AGENTS.md", "LICENSE", "NOTICE.md", "docs/", "pipeline/", "scores/deux-chorals/",
         "tools/source.py", "tools/page_assets.py", "tools/page_staves.py", "tools/page_starts.py",
         "tools/fiche_data.py", "tools/make_kit.py", "tools/omr/")
 SKIP = ("/pack/", "/work/img/", "/work/zoom/", "/work/render/", "/work/source/", "__pycache__", ".pytest_cache")

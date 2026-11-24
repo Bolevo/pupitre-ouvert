@@ -3,6 +3,7 @@
 import { beatQuarters } from '../audio/metronome';
 import type { Clef, Measure, Movement, Page, Tempo } from '../pack/types';
 import { lastAtOrBefore } from '../util/search';
+import { lang, tt } from '../i18n';
 
 // ---------- key ----------
 /** The key signature at a measure: sharps (> 0) or flats (< 0). Packs before 11/2026 have no
@@ -16,9 +17,10 @@ export function fifthsOf(m: Pick<Measure, 'tonic' | 'minor' | 'fifths'>): number
 
 /** The key signature in words: « 2 dièses », « 1 bémol », « sans altération ». */
 export function signatureWords(fifths: number): string {
-  if (!fifths) return 'sans altération';
+  if (!fifths) return tt('sans altération');
   const n = Math.abs(fifths);
-  return `${n} ${fifths > 0 ? 'dièse' : 'bémol'}${n > 1 ? 's' : ''}`;
+  if (fifths > 0) return n > 1 ? tt('{n} dièses', { n }) : tt('{n} dièse', { n });
+  return n > 1 ? tt('{n} bémols', { n }) : tt('{n} bémol', { n });
 }
 
 /** The key's name at measure index i when the pack knows it (« si mineur »), else null: the key
@@ -29,8 +31,20 @@ export function keyNameAt(mv: Movement, i: number): string | null {
   return list[lastAtOrBefore(list, i, (k) => k.m)].name ?? null;
 }
 
-/** Short form for a phone: « si min. », « Ré♭ maj. ». */
-export const shortKeyName = (name: string) => name.replace(/\bmajeur\b/, 'maj.').replace(/\bmineur\b/, 'min.');
+/** Short form for a phone: « si min. », « Ré♭ maj. » (« B min. », « D♭ maj. »). */
+export const shortKeyName = (name: string) => name.replace(/\b(majeur|major)\b/, 'maj.').replace(/\b(mineur|minor)\b/, 'min.');
+
+const STEPS: Record<string, string> = { do: 'C', ré: 'D', re: 'D', mi: 'E', fa: 'F', sol: 'G', la: 'A', si: 'B' };
+/** A key's name in the language shown. The archives name the keys in French (« si mineur »,
+ *  « Ré♭ majeur »): in English, « B minor », « D♭ major ». A name that is not read is kept. */
+export function keyLabel(name: string): string {
+  if (lang.value !== 'en') return name;
+  const m = name.match(/^\s*(do|ré|re|mi|fa|sol|la|si)\s*(♯|#|dièse|♭|b(?![a-zé])|bémol)?\s*(majeur|mineur)\s*$/i);
+  if (!m) return name;
+  const acc = (m[2] ?? '').toLowerCase();
+  const sign = acc === '♯' || acc === '#' || acc === 'dièse' ? '♯' : acc ? '♭' : '';
+  return `${STEPS[m[1].toLowerCase()]}${sign} ${m[3].toLowerCase() === 'mineur' ? 'minor' : 'major'}`;
+}
 
 // ---------- clef ----------
 /** The clef of score staff `staff` at measure index i (null: not in the pack, before 11/2026). */
@@ -44,16 +58,18 @@ export function clefAt(mv: Movement, staff: number, i: number): Clef | null {
 export function clefWords(c: Clef): string {
   const base =
     c.sign === 'G'
-      ? 'Clé de sol'
+      ? tt('Clé de sol')
       : c.sign === 'F'
         ? c.line === 4
-          ? 'Clé de fa'
-          : `Clé de fa ${c.line}e ligne`
+          ? tt('Clé de fa')
+          : tt('Clé de fa {n}e ligne', { n: c.line })
         : c.sign === 'C'
-          ? `Clé d’ut ${c.line === 1 ? '1re' : `${c.line}e`} ligne`
-          : 'Clé de percussion';
-  if (c.octave === -1) return `${base} octaviée (une octave plus bas)`;
-  if (c.octave === 1) return `${base} à l’octave supérieure`;
+          ? c.line === 1
+            ? tt('Clé d’ut 1re ligne')
+            : tt('Clé d’ut {n}e ligne', { n: c.line })
+          : tt('Clé de percussion');
+  if (c.octave === -1) return tt('{clef} octaviée (une octave plus bas)', { clef: base });
+  if (c.octave === 1) return tt('{clef} à l’octave supérieure', { clef: base });
   return base;
 }
 

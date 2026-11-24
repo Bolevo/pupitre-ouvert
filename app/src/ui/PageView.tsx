@@ -12,6 +12,7 @@ import { now } from './now';
 import { markAt } from './timing';
 import { pageRanges } from '../score/info';
 import { movementNumber } from './Bars';
+import { tt } from '../i18n';
 
 const NAV_ROOM = 64; // px kept clear above the bottom of the pages (phones: the navigator's place)
 const HEAD = 12; // px kept clear above the music brought into sight
@@ -649,7 +650,7 @@ export function PageView() {
     }
   };
 
-  if (!pages.length) return <div class="pages-wrap empty-pages">Pas d’images de pages pour cette œuvre.</div>;
+  if (!pages.length) return <div class="pages-wrap empty-pages">{tt('Pas d’images de pages pour cette œuvre.')}</div>;
 
   const pageLabel = [...new Set(visible.map((v) => v.p.page))].join('–');
   const atStart = start === 0;
@@ -681,7 +682,7 @@ export function PageView() {
             }}
             onPointerLeave={() => setHover(null)}
           >
-            <img src={w!.url(p.img)} alt={`Page ${p.page}`} draggable={false} decoding="async" />
+            <img src={w!.url(p.img)} alt={tt('Page {n}', { n: p.page })} draggable={false} decoding="async" />
             {hover && hover.page === idx && (
               <div
                 class="hover-box"
@@ -692,7 +693,7 @@ export function PageView() {
                   height: `${(hover.box.y1 - hover.box.y0) * scale}px`,
                 }}
               >
-                <span>▶ mes. {hover.box.n}</span>
+                <span>▶ {tt('mes.')} {hover.box.n}</span>
               </div>
             )}
           </div>
@@ -703,36 +704,36 @@ export function PageView() {
       </div>
     </div>
       {zoom > 1.01 && (
-        <button class="zoom-reset" ref={resetRef} onClick={() => setZoom(1)} title="Revenir à la page entière">
-          Page entière
+        <button class="zoom-reset" ref={resetRef} onClick={() => setZoom(1)} title={tt('Revenir à la page entière')}>
+          {tt('Page entière')}
         </button>
       )}
       {wide && canHover() && (
         // computers: the zoom within reach of the mouse (fingers pinch)
-        <label class="zoom" title={`Agrandir les pages : ${Math.round(zoom * 100)} % (aussi Ctrl + molette)`}>
+        <label class="zoom" title={tt('Agrandir les pages : {n} % (aussi Ctrl + molette)', { n: Math.round(zoom * 100) })}>
           <Icon name="zoom" size={18} />
-          <input type="range" min={1} max={3} step={0.05} value={zoom} aria-label="Agrandir les pages" onInput={(e) => zoomAt(+(e.target as HTMLInputElement).value)} onPointerUp={releaseFocus} />
+          <input type="range" min={1} max={3} step={0.05} value={zoom} aria-label={tt('Agrandir les pages')} onInput={(e) => zoomAt(+(e.target as HTMLInputElement).value)} onPointerUp={releaseFocus} />
         </label>
       )}
       <div class={`page-nav-box ${narrow ? 'narrow' : ''}`} ref={navBox}>
-        <nav class="page-nav" ref={navRef} aria-label="Pages et mesures">
+        <nav class="page-nav" ref={navRef} aria-label={tt('Pages et mesures')}>
           <MvSkip dir={-1} />
-          <button class="pn-turn" aria-label="Page précédente" title="Page précédente (Page préc.)" disabled={atStart} onClick={() => flip(-1)}>
+          <button class="pn-turn" aria-label={tt('Page précédente')} title={tt('Page précédente (Page préc.)')} disabled={atStart} onClick={() => flip(-1)}>
             <Icon name="chevron-left" size={20} />
           </button>
           <button
             class="pn-where"
             aria-haspopup="dialog"
             aria-expanded={goto}
-            title="Aller à une page ou à une mesure"
+            title={tt('Aller à une page ou à une mesure')}
             onClick={() => setGoto((g) => !g)}
           >
             <span class="pn-page">
-              {narrow ? 'p.' : count > 1 ? 'Pages' : 'Page'} {pageLabel}
+              {narrow ? tt('p.') : count > 1 ? tt('Pages') : tt('Page')} {pageLabel}
             </span>
             <NavMeasure short={narrow} />
           </button>
-          <button class="pn-turn" aria-label="Page suivante" title="Page suivante (Page suiv.)" disabled={atEnd} onClick={() => flip(1)}>
+          <button class="pn-turn" aria-label={tt('Page suivante')} title={tt('Page suivante (Page suiv.)')} disabled={atEnd} onClick={() => flip(1)}>
             <Icon name="chevron-right" size={20} />
           </button>
           <MvSkip dir={1} />
@@ -755,16 +756,16 @@ function MvSkip({ dir }: { dir: 1 | -1 }) {
   if (dir > 0) {
     const next = list[k + 1];
     return (
-      <button class="pn-mv" aria-label="Mouvement suivant" title={next ? `Mouvement suivant : ${next.title}` : 'Dernier mouvement'} disabled={!next} onClick={nextMovement}>
+      <button class="pn-mv" aria-label={tt('Mouvement suivant')} title={next ? tt('Mouvement suivant : {title}', { title: next.title }) : tt('Dernier mouvement')} disabled={!next} onClick={nextMovement}>
         <Icon name="mv-next" size={18} />
       </button>
     );
   }
   const atStart = (n.mv === mv ? n.i : 0) === 0 && position() < 2000;
   const prev = list[k - 1];
-  const label = atStart && prev ? 'Mouvement précédent' : 'Début du mouvement';
+  const label = atStart && prev ? tt('Mouvement précédent') : tt('Début du mouvement');
   return (
-    <button class="pn-mv" aria-label={label} title={atStart && prev ? `Mouvement précédent : ${prev.title}` : 'Début du mouvement (encore : le mouvement précédent)'} disabled={atStart && !prev} onClick={previousMovement}>
+    <button class="pn-mv" aria-label={label} title={atStart && prev ? tt('Mouvement précédent : {title}', { title: prev.title }) : tt('Début du mouvement (encore : le mouvement précédent)')} disabled={atStart && !prev} onClick={previousMovement}>
       <Icon name="mv-prev" size={18} />
     </button>
   );
@@ -783,8 +784,8 @@ function NavMeasure({ short }: { short: boolean }) {
       <span class="pn-sep" aria-hidden="true">
         ·
       </span>
-      {short ? 'mes.' : 'Mesure'} <b class="pn-n">{m.n}</b>
-      {mark && <span class="pn-mark"> · repère {mark}</span>}
+      {short ? tt('mes.') : tt('Mesure')} <b class="pn-n">{m.n}</b>
+      {mark && <span class="pn-mark"> · {tt('repère')} {mark}</span>}
     </span>
   );
 }
@@ -821,13 +822,13 @@ function GoTo({ pages, mv, onPage, onMeasure, onClose }: { pages: Page[]; mv: Mo
     <div
       class="pop goto"
       role="dialog"
-      aria-label="Aller à une page ou une mesure"
+      aria-label={tt('Aller à une page ou une mesure')}
       // Escape inside the popover closes it at once (the document listener comes one render later)
       onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
-      <div class="pop-title">Aller à</div>
+      <div class="pop-title">{tt('Aller à')}</div>
       <form class={`goto-row ${bad === 'page' ? 'bad' : ''}`} onSubmit={goPage}>
-        <label for="goto-page">Page</label>
+        <label for="goto-page">{tt('Page')}</label>
         <input
           id="goto-page"
           type="number"
@@ -838,16 +839,16 @@ function GoTo({ pages, mv, onPage, onMeasure, onClose }: { pages: Page[]; mv: Mo
           onInput={(e) => (setPg((e.target as HTMLInputElement).value), setBad(null))}
         />
         <button type="submit" class="pop-go">
-          Aller
+          {tt('Aller')}
         </button>
         {(bad === 'page' || gaps) && (
           <small>
-            {bad === 'page' ? `Pas de page ${pg}. ` : ''}Pages : {pageRanges(pages)}
+            {bad === 'page' ? `${tt('Pas de page {n}.', { n: pg })} ` : ''}{tt('Pages :')} {pageRanges(pages)}
           </small>
         )}
       </form>
       <form class={`goto-row ${bad === 'measure' ? 'bad' : ''}`} onSubmit={goMeasure}>
-        <label for="goto-measure">Mesure</label>
+        <label for="goto-measure">{tt('Mesure')}</label>
         <input
           id="goto-measure"
           ref={msInput}
@@ -861,11 +862,11 @@ function GoTo({ pages, mv, onPage, onMeasure, onClose }: { pages: Page[]; mv: Mo
           onInput={(e) => (setMs((e.target as HTMLInputElement).value), setBad(null))}
         />
         <button type="submit" class="pop-go">
-          Aller
+          {tt('Aller')}
         </button>
         <small>
-          {bad === 'measure' ? `Pas de mesure ${ms}. ` : ''}
-          {movementNumber(mv.title) !== mv.title ? `Mouvement ${movementNumber(mv.title)}, mesures ${first} à ${last}` : `Mesures ${first} à ${last}`}
+          {bad === 'measure' ? `${tt('Pas de mesure {n}.', { n: ms })} ` : ''}
+          {movementNumber(mv.title) !== mv.title ? tt('Mouvement {mv}, mesures {first} à {last}', { mv: movementNumber(mv.title), first, last }) : tt('Mesures {first} à {last}', { first, last })}
         </small>
       </form>
     </div>

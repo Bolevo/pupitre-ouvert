@@ -1,8 +1,8 @@
-// Build step: the page « Créer l'archive de votre partition » (creer.html) carries the method
-// written in docs/CREER.md, so that there is one text: read on GitHub, in the kit, and on the
-// site, where a singer sends an AI (« lis cette page et suis sa méthode »). The Markdown is
-// rendered here, at build time, with the app's own renderer: the page is plain HTML, readable by
-// any tool that fetches it, without scripts.
+// Build step: the page « Créer l'archive de votre partition » (creer.html; create.html in English)
+// carries the method written in docs/CREER.md (docs/CREATE.md), so that there is one text: read
+// on GitHub, in the kit, and on the site, where a singer sends an AI (« lis cette page et suis sa
+// méthode »). The Markdown is rendered here, at build time, with the app's own renderer: the page
+// is plain HTML, readable by any tool that fetches it, without scripts.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
@@ -23,14 +23,18 @@ export function methodHtml(md: string): string {
   return renderMarkdown(body);
 }
 
+/** The pages that carry a method, and the document each one renders. */
+const PAGES: Record<string, string> = { 'creer.html': 'CREER.md', 'create.html': 'CREATE.md' };
+
 export function creerPage(): Plugin {
   return {
     name: 'creer-page',
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {
-        if (!ctx.filename.endsWith('creer.html')) return html;
-        const md = readFileSync(fileURLToPath(new URL('../docs/CREER.md', import.meta.url)), 'utf8');
+        const doc = PAGES[ctx.filename.split(/[\\/]/).pop() ?? ''];
+        if (!doc) return html;
+        const md = readFileSync(fileURLToPath(new URL(`../docs/${doc}`, import.meta.url)), 'utf8');
         return html.replace('<!-- METHODE -->', methodHtml(md));
       },
     },

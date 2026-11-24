@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     preact(),
     appVersion(), // the commit the app is built from, in index.html (« Version » in the track list)
-    creerPage(), // creer.html carries the method of docs/CREER.md
+    creerPage(), // creer.html and create.html carry the method of docs/CREER.md and docs/CREATE.md
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
@@ -75,8 +75,9 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    // three pages: the app, its help (aide.html), and how to make the archive of a score (creer.html)
-    rolldownOptions: { input: { main: 'index.html', aide: 'aide.html', creer: 'creer.html' } },
+    // the app, its help (aide.html) and how to make the archive of a score (creer.html), the last
+    // two also in English (help.html, create.html)
+    rolldownOptions: { input: { main: 'index.html', aide: 'aide.html', creer: 'creer.html', help: 'help.html', create: 'create.html' } },
   },
   server: { host: true },
   preview: { host: true },

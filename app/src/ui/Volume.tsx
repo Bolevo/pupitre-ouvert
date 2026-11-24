@@ -1,4 +1,5 @@
 import { hasVolume, prefs, setVolume } from '../state';
+import { tt } from '../i18n';
 
 /** A slider moved with the mouse or a finger gives the keyboard back: the space bar plays again,
  *  the arrows go from measure to measure (a slider reached with Tab keeps them, to be set). */
@@ -11,9 +12,9 @@ export function Volume() {
   if (!hasVolume.value) return null;
   const v = prefs.value.volume ?? 1;
   return (
-    <label class="volume" title={`Volume général : ${Math.round(v * 100)} %`}>
-      <span>Volume</span>
-      <input type="range" min={0} max={1} step={0.01} value={v} aria-label="Volume général" onInput={(e) => setVolume(+(e.target as HTMLInputElement).value)} onPointerUp={releaseFocus} />
+    <label class="volume" title={tt('Volume général : {n} %', { n: Math.round(v * 100) })}>
+      <span>{tt('Volume')}</span>
+      <input type="range" min={0} max={1} step={0.01} value={v} aria-label={tt('Volume général')} onInput={(e) => setVolume(+(e.target as HTMLInputElement).value)} onPointerUp={releaseFocus} />
     </label>
   );
 }

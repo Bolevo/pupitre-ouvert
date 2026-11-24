@@ -13,6 +13,7 @@ import { NoteGlyph } from './Glyph';
 import { Icon } from './Icon';
 import { useDismiss } from './popover';
 import { measureIndexAt } from './timing';
+import { locale, tt } from '../i18n';
 
 export function RecPanel() {
   const p = prefs.value;
@@ -25,18 +26,18 @@ export function RecPanel() {
   const silent = !!t && !sameRate(t.rate, p.rate || 1);
   const from = t ? mv.measures[measureIndexAt(mv, t.startSt + 1)]?.n : '';
   return (
-    <section class={`rec ${rec ? 'is-rec' : ''}`} aria-label="Enregistrer ma voix">
+    <section class={`rec ${rec ? 'is-rec' : ''}`} aria-label={tt('Enregistrer ma voix')}>
       <RecButton />
       <button
         class={`rec-ctl rec-take ${on ? 'on' : ''}`}
         aria-pressed={on}
         disabled={!t}
-        aria-label="Entendre ma voix enregistrée"
-        title={on ? 'Ma voix enregistrée est entendue avec la musique (toucher pour la couper)' : 'Ma voix enregistrée est coupée (toucher pour l’entendre)'}
+        aria-label={tt('Entendre ma voix enregistrée')}
+        title={on ? tt('Ma voix enregistrée est entendue avec la musique (toucher pour la couper)') : tt('Ma voix enregistrée est coupée (toucher pour l’entendre)')}
         onClick={() => setTakeOn(!on)}
       >
         <Icon name={on ? 'wave' : 'wave-off'} size={18} />
-        <span>Ma voix enregistrée</span>
+        <span>{tt('Ma voix enregistrée')}</span>
       </button>
       <input
         class="rec-vol"
@@ -46,14 +47,14 @@ export function RecPanel() {
         step={0.01}
         value={vol}
         disabled={!t}
-        aria-label="Volume de ma voix enregistrée"
-        title={`Volume de ma voix enregistrée : ${Math.round(vol * 100)} %`}
+        aria-label={tt('Volume de ma voix enregistrée')}
+        title={tt('Volume de ma voix enregistrée : {n} %', { n: Math.round(vol * 100) })}
         onInput={(e) => setTakeVol(+(e.target as HTMLInputElement).value)}
       />
       {t && !rec && (
-        <button class="rec-ctl rec-listen" aria-label={`Écouter depuis le début de l’enregistrement (mesure ${from})`} title={`Écouter depuis le début de l’enregistrement (mesure ${from})`} onClick={listenTake}>
+        <button class="rec-ctl rec-listen" aria-label={tt('Écouter depuis le début de l’enregistrement (mesure {n})', { n: from ?? '' })} title={tt('Écouter depuis le début de l’enregistrement (mesure {n})', { n: from ?? '' })} onClick={listenTake}>
           <Icon name="first" size={16} />
-          <span>mes. {from}</span>
+          <span>{tt('mes.')} {from}</span>
         </button>
       )}
       <div class="rec-info" role="status" aria-live="polite">
@@ -78,7 +79,7 @@ function RecButton() {
     const s = Math.floor((performance.now() - r.since) / 1000);
     const lvl = Math.min(1, recLevel.value * 1.6);
     return (
-      <button class="rec-btn recording" style={{ '--lvl': lvl.toFixed(2) }} aria-label="Arrêter l’enregistrement (il est gardé)" title="Arrêter l’enregistrement : il est gardé (Espace aussi)" onClick={stopRecording}>
+      <button class="rec-btn recording" style={{ '--lvl': lvl.toFixed(2) }} aria-label={tt('Arrêter l’enregistrement (il est gardé)')} title={tt('Arrêter l’enregistrement : il est gardé (Espace aussi)')} onClick={stopRecording}>
         <Icon name="stop" size={14} />
         <span class="rec-time">
           {Math.floor(s / 60)}:{String(s % 60).padStart(2, '0')}
@@ -90,12 +91,12 @@ function RecButton() {
     <button
       class="rec-btn"
       disabled={!!busy}
-      aria-label="Enregistrer ma voix depuis ici"
-      title="Enregistrer ma voix avec la musique, depuis l’endroit où elle est (remplace l’enregistrement de ce mouvement)"
+      aria-label={tt('Enregistrer ma voix depuis ici')}
+      title={tt('Enregistrer ma voix avec la musique, depuis l’endroit où elle est (remplace l’enregistrement de ce mouvement)')}
       onClick={() => void startRecording()}
     >
       <span class="rec-dot" aria-hidden="true" />
-      <span class="rec-label">Enregistrer</span>
+      <span class="rec-label">{tt('Enregistrer')}</span>
     </button>
   );
 }
@@ -110,26 +111,26 @@ function Info({ mv, t, silent }: { mv: Movement; t: TakeInfo | null; silent: boo
   if (recording.value)
     return (
       <span class="rec-live">
-        <span class="long">Enregistrement… (■ ou Espace pour arrêter)</span>
-        <span class="short">Enregistrement…</span>
+        <span class="long">{tt('Enregistrement… (■ ou Espace pour arrêter)')}</span>
+        <span class="short">{tt('Enregistrement…')}</span>
       </span>
     );
-  if (busy === 'starting') return <span>Préparation du micro…</span>;
-  if (busy === 'saving') return <span>Sauvegarde…</span>;
+  if (busy === 'starting') return <span>{tt('Préparation du micro…')}</span>;
+  if (busy === 'saving') return <span>{tt('Sauvegarde…')}</span>;
   if (recMsg.value) return <span class="rec-msg">{recMsg.value}</span>;
   if (!t)
     return (
       <span class="rec-none">
-        <span class="long">Pas d’enregistrement pour ce mouvement</span>
-        <span class="short">Pas d’enregistrement</span>
+        <span class="long">{tt('Pas d’enregistrement pour ce mouvement')}</span>
+        <span class="short">{tt('Pas d’enregistrement')}</span>
       </span>
     );
   const tempo = takeTempo(mv, t);
   if (silent)
     return (
-      <button class="rec-tempo" onClick={() => setRate(t.rate)} title="Ma voix enregistrée ne s’entend qu’à son tempo : toucher pour y revenir">
-        <span class="long">Muette à ce tempo : enregistrée à </span>
-        <span class="short">Muette · </span>
+      <button class="rec-tempo" onClick={() => setRate(t.rate)} title={tt('Ma voix enregistrée ne s’entend qu’à son tempo : toucher pour y revenir')}>
+        <span class="long">{tt('Muette à ce tempo : enregistrée à')} </span>
+        <span class="short">{tt('Muette')} · </span>
         <NoteGlyph beat={tempo.beat} px={15} /> = {tempo.value}
       </button>
     );
@@ -139,8 +140,8 @@ function Info({ mv, t, silent }: { mv: Movement; t: TakeInfo | null; silent: boo
   const date = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
   const s = Math.round(t.durMs / 1000);
   return (
-    <span class="rec-sum" title={`Enregistrée le ${d.toLocaleString('fr-FR')}, ${s} s`}>
-      mes. {a === b ? a : `${a}–${b}`} · <NoteGlyph beat={tempo.beat} px={15} /> = {tempo.value}
+    <span class="rec-sum" title={tt('Enregistrée le {date}, {s} s', { date: d.toLocaleString(locale()), s })}>
+      {tt('mes.')} {a === b ? a : `${a}–${b}`} · <NoteGlyph beat={tempo.beat} px={15} /> = {tempo.value}
       <span class="long">
         {' '}
         · {Math.floor(s / 60)}:{String(s % 60).padStart(2, '0')} · {date}
@@ -184,52 +185,53 @@ function RecMenu({ t }: { t: TakeInfo | null }) {
   };
   return (
     <div class="rec-more-box" ref={box}>
-      <button class="rec-ctl rec-more" aria-label="Réglages de l’enregistrement" aria-expanded={open} aria-haspopup="dialog" title="Micro, décalage, exporter, importer, supprimer" onClick={() => setOpen(!open)}>
+      <button class="rec-ctl rec-more" aria-label={tt('Réglages de l’enregistrement')} aria-expanded={open} aria-haspopup="dialog" title={tt('Micro, décalage, exporter, importer, supprimer')} onClick={() => setOpen(!open)}>
         <Icon name="more" size={18} />
       </button>
       {open && (
-        <div class="pop rec-pop" role="dialog" aria-label="Ma voix enregistrée">
-          <div class="pop-title">Ma voix enregistrée</div>
+        <div class="pop rec-pop" role="dialog" aria-label={tt('Ma voix enregistrée')}>
+          <div class="pop-title">{tt('Ma voix enregistrée')}</div>
           <label class="rp-row rp-vol">
-            <span>Volume</span>
-            <input type="range" min={0} max={1} step={0.01} value={vol} disabled={!t} aria-label="Volume de ma voix enregistrée" onInput={(e) => setTakeVol(+(e.target as HTMLInputElement).value)} />
+            <span>{tt('Volume')}</span>
+            <input type="range" min={0} max={1} step={0.01} value={vol} disabled={!t} aria-label={tt('Volume de ma voix enregistrée')} onInput={(e) => setTakeVol(+(e.target as HTMLInputElement).value)} />
           </label>
           <label class="rp-row">
-            <span>Micro</span>
+            <span>{tt('Micro')}</span>
             <select value={missing ? '' : chosen} disabled={rec} onChange={(e) => setRecDevice((e.target as HTMLSelectElement).value)}>
-              <option value="">Automatique (micro intégré)</option>
+              <option value="">{tt('Automatique (micro intégré)')}</option>
               {(mics ?? [])
                 .filter((m) => m.deviceId && m.deviceId !== 'default')
                 .map((m, i) => (
-                  <option value={m.deviceId}>{m.label || `Micro ${i + 1}`}</option>
+                  <option value={m.deviceId}>{m.label || tt('Micro {n}', { n: i + 1 })}</option>
                 ))}
             </select>
           </label>
           <p class="rp-hint">
-            {missing ? 'Le micro choisi n’est plus là : micro automatique. ' : ''}
-            Le micro du téléphone laisse le casque Bluetooth en haute qualité.{micUsed.value ? ` Dernier utilisé : ${micUsed.value}.` : ''}
+            {missing ? `${tt('Le micro choisi n’est plus là : micro automatique.')} ` : ''}
+            {tt('Le micro du téléphone laisse le casque Bluetooth en haute qualité.')}
+            {micUsed.value ? ` ${tt('Dernier utilisé : {mic}.', { mic: micUsed.value })}` : ''}
           </p>
           <div class="rp-row">
-            <span>Décalage</span>
+            <span>{tt('Décalage')}</span>
             <div class="rp-offset">
-              <button class="tp-step" aria-label="Ma voix plus tôt (−10 ms)" title="Plus tôt" disabled={off <= -OFFSET_MAX} onClick={() => setRecOffset(off - 10)}>
+              <button class="tp-step" aria-label={tt('Ma voix plus tôt (−10 ms)')} title={tt('Plus tôt')} disabled={off <= -OFFSET_MAX} onClick={() => setRecOffset(off - 10)}>
                 −
               </button>
               <output aria-live="polite">{off > 0 ? '+' : ''}{off} ms</output>
-              <button class="tp-step" aria-label="Ma voix plus tard (+10 ms)" title="Plus tard" disabled={off >= OFFSET_MAX} onClick={() => setRecOffset(off + 10)}>
+              <button class="tp-step" aria-label={tt('Ma voix plus tard (+10 ms)')} title={tt('Plus tard')} disabled={off >= OFFSET_MAX} onClick={() => setRecOffset(off + 10)}>
                 +
               </button>
             </div>
           </div>
           <p class="rp-hint">
-            Ma voix en retard sur la musique : −, en avance : +.{' '}
+            {tt('Ma voix en retard sur la musique : −, en avance : +.')}{' '}
             <button class="rp-link" disabled={!off} onClick={() => setRecOffset(0)}>
-              Revenir à 0
+              {tt('Revenir à 0')}
             </button>
           </p>
           <div class="rp-actions">
             <button class="pop-action" disabled={!t || rec} onClick={exportTake}>
-              Exporter (.wav)
+              {tt('Exporter (.wav)')}
             </button>
             <button
               class={`pop-action ${confirm === 'imp' ? 'danger' : 'light'}`}
@@ -240,7 +242,7 @@ function RecMenu({ t }: { t: TakeInfo | null }) {
                 file.current?.click();
               }}
             >
-              {confirm === 'imp' ? 'Remplacer ?' : 'Importer…'}
+              {confirm === 'imp' ? tt('Remplacer ?') : tt('Importer…')}
             </button>
             <button
               class={`pop-action ${confirm === 'del' ? 'danger' : 'light'}`}
@@ -251,7 +253,7 @@ function RecMenu({ t }: { t: TakeInfo | null }) {
                 void deleteTake();
               }}
             >
-              {confirm === 'del' ? 'Confirmer ?' : 'Supprimer'}
+              {confirm === 'del' ? tt('Confirmer ?') : tt('Supprimer')}
             </button>
           </div>
           <input
@@ -259,7 +261,7 @@ function RecMenu({ t }: { t: TakeInfo | null }) {
             type="file"
             accept="audio/*,.wav"
             hidden
-            aria-label="Fichier audio à importer"
+            aria-label={tt('Fichier audio à importer')}
             onChange={(e) => {
               const f = (e.target as HTMLInputElement).files?.[0];
               (e.target as HTMLInputElement).value = '';

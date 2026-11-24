@@ -10,6 +10,7 @@ import { canHover, lowScreen, onHoverChange, onLayoutChange, onLowScreenChange, 
 import { RATE_MAX, RATE_MIN } from './score/info';
 import { cacheEarlySamples } from './offline';
 import { NS } from './site';
+import { isLang, lang, tt, type Lang } from './i18n';
 
 export const BASE = import.meta.env.BASE_URL;
 
@@ -42,6 +43,7 @@ interface Prefs {
   volume?: number; // computers: the general volume's slider, 0..1 (the gain is its square)
   sideView?: SideView; // a screen lying down: what is shown between the bars (unset: see sideView)
   firstShown?: string; // the work shown at the arrival that this device has already been shown (FIRST_WORK)
+  lang?: Lang; // the language of the app (unset: French)
 }
 export type EndMode = 'stop' | 'loop' | 'next';
 export type SideView = 'line' | 'page' | 'both';
@@ -84,6 +86,7 @@ export function migratePrefs(raw: unknown): Prefs {
   if (p.tracksPanel !== undefined && typeof p.tracksPanel !== 'boolean') delete p.tracksPanel;
   if (p.volume !== undefined) p.volume = Number.isFinite(Number(p.volume)) ? Math.max(0, Math.min(1, Number(p.volume))) : 1;
   if (p.sideView !== undefined && !SIDE_VIEWS.includes(p.sideView)) delete p.sideView;
+  if (p.lang !== undefined && !isLang(p.lang)) delete p.lang;
   return p;
 }
 /** The recorded voice's manual offset: −800…+800 ms, by 10 ms (a Bluetooth headset's latency
@@ -105,6 +108,30 @@ export function setPrefs(p: Partial<Prefs>) {
   prefs.value = { ...prefs.value, ...p };
   schedulePersist();
 }
+
+/** The language of the app: French unless English was chosen (Réglages › Langue), or asked for by
+ *  the address (`?lang=en`, as the English pages of the site open the app; kept from then on). */
+function startLang(): Lang {
+  let asked: string | null = null;
+  try {
+    const url = new URL(location.href);
+    asked = url.searchParams.get('lang');
+    if (asked !== null) {
+      url.searchParams.delete('lang');
+      history.replaceState(null, '', url); // the address stays the app's own
+    }
+  } catch {
+    /* no address to read (tests) */
+  }
+  if (isLang(asked) && asked !== (prefs.value.lang ?? 'fr')) setPrefs({ lang: asked });
+  return prefs.value.lang ?? 'fr';
+}
+export function setLang(l: Lang) {
+  if (l !== (prefs.value.lang ?? 'fr')) setPrefs({ lang: l });
+  lang.value = l;
+  if (typeof document !== 'undefined') document.documentElement.lang = l;
+}
+setLang(startLang());
 
 // Preferences are written a moment after the last change (a volume slider fires dozens of
 // changes a second: one synchronous localStorage write each was wasted work), and at once when
@@ -619,7 +646,7 @@ export async function importZip(file: File) {
     engine();
     keepStorage();
   } catch (e) {
-    error.value = `Import impossible. ${e instanceof Error ? e.message : e}`;
+    error.value = `${tt('Import impossible.')} ${e instanceof Error ? e.message : e}`;
   }
 }
 
@@ -646,7 +673,7 @@ export async function removeOpenWork() {
     if (next) await openWork(next);
     else setPrefs({ work: null, mv: null });
   } catch (e) {
-    error.value = `Retrait impossible. ${e instanceof Error ? e.message : e}`;
+    error.value = `${tt('Retrait impossible.')} ${e instanceof Error ? e.message : e}`;
   }
 }
 

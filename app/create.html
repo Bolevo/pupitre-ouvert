@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a2c31" />
+    <meta name="description" content="Turning a scanned score (PDF, photos) into a .zip archive for Pupitre Ouvert, with the help of an AI: the method, the tools, the format." />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="alternate" hreflang="fr" href="https://bolevo.github.io/pupitre-ouvert/creer.html" />
+    <title>Make the archive of your score — Pupitre Ouvert</title>
+    <link rel="stylesheet" href="./src/aide/aide.css" />
+    <link rel="stylesheet" href="./src/aide/creer.css" />
+  </head>
+  <body>
+    <!-- The English twin of creer.html (keep the two in step). Two readers: a singer, who needs
+         three steps and a sentence to give to an AI; and that AI, sent here by the sentence: its
+         method is the second half of the page, rendered at build time from docs/CREATE.md
+         (vite-creer.ts) - one text for the site, the repository and the kit. -->
+    <header class="masthead">
+      <a class="brand" href="./?lang=en" title="Open Pupitre Ouvert">
+        <img src="./icon.svg" alt="" width="32" height="32" />
+        <span>Pupitre Ouvert</span>
+      </a>
+      <span class="masthead-links">
+        <a class="other-lang" href="./creer.html" lang="fr" hreflang="fr">Français</a>
+        <a class="open-app" href="./?lang=en">Open the app</a>
+      </span>
+    </header>
+
+    <section class="hero creer-hero" aria-labelledby="title">
+      <div class="hero-text">
+        <h1 id="title">Make the archive of your score</h1>
+        <p class="lead">
+          Pupitre Ouvert opens a work from a .zip archive: the pages of your score and their transcription. An artificial intelligence can
+          make it for you, from a PDF or from photos.
+        </p>
+        <p class="hero-links">
+          <a href="#you">For you: three steps</a>
+          <a href="#method">For the AI: the method</a>
+          <a href="./help.html">The app’s help</a>
+        </p>
+      </div>
+    </section>
+
+    <main class="creer">
+      <section id="you" class="block">
+        <h2>For you: three steps</h2>
+        <ol class="steps">
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Scan the score</h3>
+              <p>
+                A PDF, or one photo per page, in order: the whole page, flat, sharp, without shadows. The cleaner the image, the more
+                accurate the transcription.
+              </p>
+            </div>
+          </li>
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Hand it to an AI, with this sentence</h3>
+              <p>
+                You need an AI that can <b>run code</b> and <b>read images</b> (Claude or ChatGPT, for instance, in their modes that run
+                code). Attach your files and give it:
+              </p>
+              <div class="prompt">
+                <p id="phrase">
+                  Read the page https://bolevo.github.io/pupitre-ouvert/create.html and follow its method to make, from the score I am
+                  attaching, a .zip archive for Pupitre Ouvert.
+                </p>
+                <button type="button" id="copier" class="open-app">Copy the sentence</button>
+              </div>
+              <p class="tip">
+                You can ask for the voices first, and the piano afterwards; or only for the pages you need. A fuller archive will replace
+                the first one.
+              </p>
+            </div>
+          </li>
+          <li class="step no-shot">
+            <div class="step-text">
+              <h3>Add the archive, and check it</h3>
+              <p>
+                In <a href="./?lang=en">Pupitre Ouvert</a>: list of works, at the top left, then <span class="ctl">Add a score (.zip)…</span>
+                The work then stays in the app.
+              </p>
+              <p>
+                Then listen, score in hand. An AI makes mistakes: a note, a duration, a syllable. Note the movement, the bar and the voice,
+                and ask it to correct them; the new archive replaces the old one.
+              </p>
+            </div>
+          </li>
+        </ol>
+        <ul class="facts">
+          <li><b>Your files stay yours.</b> Pupitre Ouvert sends the archive nowhere: it is kept in your browser.</li>
+          <li>
+            <b>Copyright.</b> The archive holds the images of your score: it is made for your personal use. Do not pass it around if the
+            edition is protected.
+          </li>
+          <li>
+            <b>You can program?</b> Everything is there: <a href="https://github.com/Bolevo/pupitre-ouvert">the repository</a>, the same
+            tools, the same method.
+          </li>
+        </ul>
+      </section>
+
+      <section id="method" class="block method">
+        <h2>For the AI: the method</h2>
+        <p class="intro">
+          What follows is addressed to the AI that makes the archive. It is the document
+          <a href="https://github.com/Bolevo/pupitre-ouvert/blob/main/docs/CREATE.md"><code>docs/CREATE.md</code></a> of the repository;
+          the tools are in the <a href="./kit.zip">kit</a>.
+        </p>
+<!-- METHODE -->
+      </section>
+
+      <footer class="end">
+        <a class="open-app big" href="./?lang=en">Open Pupitre Ouvert</a>
+        <a href="./help.html">Help</a>
+        <a href="https://github.com/Bolevo/pupitre-ouvert">The repository</a>
+        <a href="#title">Back to the top</a>
+      </footer>
+    </main>
+
+    <script type="module" src="./src/aide/creer.ts"></script>
+  </body>
+</html>

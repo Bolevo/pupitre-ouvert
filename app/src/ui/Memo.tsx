@@ -21,6 +21,7 @@ import { loadSettings, loadStore, saveSettings, saveStore, type Best, type MemoS
 import { Icon } from './Icon';
 import { dropStrayCaret } from './popover';
 import { reducedMotion } from './media';
+import { tt } from '../i18n';
 
 interface RunLine extends DrillLine {
   tr?: string;
@@ -51,18 +52,18 @@ interface Run {
   result: Result | null;
 }
 
-const mvts = (n: number) => `${n} mouvement${n > 1 ? 's' : ''}`;
+const mvts = (n: number) => (n > 1 ? tt('{n} mouvements', { n }) : tt('{n} mouvement', { n }));
 /** What changes for the next round of learning. */
 function nextSummary(res: Result, r: Run): string {
   const secs = Object.keys(r.next);
   if (secs.length === 1) {
     const l = r.next[+secs[0]];
-    return `Prochain tour : ${l === MAX_LEVEL ? 'sans aide' : `aide « ${HELP[l]} »`}`;
+    return l === MAX_LEVEL ? tt('Prochain tour : sans aide') : tt('Prochain tour : aide « {help} »', { help: tt(HELP[l]) });
   }
   const parts: string[] = [];
-  if (res.up) parts.push(`moins d’aide pour ${mvts(res.up)}`);
-  if (res.down) parts.push(`plus d’aide pour ${mvts(res.down)}`);
-  return parts.length ? `Prochain tour : ${parts.join(', ')}` : 'Prochain tour : la même aide';
+  if (res.up) parts.push(tt('moins d’aide pour {what}', { what: mvts(res.up) }));
+  if (res.down) parts.push(tt('plus d’aide pour {what}', { what: mvts(res.down) }));
+  return parts.length ? tt('Prochain tour : {what}', { what: parts.join(', ') }) : tt('Prochain tour : la même aide');
 }
 
 // the field is never empty: a Backspace then deletes this space, which Android keyboards report
@@ -72,7 +73,7 @@ const fmtTime = (ms: number) => {
   const s = Math.round(ms / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
-const pct = (x: number) => `${Math.round(x * 100)} %`;
+const pct = (x: number) => tt('{n} %', { n: Math.round(x * 100) });
 
 /** Scrolls `scroller` so that `el` is in the part of it that is visible (above the phone's
  *  keyboard): about a third from the top when `place`, else only when it is out of view. */
@@ -422,7 +423,7 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
     const num = sectionNumber(sections[sec].title, sec);
     // the heading starts the run from this movement (again, for the current one)
     const go = (label: string) => (
-      <button class="memo-head-go" onMouseDown={keepFocus} title="Reprendre à ce mouvement" aria-label={`Reprendre au mouvement ${num}`} onClick={ctl(() => jump(li))}>
+      <button class="memo-head-go" onMouseDown={keepFocus} title={tt('Reprendre à ce mouvement')} aria-label={tt('Reprendre au mouvement {n}', { n: num })} onClick={ctl(() => jump(li))}>
         {label}
       </button>
     );
@@ -433,9 +434,9 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
       <h3 class="memo-head">
         {go(sections[sec].title)}
         {nx === undefined || nx === cue ? (
-          <span class="memo-help-level">Aide : {HELP[cue]}</span>
+          <span class="memo-help-level">{tt('Aide :')} {tt(HELP[cue])}</span>
         ) : (
-          <span class={`memo-help-level ${nx > cue ? 'up' : 'down'}`}>Prochain tour : {nx === MAX_LEVEL ? 'sans aide' : HELP[nx]}</span>
+          <span class={`memo-help-level ${nx > cue ? 'up' : 'down'}`}>{tt('Prochain tour :')} {nx === MAX_LEVEL ? tt('sans aide') : tt(HELP[nx])}</span>
         )}
       </h3>
     );
@@ -447,26 +448,26 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
   /** On a button that moves in the text: the field keeps the focus (the phone's keyboard stays
    *  open, and nothing moves under the finger between press and release). */
   const keepFocus = (e: MouseEvent) => e.preventDefault();
-  const help = mode === 'initials' ? 'Tapez l’initiale de chaque mot' : 'Tapez chaque mot, sans espace · ⌫ corrige';
+  const help = mode === 'initials' ? tt('Tapez l’initiale de chaque mot') : tt('Tapez chaque mot, sans espace · ⌫ corrige');
 
   return (
     <div class={`memo ${r.test ? 'testing' : ''}`} onKeyDown={onKeyDown}>
       <header class="fiche-head">
-        <button class="fiche-close memo-back" aria-label="Retour à la fiche" title="Retour à la fiche" onClick={onBack}>
+        <button class="fiche-close memo-back" aria-label={tt('Retour à la fiche')} title={tt('Retour à la fiche')} onClick={onBack}>
           <Icon name="chevron-left" size={20} />
         </button>
         <div class="fiche-title">
-          <b>Apprendre le texte</b>
+          <b>{tt('Apprendre le texte')}</b>
           <span>{title}</span>
         </div>
-        <button class="fiche-close" aria-label="Fermer la fiche" title="Fermer (Échap)" onClick={onClose}>
+        <button class="fiche-close" aria-label={tt('Fermer la fiche')} title={tt('Fermer (Échap)')} onClick={onClose}>
           <Icon name="close" size={18} />
         </button>
       </header>
       <div class="memo-bar">
         <select
           class="memo-scope"
-          aria-label="Texte à apprendre"
+          aria-label={tt('Texte à apprendre')}
           value={scope}
           onChange={(e) => {
             setScope((e.currentTarget as HTMLSelectElement).value);
@@ -474,33 +475,33 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
           }}
         >
           {sections.map((s, k) => (
-            <option value={s.mv}>{r.test ? `Mouvement ${sectionNumber(s.title, k)}` : s.title}</option>
+            <option value={s.mv}>{r.test ? tt('Mouvement {n}', { n: sectionNumber(s.title, k) }) : s.title}</option>
           ))}
-          {sections.length > 1 && <option value="all">Toute l’œuvre</option>}
+          {sections.length > 1 && <option value="all">{tt('Toute l’œuvre')}</option>}
         </select>
-        <div class="seg memo-seg" role="group" aria-label="Apprendre ou vérifier">
-          <button class={!test ? 'on' : ''} aria-pressed={!test} title="Apprendre : l’aide s’efface mouvement par mouvement (Alt+3)" onClick={ctl(() => setTest(false))}>
-            Apprendre
+        <div class="seg memo-seg" role="group" aria-label={tt('Apprendre ou vérifier')}>
+          <button class={!test ? 'on' : ''} aria-pressed={!test} title={tt('Apprendre : l’aide s’efface mouvement par mouvement (Alt+3)')} onClick={ctl(() => setTest(false))}>
+            {tt('Apprendre')}
           </button>
-          <button class={test ? 'on' : ''} aria-pressed={test} title="Épreuve : tout le texte caché, un score (Alt+3)" onClick={ctl(() => setTest(true))}>
-            Épreuve
+          <button class={test ? 'on' : ''} aria-pressed={test} title={tt('Épreuve : tout le texte caché, un score (Alt+3)')} onClick={ctl(() => setTest(true))}>
+            {tt('Épreuve')}
           </button>
         </div>
-        <div class="seg memo-seg" role="group" aria-label="Que taper">
-          <button class={mode === 'initials' ? 'on' : ''} aria-pressed={mode === 'initials'} title="La première lettre de chaque mot (Alt+1)" onClick={ctl(() => setMode('initials'))}>
-            Initiales
+        <div class="seg memo-seg" role="group" aria-label={tt('Que taper')}>
+          <button class={mode === 'initials' ? 'on' : ''} aria-pressed={mode === 'initials'} title={tt('La première lettre de chaque mot (Alt+1)')} onClick={ctl(() => setMode('initials'))}>
+            {tt('Initiales')}
           </button>
-          <button class={mode === 'words' ? 'on' : ''} aria-pressed={mode === 'words'} title="Le mot entier (Alt+2)" onClick={ctl(() => setMode('words'))}>
-            Mots
+          <button class={mode === 'words' ? 'on' : ''} aria-pressed={mode === 'words'} title={tt('Le mot entier (Alt+2)')} onClick={ctl(() => setMode('words'))}>
+            {tt('Mots')}
           </button>
         </div>
         {hasPhon && (
-          <div class="seg memo-seg" role="group" aria-label="Écriture">
+          <div class="seg memo-seg" role="group" aria-label={tt('Écriture')}>
             <button class={script === 'phon' ? 'on' : ''} aria-pressed={script === 'phon'} onClick={ctl(() => changeSettings({ script: 'phon' }))}>
-              Phonétique
+              {tt('Phonétique')}
             </button>
             <button class={script === 'text' ? 'on' : ''} aria-pressed={script === 'text'} onClick={ctl(() => changeSettings({ script: 'text' }))}>
-              Cyrillique
+              {tt('Cyrillique')}
             </button>
           </div>
         )}
@@ -510,7 +511,7 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
           ref={input}
           class="memo-input"
           type="text"
-          aria-label="Saisie du texte"
+          aria-label={tt('Saisie du texte')}
           autocomplete="off"
           autocorrect="off"
           autocapitalize="off"
@@ -523,23 +524,23 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
-        {r.test && <span class="memo-tag">Épreuve</span>}
+        {r.test && <span class="memo-tag">{tt('Épreuve')}</span>}
         <span class="memo-where">
-          {res ? 'Terminé' : `Ligne ${Math.min(d.li + 1, lineCount)}/${lineCount}`}
+          {res ? tt('Terminé') : tt('Ligne {i}/{n}', { i: Math.min(d.li + 1, lineCount), n: lineCount })}
           <span class="memo-sep"> · </span>
-          {d.position}/{total} mots
+          {tt('{i}/{n} mots', { i: d.position, n: total })}
         </span>
-        <span class={`memo-streak ${d.streak >= 10 ? 'hot' : ''}`} title="Mots d’affilée sans erreur">
-          Série {d.streak}
+        <span class={`memo-streak ${d.streak >= 10 ? 'hot' : ''}`} title={tt('Mots d’affilée sans erreur')}>
+          {tt('Série {n}', { n: d.streak })}
         </span>
         {!res && (d.count > 0 || d.li > 0) && (
-          <button class="memo-restart" onMouseDown={keepFocus} aria-label="Recommencer" title="Recommencer depuis le début (Alt+R)" onClick={ctl(restart)}>
+          <button class="memo-restart" onMouseDown={keepFocus} aria-label={tt('Recommencer')} title={tt('Recommencer depuis le début (Alt+R)')} onClick={ctl(restart)}>
             <Icon name="replay" size={17} />
           </button>
         )}
         {!focused && !res && (
           <button class="memo-type" onClick={focusInput}>
-            Toucher pour écrire
+            {tt('Toucher pour écrire')}
           </button>
         )}
         <span class="memo-progress" style={{ transform: `scaleX(${total ? d.position / total : 0})` }} aria-hidden="true" />
@@ -575,19 +576,19 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
           })}
           {res && (
             <section class="memo-result" aria-live="polite">
-              <h3>{r.test ? 'Épreuve terminée' : 'Tour terminé'}</h3>
+              <h3>{r.test ? tt('Épreuve terminée') : tt('Tour terminé')}</h3>
               <p class="memo-score">
                 <b>{pct(res.acc)}</b>
                 <span>
-                  {res.ok}/{res.total} mots · {res.total - res.ok} erreur{res.total - res.ok > 1 ? 's' : ''} · {fmtTime(res.ms)}
+                  {tt('{i}/{n} mots', { i: res.ok, n: res.total })} · {res.total - res.ok > 1 ? tt('{n} erreurs', { n: res.total - res.ok }) : tt('{n} erreur', { n: res.total - res.ok })} · {fmtTime(res.ms)}
                 </span>
               </p>
               {r.test ? (
                 res.record ? (
-                  <p class="memo-record">Nouveau record</p>
+                  <p class="memo-record">{tt('Nouveau record')}</p>
                 ) : res.best ? (
                   <p class="memo-best">
-                    Record : {pct(res.best.acc)} en {fmtTime(res.best.ms)}
+                    {tt('Record : {pct} en {time}', { pct: pct(res.best.acc), time: fmtTime(res.best.ms) })}
                   </p>
                 ) : null
               ) : (
@@ -595,11 +596,11 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
               )}
               {res.review.length > 0 && (
                 <div class="memo-review">
-                  <h4>À revoir</h4>
+                  <h4>{tt('À revoir')}</h4>
                   <ul>
                     {res.review.map((i) => (
                       <li>
-                        <button class="memo-review-line" onMouseDown={keepFocus} title="Reprendre à cette ligne" onClick={ctl(() => jump(i))}>
+                        <button class="memo-review-line" onMouseDown={keepFocus} title={tt('Reprendre à cette ligne')} onClick={ctl(() => jump(i))}>
                           {r.lines[i].words.map((w, j) => (
                             <span class={d.marks[i][j] === MISS ? 'miss' : ''}>{w.shown} </span>
                           ))}
@@ -611,10 +612,10 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
               )}
               <div class="memo-actions">
                 <button class="pop-action" onClick={ctl(restart)}>
-                  {r.test ? 'Recommencer' : 'Encore un tour'} <kbd>Entrée</kbd>
+                  {r.test ? tt('Recommencer') : tt('Encore un tour')} <kbd>{tt('Entrée')}</kbd>
                 </button>
                 <button class="memo-alt" onClick={ctl(() => setTest(!r.test))}>
-                  {r.test ? 'Apprendre' : 'Épreuve'}
+                  {r.test ? tt('Apprendre') : tt('Épreuve')}
                 </button>
               </div>
             </section>
@@ -622,8 +623,8 @@ export function Memo({ sections, title, workId, onBack, onClose }: { sections: S
         </div>
       </div>
       <p class="memo-help">
-        {help} · Entrée ou ? : voir le mot · Un titre : reprendre là · Alt+↑ ↓ ligne · Alt+R recommencer · Alt+1 Initiales · Alt+2 Mots · Alt+3 Épreuve · Échap fermer
-        {best && !res && r.test && ` · Record : ${pct(best.acc)} en ${fmtTime(best.ms)}`}
+        {help} · {tt('Entrée ou ? : voir le mot · Un titre : reprendre là · Alt+↑ ↓ ligne · Alt+R recommencer · Alt+1 Initiales · Alt+2 Mots · Alt+3 Épreuve · Échap fermer')}
+        {best && !res && r.test && ` · ${tt('Record : {pct} en {time}', { pct: pct(best.acc), time: fmtTime(best.ms) })}`}
       </p>
     </div>
   );

@@ -1,6 +1,8 @@
 # Ce que Pupitre Ouvert utilise, et sous quelles licences
 
-Fichiers livrés avec l'app et utilisés sur l'appareil ; aucun service en ligne.
+Pupitre Ouvert lui-même (le code, les outils, les documents de ce dépôt) est sous licence MIT :
+[`LICENSE`](LICENSE). Ce qui suit vient d'ailleurs et garde sa propre licence : des fichiers
+livrés avec l'app et utilisés sur l'appareil ; aucun service en ligne.
 
 | Bibliothèque ou fichier | Sert à | Licence |
 |---|---|---|

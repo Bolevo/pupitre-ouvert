@@ -5,13 +5,14 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { INSTRUMENTS, type InstId } from '../audio/instruments';
 import type { Movement, Part } from '../pack/types';
-import { audibleParts, followPart, lyricVerses, resetSettings, movement, myPart, playing, position, prefs, setPrefs, setTrack, trackOf, tracksOpen, unmuteAll } from '../state';
+import { audibleParts, followPart, lyricVerses, resetSettings, movement, myPart, playing, position, prefs, setLang, setPrefs, setTrack, trackOf, tracksOpen, unmuteAll } from '../state';
 import { Icon } from './Icon';
 import { setRecOn } from '../rec';
 import { ticker } from './timing';
 import { releaseFocus, Volume } from './Volume';
 import { soundingAt } from '../util/search';
 import { appVersion, versionLabel } from '../version';
+import { helpPage, LANGS, lang, partLabel, tt, ttKey } from '../i18n';
 
 export function Tracks({ onClose }: { onClose?: () => void }) {
   const mv = movement.value;
@@ -55,27 +56,28 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
   const shownLine = lyricVerses.value ? lines.find((l) => l.n === lyricVerses.value![0])?.id ?? 'all' : 'all';
 
   return (
-    <section class="tracks" id="pistes" aria-label="Réglages">
+    <section class="tracks" id="pistes" aria-label={tt('Réglages')}>
       <header class="tracks-head">
-        <span class="tracks-title">Réglages</span>
+        <span class="tracks-title">{tt('Réglages')}</span>
         <Volume />
-        <div class="seg small" role="group" aria-label="Taille de la ligne du bas" title="Taille de la ligne du bas">
+        <div class="seg small" role="group" aria-label={tt('Taille de la ligne du bas')} title={tt('Taille de la ligne du bas')}>
           {[0, 1, 2].map((i) => (
-            <button class={prefs.value.laneSize === i ? 'on' : ''} style={{ fontSize: `${10 + i * 3}px` }} onClick={() => setPrefs({ laneSize: i })} aria-label={['Petite', 'Moyenne', 'Grande'][i]}>
+            <button class={prefs.value.laneSize === i ? 'on' : ''} style={{ fontSize: `${10 + i * 3}px` }} onClick={() => setPrefs({ laneSize: i })} aria-label={tt([ttKey('Petite'), ttKey('Moyenne'), ttKey('Grande')][i])}>
               A
             </button>
           ))}
         </div>
         {onClose && (
           <button class="tracks-close" onClick={onClose}>
-            Fermer
+            {tt('Fermer')}
             <Icon name="close" size={16} />
           </button>
         )}
       </header>
       <div class="track-rows" role="list">
         {mv.parts.map((p) => {
-          const t = trackOf(p);
+          const trk = trackOf(p);
+          const name = partLabel(p.name);
           const isMe = p.id === me;
           const audible = heard.has(p.id);
           return (
@@ -83,13 +85,13 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
               <button
                 class="t-eye"
                 aria-pressed={isMe}
-                title={isMe ? `${p.name} est affiché en grand en bas` : `Afficher ${p.name} en grand en bas`}
-                aria-label={`Suivre ${p.name}`}
+                title={isMe ? tt('{name} est affiché en grand en bas', { name }) : tt('Afficher {name} en grand en bas', { name })}
+                aria-label={tt('Suivre {name}', { name })}
                 onClick={() => follow(p)}
               >
                 <Icon name={isMe ? 'eye' : 'eye-off'} size={18} />
               </button>
-              <button class="t-name" onClick={() => follow(p)} title={`Suivre ${p.name}`}>
+              <button class="t-name" onClick={() => follow(p)} title={tt('Suivre {name}', { name })}>
                 <span
                   class="t-meter"
                   ref={(el) => {
@@ -97,23 +99,23 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
                     else meters.current.delete(p.id);
                   }}
                 />
-                {p.name}
+                {name}
               </button>
               <button
-                class={`t-btn solo ${t.solo ? 'on' : ''}`}
-                aria-pressed={t.solo}
-                title="Solo : n’entendre que les voix en solo (enlève le muet)"
-                aria-label={`Solo ${p.name}`}
-                onClick={() => setTrack(p, { solo: !t.solo })}
+                class={`t-btn solo ${trk.solo ? 'on' : ''}`}
+                aria-pressed={trk.solo}
+                title={tt('Solo : n’entendre que les voix en solo (enlève le muet)')}
+                aria-label={tt('Solo {name}', { name })}
+                onClick={() => setTrack(p, { solo: !trk.solo })}
               >
                 S
               </button>
               <button
-                class={`t-btn mute ${t.mute ? 'on' : ''}`}
-                aria-pressed={t.mute}
-                title="Muet (enlève le solo)"
-                aria-label={`Muet ${p.name}`}
-                onClick={() => setTrack(p, { mute: !t.mute })}
+                class={`t-btn mute ${trk.mute ? 'on' : ''}`}
+                aria-pressed={trk.mute}
+                title={tt('Muet (enlève le solo)')}
+                aria-label={tt('Muet {name}', { name })}
+                onClick={() => setTrack(p, { mute: !trk.mute })}
               >
                 M
               </button>
@@ -123,15 +125,15 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
                 min={0}
                 max={1}
                 step={0.01}
-                value={t.vol}
-                aria-label={`Volume ${p.name}`}
-                title={`Volume ${Math.round(t.vol * 100)} %`}
+                value={trk.vol}
+                aria-label={tt('Volume {name}', { name })}
+                title={tt('Volume {n} %', { n: Math.round(trk.vol * 100) })}
                 onInput={(e) => setTrack(p, { vol: +(e.target as HTMLInputElement).value })}
                 onPointerUp={releaseFocus}
               />
-              <select class="t-inst" value={t.inst} aria-label={`Instrument ${p.name}`} onChange={(e) => setTrack(p, { inst: (e.target as HTMLSelectElement).value as InstId })}>
+              <select class="t-inst" value={trk.inst} aria-label={tt('Instrument {name}', { name })} onChange={(e) => setTrack(p, { inst: (e.target as HTMLSelectElement).value as InstId })}>
                 {INSTRUMENTS.map((i) => (
-                  <option value={i.id}>{i.label}</option>
+                  <option value={i.id}>{tt(i.label)}</option>
                 ))}
               </select>
             </div>
@@ -139,12 +141,12 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
         })}
       </div>
       <footer class="tracks-foot">
-        <button class="tracks-reset" disabled={!changed} onClick={unmuteAll} title="Enlever tous les solos, muets et soutiens">
-          Tout entendre
+        <button class="tracks-reset" disabled={!changed} onClick={unmuteAll} title={tt('Enlever tous les solos, muets et soutiens')}>
+          {tt('Tout entendre')}
         </button>
         <button
           class={`tracks-reset ${confirmReset ? 'confirm' : ''}`}
-          title="Tout remettre par défaut : volumes, solos, muets, instruments, tempo, affichage"
+          title={tt('Tout remettre par défaut : volumes, solos, muets, instruments, tempo, affichage')}
           onClick={() => {
             if (!confirmReset) {
               setConfirmReset(true);
@@ -155,17 +157,17 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
             }
           }}
         >
-          {confirmReset ? 'Confirmer ?' : 'Réglages par défaut'}
+          {confirmReset ? tt('Confirmer ?') : tt('Réglages par défaut')}
         </button>
         {/* phones: the help is here, with the options (in the top bar it took room from the movements) */}
-        <a class="tracks-help" href="aide.html" target="_blank" rel="noopener" title="Aide : comment se servir de Pupitre Ouvert">
+        <a class="tracks-help" href={helpPage()} target="_blank" rel="noopener" title={tt('Aide : comment se servir de Pupitre Ouvert')}>
           <Icon name="help" size={17} />
-          Aide
+          {tt('Aide')}
         </a>
         {version && (
           // which version of the app this is; the date is in the tooltip where there is one (styles.css)
-          <span class="tracks-version" title={`Pupitre Ouvert sur cet appareil : ${versionLabel(version)}`}>
-            Version {version.name}
+          <span class="tracks-version" title={tt('Pupitre Ouvert sur cet appareil : {version}', { version: versionLabel(version) })}>
+            {tt('Version')} {version.name}
             {version.when && <span class="tv-date"> · {version.when}</span>}
           </span>
         )}
@@ -173,20 +175,28 @@ export function Tracks({ onClose }: { onClose?: () => void }) {
           class={`tracks-rec ${prefs.value.recOn ? 'on' : ''}`}
           role="switch"
           aria-checked={!!prefs.value.recOn}
-          title="Ajoute sous la barre de lecture un panneau pour enregistrer ma voix et la réécouter avec la musique (utilise le micro)"
+          title={tt('Ajoute sous la barre de lecture un panneau pour enregistrer ma voix et la réécouter avec la musique (utilise le micro)')}
           onClick={() => setRecOn(!prefs.value.recOn)}
         >
           <span class="sw" aria-hidden="true" />
-          Enregistrer ma voix
+          {tt('Enregistrer ma voix')}
         </button>
+        {/* the language of the app: each named in itself, so that it can be found in the other one */}
+        <div class="seg small tracks-lang" role="radiogroup" aria-label="Langue · Language" title="Langue · Language">
+          {LANGS.map(([id, label]) => (
+            <button role="radio" aria-checked={lang.value === id} class={lang.value === id ? 'on' : ''} lang={id} onClick={() => setLang(id)}>
+              {label}
+            </button>
+          ))}
+        </div>
         {lines.length > 1 && (
           <label class="tracks-lyrics">
-            Paroles
+            {tt('Paroles')}
             <select value={shownLine} onChange={(e) => setPrefs({ lyrics: (e.target as HTMLSelectElement).value })}>
               {lines.map((l) => (
                 <option value={l.id}>{l.label}</option>
               ))}
-              <option value="all">Toutes</option>
+              <option value="all">{tt('Toutes')}</option>
             </select>
           </label>
         )}

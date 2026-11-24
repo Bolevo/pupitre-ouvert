@@ -23,7 +23,8 @@ partition numérisée ──► scores/<oeuvre>/ ──► packs/<oeuvre>.zip �
   dans le navigateur (IndexedDB, localStorage). Pas de mesure d'audience.
 - **Hors ligne** : le service worker (Workbox) précharge l'app, l'exemple et l'aide ; les sons des
   instruments sont gardés à leur première écoute.
-- Interface en français ; code, identifiants et commits en anglais.
+- **Français par défaut, anglais au choix** (Réglages) : le français est dans le code, l'anglais
+  dans `src/i18n-en.ts`. Code, identifiants et commits en anglais.
 
 ## L'app (`app/`, Preact + TypeScript + Vite)
 
@@ -36,7 +37,9 @@ partition numérisée ──► scores/<oeuvre>/ ──► packs/<oeuvre>.zip �
 | `src/ui/` | l'écran : pages et cases des mesures (`PageView.tsx`), ligne (`Lane.tsx`), barres (`Bars.tsx`), pistes (`Tracks.tsx`), fiche et apprentissage du texte (`Fiche.tsx`, `Memo.tsx`), enregistrement (`Rec.tsx`) |
 | `src/memo/` | « Apprendre le texte » : le texte de la fiche (`text.ts`), l'exercice (`drill.ts`), la progression (`store.ts`) |
 | `src/site.ts` | le nom de l'app et le préfixe de tout ce qu'elle garde dans le navigateur |
+| `src/i18n.ts`, `src/i18n-en.ts` | la langue : `tt('Texte en français')` rend le texte dans la langue choisie ; la table anglaise a le texte français pour clé (`tests/i18n.test.ts` vérifie qu'aucun texte n'y manque) |
 | `aide.html`, `creer.html` | l'aide, et la page « Créer l'archive » (rendue de `docs/CREER.md` au build : `vite-creer.ts`) |
+| `help.html`, `create.html` | les mêmes en anglais (`docs/CREATE.md`) : à tenir à jour ensemble |
 | `public/sf`, `public/audio` | les sons (voir `NOTICE.md`) |
 
 Les temps sont en millisecondes au tempo écrit ; le tempo choisi par le chanteur n'est qu'un
@@ -57,9 +60,12 @@ position dans la mesure est interpolée.
 ## Les outils d'image (`tools/`)
 
 - `source.py` : PDF ou photos → une image par page.
-- `omr/` : redressement, détection des portées et des barres, découpes pour la lecture
-  (`pages.py`, `zoom.py`) ; `draft.py` : brouillon Audiveris, facultatif.
-- `page_assets.py` (+ `page_staves.py`, `page_starts.py`) : les pages de l'app et les cases des mesures.
+- `omr/` : détection des portées et des barres, découpes pour la lecture (`pages.py`, `zoom.py`) ;
+  `draft.py` : brouillon Audiveris, facultatif.
+- `page_assets.py` (+ `page_staves.py`, `page_starts.py`) : les pages de l'app et les cases des
+  mesures. Une photo ou un scan y devient une page propre : fond blanc et encre rétablie
+  (`omr/imgproc.py`), page redressée et aplatie (`omr/surface.py`, `omr/dewarp.py`), recadrée sur
+  ce qui est imprimé (`omr/frame.py`).
 - `fiche_data.py` : les faits d'une œuvre, pour écrire sa fiche.
 - `make_kit.py` : le kit (`kit.zip`) servi à côté de l'app.
 - `check_sf.py`, `extract_sf2.py`, `make_solfege.py`, `help/`, `icon/` : fabrication des sons,

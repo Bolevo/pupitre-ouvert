@@ -7,6 +7,7 @@ import { Volume } from './Volume';
 import { useDismiss } from './popover';
 import { now } from './now';
 import type { MetroSub } from '../audio/metronome';
+import { helpPage, partLabel, tt, ttKey } from '../i18n';
 
 /** Work and movements. */
 export function TopBar() {
@@ -26,22 +27,22 @@ export function TopBar() {
         <select
           class="work-select"
           value={w?.pack.id}
-          aria-label="Œuvre"
+          aria-label={tt('Œuvre')}
           onChange={(e) => {
             const sel = e.target as HTMLSelectElement;
             const chosen = sel.value;
             if (chosen !== IMPORT && chosen !== REMOVE) return void openWork(chosen);
             sel.value = w?.pack.id ?? ''; // the two actions of the list are not works
             if (chosen === IMPORT) pickZip();
-            else if (w && confirm(`Retirer « ${w.pack.title} » de cet appareil ?\n\nSes enregistrements et la progression de son texte sont effacés aussi. Votre fichier .zip n’est pas touché : vous pourrez l’ajouter de nouveau.`)) void removeOpenWork();
+            else if (w && confirm(tt('Retirer « {title} » de cet appareil ?\n\nSes enregistrements et la progression de son texte sont effacés aussi. Votre fichier .zip n’est pas touché : vous pourrez l’ajouter de nouveau.', { title: w.pack.title }))) void removeOpenWork();
           }}
         >
           {works.value.map((x) => (
             <option value={x.id}>{x.composer ? `${x.composer} — ${x.title}` : x.title}</option>
           ))}
-          <option value={IMPORT}>Ajouter une partition (.zip)…</option>
+          <option value={IMPORT}>{tt('Ajouter une partition (.zip)…')}</option>
           {/* only a work added here can be removed (the example comes with the app) */}
-          {w?.source === 'imported' && <option value={REMOVE}>Retirer « {w.pack.title} »…</option>}
+          {w?.source === 'imported' && <option value={REMOVE}>{tt('Retirer « {title} »…', { title: w.pack.title })}</option>}
         </select>
       </div>
       <MetroControl />
@@ -52,15 +53,15 @@ export function TopBar() {
             <button
               class={`fiche-btn ${ficheOpen.value ? 'on' : ''}`}
               aria-pressed={ficheOpen.value}
-              aria-label="Fiche de l’œuvre"
-              title="Fiche de l’œuvre : structure, texte et traduction"
+              aria-label={tt('Fiche de l’œuvre')}
+              title={tt('Fiche de l’œuvre : structure, texte et traduction')}
               onClick={() => (ficheOpen.value = !ficheOpen.value)}
             >
               <Icon name="book" size={19} />
             </button>
           )}
           {w.pack.movements.length > 1 && (
-            <nav class="movements" aria-label="Mouvements" ref={nav}>
+            <nav class="movements" aria-label={tt('Mouvements')} ref={nav}>
               {w.pack.movements.map((m) => (
                 <button
                   class={m.id === mv?.id ? 'on' : ''}
@@ -84,29 +85,29 @@ export function TopBar() {
 const IMPORT = '__import__';
 const REMOVE = '__remove__';
 
-/** The help page (aide.html, public), in a tab of its own: the rehearsal stays where it is. A
+/** The help page (aide.html, or help.html in English), in a tab of its own: the rehearsal stays where it is. A
  *  round button floating at the top right of the pages' area (wide screens; phones have the help
  *  in the track list), or a sentence (`text`, on the first screen). */
 export function HelpLink({ text }: { text?: string }) {
   if (text)
     return (
-      <a class="help-link" href="aide.html" target="_blank" rel="noopener">
+      <a class="help-link" href={helpPage()} target="_blank" rel="noopener">
         {text}
       </a>
     );
   return (
-    <a class="help-btn" href="aide.html" target="_blank" rel="noopener" aria-label="Aide : comment se servir de Pupitre Ouvert" title="Aide : comment se servir de Pupitre Ouvert">
+    <a class="help-btn" href={helpPage()} target="_blank" rel="noopener" aria-label={tt('Aide : comment se servir de Pupitre Ouvert')} title={tt('Aide : comment se servir de Pupitre Ouvert')}>
       <Icon name="help" size={19} />
     </a>
   );
 }
 
 const METRO_SUBS: [MetroSub, string][] = [
-  ['beat', 'Les temps de la mesure'],
-  ['measure', 'Le 1er temps seulement'],
-  ['half', 'Les blanches'],
-  ['quarter', 'Les noires'],
-  ['eighth', 'Les croches'],
+  ['beat', ttKey('Les temps de la mesure')],
+  ['measure', ttKey('Le 1er temps seulement')],
+  ['half', ttKey('Les blanches')],
+  ['quarter', ttKey('Les noires')],
+  ['eighth', ttKey('Les croches')],
 ];
 
 /** Metronome: the button turns it on / off, the arrow chooses what it beats. */
@@ -127,22 +128,22 @@ function MetroControl() {
       <button
         class="metro-toggle"
         aria-pressed={on}
-        aria-label="Métronome"
-        title={on ? 'Couper le métronome' : 'Métronome'}
+        aria-label={tt('Métronome')}
+        title={on ? tt('Couper le métronome') : tt('Métronome')}
         onClick={() => {
           setMetro(!on);
-          flash(on ? 'Métronome coupé' : 'Métronome');
+          flash(on ? tt('Métronome coupé') : tt('Métronome'));
         }}
       >
         <Icon name="metronome" size={19} />
-        <span>Métronome</span>
+        <span>{tt('Métronome')}</span>
       </button>
-      <button class="metro-more" aria-label="Réglage du métronome" aria-expanded={open} title="Ce que bat le métronome" onClick={() => setOpen(!open)}>
+      <button class="metro-more" aria-label={tt('Réglage du métronome')} aria-expanded={open} title={tt('Ce que bat le métronome')} onClick={() => setOpen(!open)}>
         <Icon name="chevron" size={14} />
       </button>
       {open && (
-        <div class="metro-menu" role="radiogroup" aria-label="Le métronome bat">
-          <div class="metro-menu-title">Le métronome bat</div>
+        <div class="metro-menu" role="radiogroup" aria-label={tt('Le métronome bat')}>
+          <div class="metro-menu-title">{tt('Le métronome bat')}</div>
           {METRO_SUBS.map(([v, label]) => (
             <button
               role="radio"
@@ -153,7 +154,7 @@ function MetroControl() {
                 setOpen(false);
               }}
             >
-              {label}
+              {tt(label)}
               {v === 'beat' && ts ? <small> ({ts[0]}/{ts[1]})</small> : null}
             </button>
           ))}
@@ -164,10 +165,11 @@ function MetroControl() {
   );
 }
 
-const END_MODES: [EndMode, string, string, string][] = [
-  ['stop', 'end-stop', 'Arrêt', 'À la fin du mouvement : s’arrêter'],
-  ['loop', 'end-loop', 'Boucle', 'À la fin du mouvement : le rejouer depuis le début'],
-  ['next', 'end-next', 'Enchaîner', 'À la fin du mouvement : enchaîner le suivant'],
+// mode, icon, the word shown, its full name, and the same in the confirmation bubble
+const END_MODES: [EndMode, string, string, string, string][] = [
+  ['stop', 'end-stop', ttKey('Arrêt'), ttKey('À la fin du mouvement : s’arrêter'), ttKey('Fin du mouvement : s’arrêter')],
+  ['loop', 'end-loop', ttKey('Boucle'), ttKey('À la fin du mouvement : le rejouer depuis le début'), ttKey('Fin du mouvement : le rejouer depuis le début')],
+  ['next', 'end-next', ttKey('Enchaîner'), ttKey('À la fin du mouvement : enchaîner le suivant'), ttKey('Fin du mouvement : enchaîner le suivant')],
 ];
 
 /** What happens at the end of a movement. */
@@ -176,21 +178,21 @@ function EndModeControl() {
   // phones show only the icons: a choice is confirmed in words for a moment
   const [hint, setHint] = useTimed<string>(1800);
   return (
-    <div class="end-mode" role="radiogroup" aria-label="À la fin du mouvement">
-      {END_MODES.map(([mode, icon, label, title]) => (
+    <div class="end-mode" role="radiogroup" aria-label={tt('À la fin du mouvement')}>
+      {END_MODES.map(([mode, icon, label, title, said]) => (
         <button
           role="radio"
           aria-checked={cur === mode}
           class={cur === mode ? 'on' : ''}
-          title={title}
-          aria-label={title}
+          title={tt(title)}
+          aria-label={tt(title)}
           onClick={() => {
             setEndMode(mode);
-            setHint(title.replace('À la fin du mouvement : ', 'Fin du mouvement : '));
+            setHint(tt(said));
           }}
         >
           <Icon name={icon} size={18} />
-          <span>{label}</span>
+          <span>{tt(label)}</span>
         </button>
       ))}
       {hint && <div class="end-hint" role="status">{hint}</div>}
@@ -248,9 +250,9 @@ function useTimed<T>(ms: number): [T | null, (v: T) => void] {
 
 // each name begins with the word shown: what is read is what is said
 const SIDE_VIEWS: [SideView, string, string][] = [
-  ['line', 'Ligne', 'Ligne de ma voix seule'],
-  ['page', 'Page', 'Page seule'],
-  ['both', 'Les deux', 'Les deux : la page et la ligne côte à côte'],
+  ['line', ttKey('Ligne'), ttKey('Ligne de ma voix seule')],
+  ['page', ttKey('Page'), ttKey('Page seule')],
+  ['both', ttKey('Les deux'), ttKey('Les deux : la page et la ligne côte à côte')],
 ];
 
 /** A phone lying down: the line of my voice, the printed page, or both side by side (the bottom
@@ -258,11 +260,11 @@ const SIDE_VIEWS: [SideView, string, string][] = [
 function SideViewControl() {
   const cur = sideView.value;
   return (
-    <div class="side-view" role="radiogroup" aria-label="Affichage">
+    <div class="side-view" role="radiogroup" aria-label={tt('Affichage')}>
       {SIDE_VIEWS.map(([view, label, title]) => (
-        <button role="radio" aria-checked={cur === view} class={cur === view ? 'on' : ''} aria-label={title} title={title} onClick={() => setSideView(view)}>
+        <button role="radio" aria-checked={cur === view} class={cur === view ? 'on' : ''} aria-label={tt(title)} title={tt(title)} onClick={() => setSideView(view)}>
           <Icon name={`view-${view}`} size={18} />
-          <span>{label}</span>
+          <span>{tt(label)}</span>
         </button>
       ))}
     </div>
@@ -274,7 +276,7 @@ function SideViewControl() {
 export function Transport() {
   const mv = movement.value;
   const me = mv?.parts.find((x) => x.id === myPart.value);
-  const myName = me?.name ?? '';
+  const myName = me ? partLabel(me.name) : '';
   const myTrack = me ? trackOf(me) : null; // reads prefs: re-renders when the track settings change
   const myMode = myTrack ? myModeOf(myTrack) : 'on';
 
@@ -304,13 +306,13 @@ export function Transport() {
       <div class="t-play">
         <button
           class="ctl replay"
-          aria-label={`Réécouter ${myName} seul depuis la mesure précédente, puis continuer`}
-          title={`Réécouter : la mesure précédente avec ${myName} seul, puis la suite normalement (R)`}
+          aria-label={tt('Réécouter {name} seul depuis la mesure précédente, puis continuer', { name: myName })}
+          title={tt('Réécouter : la mesure précédente avec {name} seul, puis la suite normalement (R)', { name: myName })}
           onClick={() => void replayMine()}
         >
           <Icon name="replay" />
         </button>
-        <button class="play" aria-label={playing.value || between.value ? 'Pause' : 'Lecture'} title="Lecture / pause (Espace)" onClick={toggle}>
+        <button class="play" aria-label={playing.value || between.value ? tt('Pause') : tt('Lecture')} title={tt('Lecture / pause (Espace)')} onClick={toggle}>
           <Icon name={playing.value || between.value ? 'pause' : 'play'} size={26} />
         </button>
         <TempoControl />
@@ -319,34 +321,34 @@ export function Transport() {
       <SideViewControl />
 
       {me && (
-        <div class="my-voice" role="radiogroup" aria-label={`Ma voix (${myName})`}>
+        <div class="my-voice" role="radiogroup" aria-label={tt('Ma voix ({name})', { name: myName })}>
           <span class="my-voice-name">{myName}</span>
           {(
             [
-              ['on', 'speaker', 'Entendre', `Entendre ${myName} normalement`],
-              ['mute', 'speaker-off', 'Muet', `Couper ${myName} pour chanter par-dessus`],
-              ['solo', 'solo', 'Seul', `${myName} seul (comme S dans les réglages)`],
-              ['support', 'support', 'Soutien', `Soutien : chaque note de ${myName} ne sonne qu’à sa seconde moitié (chanter d’abord, vérifier ensuite)`],
+              ['on', 'speaker', ttKey('Entendre'), ttKey('Entendre {name} normalement')],
+              ['mute', 'speaker-off', ttKey('Muet'), ttKey('Couper {name} pour chanter par-dessus')],
+              ['solo', 'solo', ttKey('Seul'), ttKey('{name} seul (comme S dans les réglages)')],
+              ['support', 'support', ttKey('Soutien'), ttKey('Soutien : chaque note de {name} ne sonne qu’à sa seconde moitié (chanter d’abord, vérifier ensuite)')],
             ] as const
           ).map(([mode, icon, label, title]) => (
             <button
               role="radio"
               aria-checked={myMode === mode}
               class={`mv-${mode} ${myMode === mode ? 'on' : ''}`}
-              aria-label={`${label} ma voix (${myName})`}
-              title={title}
+              aria-label={tt('{label} ma voix ({name})', { label: tt(label), name: myName })}
+              title={tt(title, { name: myName })}
               onClick={() => setMyMode(me, mode)}
             >
               <Icon name={icon} size={18} />
-              <span>{label}</span>
+              <span>{tt(label)}</span>
             </button>
           ))}
         </div>
       )}
 
-      <button class={`ctl tracks-toggle ${tracksOpen.value ? 'on' : ''}`} aria-expanded={tracksOpen.value} aria-controls="pistes" aria-label="Réglages" onClick={() => setTracksOpen(!tracksOpen.value)} title="Réglages : chaque voix (suivre, solo, muet, volume, instrument), affichage">
+      <button class={`ctl tracks-toggle ${tracksOpen.value ? 'on' : ''}`} aria-expanded={tracksOpen.value} aria-controls="pistes" aria-label={tt('Réglages')} onClick={() => setTracksOpen(!tracksOpen.value)} title={tt('Réglages : chaque voix (suivre, solo, muet, volume, instrument), affichage')}>
         <Icon name="mixer" />
-        <span>Réglages</span>
+        <span>{tt('Réglages')}</span>
       </button>
       <Volume />
     </footer>

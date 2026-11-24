@@ -12,10 +12,11 @@ import { measureIndexAt, ticker } from './timing';
 import { lastAtOrBefore, upperBound } from '../util/search';
 import { Icon } from './Icon';
 import { phoneLayout, reducedMotion } from './media';
-import { clefAt, clefWords, fifthsOf, keyNameAt, shortKeyName, signatureWords } from '../score/info';
+import { clefAt, clefWords, fifthsOf, keyNameAt, shortKeyName, signatureWords, keyLabel } from '../score/info';
 import { ClefGlyph, SignatureGlyph } from './Glyph';
 import { now } from './now';
 import { NS } from '../site';
+import { lang, partLabel, tt } from '../i18n';
 
 export const LANE_SCALES = [38, 46, 56];
 const PLAYHEAD = 0.3; // share of the width left of the playhead
@@ -328,7 +329,7 @@ export function Lane() {
             const nn = m.measures[next.m].n;
             if (next.t - st >= len * 0.95) {
               // the line's own width: a phone lying down gives it the screen or half of it
-              const key = `${nn}:${k}:${cw}`;
+              const key = `${nn}:${k}:${cw}:${lang.value}`;
               if (key !== entryKey && cw > 0) {
                 entryKey = key;
                 entryTxt = entryText(entryRef.current, nn, k);
@@ -336,13 +337,13 @@ export function Lane() {
               txt = entryTxt;
               entryAt.current = m.measures[Math.max(0, next.m - 1)].t;
             }
-          } else if (mine.length) txt = 'Fin de la partie';
+          } else if (mine.length) txt = tt('Fin de la partie');
         }
         if (entryRef.current.textContent !== txt) {
           entryRef.current.textContent = txt;
-          const go = txt.startsWith('Entrée') || txt.startsWith('→');
+          const go = txt !== '' && txt !== tt('Fin de la partie'); // an entry to come: the label goes there
           entryRef.current.disabled = !go;
-          entryRef.current.title = go ? 'Aller une mesure avant mon entrée' : '';
+          entryRef.current.title = go ? tt('Aller une mesure avant mon entrée') : '';
         }
       }
       // next look: at the next change (a note starts or ends, a new measure), or soon to check
@@ -511,9 +512,9 @@ export function Lane() {
   }, [held?.id]);
 
   const myP = mv?.parts.find((p) => p.id === me);
-  const partName = myP?.name ?? me;
+  const partName = partLabel(myP?.name ?? me);
   return (
-    <section class="lane" aria-label={`Voix suivie : ${partName}`}>
+    <section class="lane" aria-label={tt('Voix suivie : {name}', { name: partName })}>
       <div
         class="lane-scroll"
         ref={scroller}
@@ -544,7 +545,7 @@ export function Lane() {
           {noteName(held.midi)}
         </div>
       )}
-      {status === 'loading' && <div class="lane-status" role="status">Préparation de la ligne…</div>}
+      {status === 'loading' && <div class="lane-status" role="status">{tt('Préparation de la ligne…')}</div>}
     </section>
   );
 }
@@ -639,8 +640,8 @@ function VoicePicker({ name }: { name: string }) {
         class="lane-voice"
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`Voix suivie : ${name}. Choisir une autre voix`}
-        title="Choisir la voix suivie"
+        aria-label={tt('Voix suivie : {name}. Choisir une autre voix', { name })}
+        title={tt('Choisir la voix suivie')}
         disabled={parts.length < 2}
         onClick={() => setOpen((o) => !o)}
       >
@@ -649,7 +650,7 @@ function VoicePicker({ name }: { name: string }) {
         {parts.length > 1 && <Icon name="chevron" size={13} />}
       </button>
       {open && (
-        <div class="voice-menu" role="radiogroup" aria-label="Voix suivie">
+        <div class="voice-menu" role="radiogroup" aria-label={tt('Voix suivie')}>
           {parts.map((p) => (
             <button
               role="radio"
@@ -660,7 +661,7 @@ function VoicePicker({ name }: { name: string }) {
                 setOpen(false);
               }}
             >
-              {p.name}
+              {partLabel(p.name)}
             </button>
           ))}
         </div>
@@ -673,10 +674,10 @@ function VoicePicker({ name }: { name: string }) {
  *  header row beside the voice and the score's information (the key's name stays visible). */
 function entryText(el: HTMLElement, nn: number | string, k: number): string {
   const forms = [
-    k >= 2 ? `Entrée mesure ${nn} (dans ${k} mesures)` : `Entrée mesure ${nn}`,
-    k >= 2 ? `Entrée mes. ${nn} (dans ${k})` : `Entrée mes. ${nn}`,
-    `Entrée mes. ${nn}`,
-    `→ mes. ${nn}`,
+    k >= 2 ? tt('Entrée mesure {n} (dans {k} mesures)', { n: nn, k }) : tt('Entrée mesure {n}', { n: nn }),
+    k >= 2 ? tt('Entrée mes. {n} (dans {k})', { n: nn, k }) : tt('Entrée mes. {n}', { n: nn }),
+    tt('Entrée mes. {n}', { n: nn }),
+    tt('→ mes. {n}', { n: nn }),
   ];
   const head = el.parentElement;
   if (!head) return forms[1];
@@ -698,9 +699,10 @@ function LaneInfo({ staves }: { staves: number[] }) {
   if (!mv || !m) return null;
   const clefs = staves.map((st) => clefAt(mv, st, i)).filter((c) => c !== null);
   const fifths = fifthsOf(m);
-  const name = keyNameAt(mv, i);
+  const key = keyNameAt(mv, i);
+  const name = key && keyLabel(key); // in the language shown
   const [num, den] = m.ts;
-  const said = [...clefs.map(clefWords), `armure : ${signatureWords(fifths)}`, `mesure à ${num}/${den}`, name ? `ton : ${name}` : '', `diapason : la ${LA_HZ} Hz`]
+  const said = [...clefs.map(clefWords), tt('armure : {sig}', { sig: signatureWords(fifths) }), tt('mesure à {num}/{den}', { num, den }), name ? tt('ton : {name}', { name }) : '', tt('diapason : la {hz} Hz', { hz: LA_HZ })]
     .filter(Boolean)
     .join(', ');
   return (
@@ -724,8 +726,8 @@ function LaneInfo({ staves }: { staves: number[] }) {
             <span class="short">{shortKeyName(name)}</span>
           </span>
         )}
-        <span class="li-pitch" title={`Diapason : le la3 sonne à ${LA_HZ} Hz`}>
-          la {LA_HZ} Hz
+        <span class="li-pitch" title={tt('Diapason : le la3 sonne à {hz} Hz', { hz: LA_HZ })}>
+          {tt('la {hz} Hz', { hz: LA_HZ })}
         </span>
       </span>
     </span>

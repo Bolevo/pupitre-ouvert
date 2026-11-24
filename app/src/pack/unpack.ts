@@ -5,6 +5,7 @@ import { set } from './db';
 import { unzipSync, strFromU8 } from 'fflate';
 import { PACK_MAJOR, type Pack } from './types';
 import { problems } from './validate';
+import { tt } from '../i18n';
 
 export interface WorkSummary {
   id: string;
@@ -21,7 +22,7 @@ export interface StoredPack {
 export const summary = (p: Pack): WorkSummary => ({ id: p.id, title: p.title, composer: p.composer ?? '' });
 
 export function check(p: Pack) {
-  if (Math.floor(p.version) !== PACK_MAJOR) throw new Error(`Version de pack non prise en charge (${p.version})`);
+  if (Math.floor(p.version) !== PACK_MAJOR) throw new Error(tt('Version de pack non prise en charge ({version})', { version: p.version }));
 }
 
 const MIME: Record<string, string> = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
@@ -34,11 +35,11 @@ export function unpackZip(zip: Uint8Array): StoredPack {
   try {
     files = unzipSync(zip);
   } catch {
-    throw new Error('Ce fichier n’est pas une archive .zip lisible.');
+    throw new Error(tt('Ce fichier n’est pas une archive .zip lisible.'));
   }
   const names = Object.keys(files).filter((n) => !n.endsWith('/') && !n.startsWith('__MACOSX/'));
   const main = names.filter((n) => n === 'pack.json' || n.endsWith('/pack.json')).sort((a, b) => a.length - b.length)[0];
-  if (main === undefined) throw new Error('pack.json manquant dans le fichier : ce n’est pas une archive faite pour Pupitre.');
+  if (main === undefined) throw new Error(tt('pack.json manquant dans le fichier : ce n’est pas une archive faite pour Pupitre.'));
   const root = main.slice(0, -'pack.json'.length);
   const texts: Record<string, string> = {};
   const blobs: Record<string, Blob> = {};
@@ -53,11 +54,11 @@ export function unpackZip(zip: Uint8Array): StoredPack {
   try {
     pack = JSON.parse(texts['pack.json']) as Pack;
   } catch {
-    throw new Error('pack.json est illisible (JSON incorrect).');
+    throw new Error(tt('pack.json est illisible (JSON incorrect).'));
   }
   delete texts['pack.json'];
   const wrong = problems(pack, texts, Object.keys(blobs));
-  if (wrong.length) throw new Error(wrong.length === 1 ? wrong[0] : `L’archive est à corriger :\n${wrong.map((w) => `• ${w}`).join('\n')}`);
+  if (wrong.length) throw new Error(wrong.length === 1 ? wrong[0] : `${tt('L’archive est à corriger :')}\n${wrong.map((w) => `• ${w}`).join('\n')}`);
   return { pack, texts, blobs };
 }
 

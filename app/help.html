@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a2c31" />
+    <meta name="description" content="How to use Pupitre Ouvert to learn your choir part: listen, learn, sing, check a note." />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="alternate" hreflang="fr" href="https://bolevo.github.io/pupitre-ouvert/aide.html" />
+    <title>Pupitre Ouvert help</title>
+    <link rel="stylesheet" href="./src/aide/aide.css" />
+  </head>
+  <body>
+    <!-- The help page in English (the French one is aide.html: keep the two in step). Offline once
+         the app has been opened (precached). Pictures: tools/help/ (README there), taken with the
+         app in English. Icons: the app's own (src/ui/Icon.tsx), drawn the same way. -->
+    <svg class="sprite" aria-hidden="true">
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5l13 7.5-13 7.5z" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-speaker-off" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-solo" viewBox="0 0 24 24"><path d="M12 3.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 20.5c0-4 3.1-6.8 7-6.8s7 2.8 7 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-support" viewBox="0 0 24 24"><path d="M2.5 12h.01M6.5 12h.01M10.5 12c1.4-6 3.6-6 5 0s3.6 6 5 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mixer" viewBox="0 0 24 24"><path d="M5 4v16M12 4v16M19 4v16M3 15h4M10 8h4M17 13h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.4 9.4a2.6 2.6 0 1 1 3.7 2.4c-.7.3-1.1.9-1.1 1.6v.5M12 16.9v.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5C10.3 5 7.8 4.5 4 4.5v13c3.8 0 6.3.5 8 2 1.7-1.5 4.2-2 8-2v-13c-3.8 0-6.3.5-8 2zM12 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M6.5 21h11L14.5 3.5h-5zM12 15.5l5.5-9M8.6 15.5h6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mv-prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5L9 12l10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-mv-next" viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-stop" viewBox="0 0 24 24"><path d="M5 6l8 6-8 6zM18 6v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-loop" viewBox="0 0 24 24"><path d="M17 3l3 3-3 3M4 12v-1a5 5 0 0 1 5-5h11M7 21l-3-3 3-3M20 12v1a5 5 0 0 1-5 5H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-end-next" viewBox="0 0 24 24"><path d="M3.5 6l7 6-7 6zM13 6l7 6-7 6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24"><path d="M5 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM12 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM19 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5z" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18.5h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M5 5.5h14a1 1 0 0 1 1 1V15H4V6.5a1 1 0 0 1 1-1zM2 18.5h20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+    </svg>
+
+    <header class="masthead">
+      <a class="brand" href="./?lang=en" title="Open Pupitre Ouvert">
+        <img src="./icon.svg" alt="" width="32" height="32" />
+        <span>Pupitre Ouvert</span>
+      </a>
+      <span class="masthead-links">
+        <a class="other-lang" href="./aide.html" lang="fr" hreflang="fr">Français</a>
+        <a class="open-app" href="./?lang=en">Open the app</a>
+      </span>
+    </header>
+
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-text">
+        <h1 id="title">Learn your part with Pupitre Ouvert</h1>
+        <p class="lead">
+          Pupitre Ouvert plays your score, voice by voice. Your line scrolls as the music goes; you can hear it alone, or mute it and sing
+          in its place.
+        </p>
+        <p class="hero-links">
+          <a href="#essentials">The essentials, in 6 steps</a>
+          <a href="#scores">Add your scores</a>
+          <a href="#screen">The screen at a glance</a>
+          <a href="#features">All the features</a>
+          <a href="#contact">Write to us</a>
+        </p>
+        <p class="platforms">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-phone" /></svg> Android, iPhone</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-laptop" /></svg> Windows, Mac, Linux</span>
+          <span>In the browser, preferably Chrome</span>
+        </p>
+      </div>
+      <figure class="hero-video">
+        <div class="phone">
+          <video
+            id="demo-video"
+            src="./src/aide/img/en/lecture.mp4"
+            poster="./src/aide/img/en/lecture.webp"
+            width="360"
+            height="780"
+            autoplay
+            muted
+            loop
+            playsinline
+            aria-label="Pupitre Ouvert playing on a phone: the bar being played lights up on the page, the line at the bottom scrolls"
+          ></video>
+        </div>
+        <figcaption>The bar being played lights up on the page. At the bottom, your voice scrolls under the orange mark.</figcaption>
+      </figure>
+    </section>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Contents">
+        <p class="toc-title">Contents</p>
+        <ol class="toc-list">
+          <li><a href="#essentials">The essentials</a></li>
+          <li><a href="#scores">Your scores</a></li>
+          <li><a href="#screen">The screen</a></li>
+          <li><a href="#moving">Moving around</a></li>
+          <li><a href="#my-voice">My voice</a></li>
+          <li><a href="#settings">Advanced settings</a></li>
+          <li><a href="#tempo">Tempo</a></li>
+          <li><a href="#metronome">Metronome, end</a></li>
+          <li><a href="#text">Learn the text</a></li>
+          <li><a href="#record">Record my voice</a></li>
+          <li><a href="#headphones">Headphones</a></li>
+          <li><a href="#computer">Computer</a></li>
+          <li><a href="#offline">Offline</a></li>
+          <li><a href="#questions">Questions</a></li>
+          <li><a href="#copyright">Copyright</a></li>
+          <li><a href="#data">Your data</a></li>
+          <li><a href="#licences">Author and licences</a></li>
+          <li><a href="#contact">Write to us</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <!-- ===== The typical rehearsal: what most singers need, first ===== -->
+        <section id="essentials" class="block">
+          <h2>The essentials, in 6 steps</h2>
+          <p class="intro">
+            These six steps show the essentials of Pupitre Ouvert. The other features are described further down, by topic.
+          </p>
+
+          <ol class="steps">
+            <li class="step">
+              <div class="step-text">
+                <h3>The first time, choose your voice</h3>
+                <p>
+                  Pupitre Ouvert opens on an example work: two Bach chorales. At the top of the bottom line, touch the name of the voice
+                  followed, <span class="ctl">Tenor</span> to begin with, and choose yours. That is the voice Pupitre Ouvert will follow and bring forward,
+                  in all your scores.
+                </p>
+                <p>To work on <b>your own</b> score, add it: see <a href="#scores">Your scores</a>.</p>
+              </div>
+              <figure class="shot phone-shot">
+                <img src="./src/aide/img/en/voice.webp" width="360" height="780" alt="The bottom line with the menu of the voice followed open: Soprano, Alto, Tenor, Bass" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Listen to everything, following your line</h3>
+                <p>
+                  Touch <span class="ctl icon-only" role="img" aria-label="Play"><svg class="ic" aria-hidden="true"><use href="#i-play" /></svg></span>, or a bar on the page: the music starts from there.
+                </p>
+                <p>
+                  At the top, the <b>full score</b>: these are the pages of your paper score, scanned as they are, with any handwritten
+                  markings. Its page numbers are those of the paper: the page 12 the conductor mentions is page 12 in Pupitre Ouvert. It
+                  follows the music; the bar being played lights up, and your staff is in blue.
+                </p>
+                <p>
+                  At the bottom, the <b>line of my voice</b> shows your part alone, large, with the text. It scrolls under a fixed mark and
+                  the note being sung lights up in orange. This line, and the music you hear, come from a digital transcription of the score
+                  (in MusicXML format): a wrong note may have slipped in. When in doubt, the paper score is right (see
+                  <a href="#scores">Your scores</a> to have the archive corrected).
+                </p>
+                <p>
+                  Your voice sounds as a clarinet, in front of the other voices on a choir “ah” and the piano: it stands out without
+                  covering the harmony.
+                </p>
+              </div>
+              <figure class="shot phone-shot">
+                <img src="./src/aide/img/en/hero.webp" width="360" height="780" alt="Pupitre Ouvert playing: bar 6 lit up on the page, the soprano line at the bottom with the lyrics" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Your voice alone: “Alone”</h3>
+                <p>
+                  In the bottom bar, <b>My voice</b> has four modes. Touch <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg>Alone</span>: you now hear only your part.
+                </p>
+                <p>
+                  Too fast? Touch the tempo <span class="ctl">♩ = 120</span> then <span class="ctl">−</span> to slow down. <span class="ctl icon-only" role="img" aria-label="Hear again"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> plays the previous
+                  bar again with your voice alone, then the music goes on.
+                </p>
+              </div>
+              <figure class="shot phone-crop-fig">
+                <img class="crop phone-crop" src="./src/aide/img/en/tempo.webp" width="360" height="310" alt="The tempo setting: minus, plus, and “Back to the score’s tempo”" loading="lazy" />
+              </figure>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Everything but your voice: “Mute”</h3>
+                <p>
+                  Touch <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg>Mute</span>: the whole choir plays, except your voice. The bottom line keeps scrolling.
+                </p>
+                <p>
+                  Between the two, <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg>Support</span> sounds only the second half of each note of your voice: the note comes in
+                  after its start. <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg>Hear</span> brings everything back.
+                </p>
+                <p class="tip">On a phone, these four buttons show only their icon: they are at the bottom, between the tempo and <span class="ctl icon-only" role="img" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span>.</p>
+              </div>
+              <div class="modes" role="list">
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg><span class="mode-name">Hear</span><span class="mode-what">everything, your voice in front</span></div>
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg><span class="mode-name">Alone</span><span class="mode-what">your voice only</span></div>
+                <div class="mode" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg><span class="mode-name">Support</span><span class="mode-what">each note, from its second half</span></div>
+                <div class="mode on" role="listitem"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg><span class="mode-name">Mute</span><span class="mode-what">everything but your voice</span></div>
+              </div>
+            </li>
+
+            <li class="step">
+              <div class="step-text">
+                <h3>Hear a note</h3>
+                <p>
+                  Not sure of a note? <b>Press and hold</b> it in the bottom line: the music pauses, the note sounds for as long as you hold
+                  it and its name is shown (here <b>B♭4</b>). When you let go, the music resumes where it was.
+                </p>
+                <p>A short touch only plays the note.</p>
+              </div>
+              <figure class="shot phone-crop-fig">
+                <img class="crop phone-crop" src="./src/aide/img/en/hold.webp" width="360" height="205" alt="A long press on a note of the line: its name, B flat 4, is shown above it" loading="lazy" />
+              </figure>
+            </li>
+
+            <li class="step no-shot" id="install">
+              <div class="step-text">
+                <h3>Install Pupitre Ouvert on your phone</h3>
+                <p>
+                  Added to the home screen, Pupitre Ouvert opens like an app: full screen, in one touch, and without a network. Nothing is
+                  downloaded from an app store: the browser does it.
+                </p>
+                <div class="two">
+                  <div class="card">
+                    <h4>Android (Chrome)</h4>
+                    <ol class="seq">
+                      <li>Open Pupitre Ouvert in Chrome.</li>
+                      <li>Touch the menu <span class="ctl">⋮</span> at the top right.</li>
+                      <li>Choose “Add to Home screen” (or “Install app”).</li>
+                    </ol>
+                  </div>
+                  <div class="card">
+                    <h4>iPhone (Safari)</h4>
+                    <ol class="seq">
+                      <li>Open Pupitre Ouvert in Safari.</li>
+                      <li>Touch the Share button (the square with an arrow pointing up).</li>
+                      <li>Choose “Add to Home Screen”.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section id="scores" class="block">
+          <h2>Your scores</h2>
+          <p class="intro">
+            Pupitre Ouvert comes with one example. The other scores are yours to bring: one <b>.zip archive</b> per work.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h4>Add a score</h4>
+              <ol class="seq">
+                <li>Touch the list of works, at the top left.</li>
+                <li>Choose <span class="ctl">Add a score (.zip)…</span> and pick the file.</li>
+                <li>The work opens, and stays in the list: no need to load it again next time, even without a network.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h4>Get the archive of your score</h4>
+              <p>
+                The archive brings together the scanned pages of your score and their transcription. An artificial intelligence that can
+                run code (Claude, ChatGPT…) can make it from your PDF or your photos, following the method published with Pupitre Ouvert.
+              </p>
+              <p><a class="open-app" href="./create.html">Make the archive of my score</a></p>
+            </div>
+          </div>
+          <ul class="facts">
+            <li>
+              <b>Where is it kept?</b> In the browser of this device, and nowhere else. On another device, or in another browser, add it
+              again. <b>Keep your .zip file</b>: clearing the site’s data, or uninstalling the app, removes your scores too.
+            </li>
+            <li><b>A corrected version</b>: add the new archive, it replaces the old one.</li>
+            <li>
+              <b>Remove a work</b>: open it, then, in the list of works, <span class="ctl">Remove “…”…</span>. Its recordings and the progress in its text
+              are erased with it. The example is part of the app.
+            </li>
+            <li><b>The archive is refused?</b> Pupitre Ouvert says what is missing: pass the message on to whoever, or whichever AI, made it.</li>
+          </ul>
+        </section>
+
+        <!-- ===== Map of the screen ===== -->
+        <section id="screen" class="block">
+          <h2>The screen at a glance</h2>
+          <p class="intro">Everything is on one screen, with no menu. Each letter refers to the legend.</p>
+          <div class="map">
+            <figure class="map-figure">
+              <div class="phone pinned">
+                <img src="./src/aide/img/en/hero.webp" width="360" height="780" alt="The screen of Pupitre Ouvert on a phone, its areas marked with letters" loading="lazy" />
+                <span class="pin" style="left: 36.4%; top: 1%">A</span>
+                <span class="pin" style="left: 96%; top: 1%">B</span>
+                <span class="pin" style="left: 13.9%; top: 7%">C</span>
+                <span class="pin" style="left: 57%; top: 7.3%">D</span>
+                <span class="pin" style="left: 96%; top: 14.5%">E</span>
+                <span class="pin" style="left: 63.3%; top: 67.8%">F</span>
+                <span class="pin" style="left: 26.7%; top: 75.8%">G</span>
+                <span class="pin" style="left: 96%; top: 79.5%">H</span>
+                <span class="pin" style="left: 26.9%; top: 93.3%">I</span>
+                <span class="pin" style="left: 85.3%; top: 93.5%">J</span>
+                <span class="pin" style="left: 97.8%; top: 93.6%">K</span>
+              </div>
+            </figure>
+            <dl class="legend">
+              <div><dt>A</dt><dd><b>Work</b>: the score that is open; choose another.</dd></div>
+              <div><dt>B</dt><dd><span class="ctl icon-only" role="img" aria-label="Metronome"><svg class="ic" aria-hidden="true"><use href="#i-metronome" /></svg></span> <b>Metronome</b> and <b>end of the movement</b>: stop, loop or go on.</dd></div>
+              <div><dt>C</dt><dd><span class="ctl icon-only" role="img" aria-label="Work notes"><svg class="ic" aria-hidden="true"><use href="#i-book" /></svg></span> <b>Work notes</b>: the text, its translation, “Learn the text”.</dd></div>
+              <div><dt>D</dt><dd><b>Movements</b>: touch one to open it.</dd></div>
+              <div><dt>E</dt><dd><b>The page</b>: touch a bar to play from there; swipe to turn the page, pinch to zoom.</dd></div>
+              <div><dt>F</dt><dd><b>Navigator</b>: page and bar; touch the middle to go to a bar.</dd></div>
+              <div><dt>G</dt><dd><b>Voice followed</b>: touch to follow another voice. Next to it: the clef, the key signature, the time signature, the key, and the pitch of the sounds (A 440 Hz).</dd></div>
+              <div><dt>H</dt><dd><b>Line of my voice</b>: your part alone, with the text; touch a note to hear it.</dd></div>
+              <div><dt>I</dt><dd><span class="ctl icon-only" role="img" aria-label="Hear again"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> hear again, <span class="ctl icon-only" role="img" aria-label="Play"><svg class="ic" aria-hidden="true"><use href="#i-play" /></svg></span> play and pause, <span class="ctl">♩ = 120</span> the tempo.</dd></div>
+              <div><dt>J</dt><dd><b>My voice</b>: <svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg> Hear, <svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg> Mute, <svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg> Alone, <svg class="ic" aria-hidden="true"><use href="#i-support" /></svg> Support.</dd></div>
+              <div><dt>K</dt><dd><span class="ctl icon-only" role="img" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> <b>Settings</b>: each voice and the piano (follow, solo, mute, volume, instrument), the display, the language, and the help.</dd></div>
+            </dl>
+          </div>
+          <figure class="shot wide">
+            <img src="./src/aide/img/en/desk.webp" width="1366" height="820" alt="Pupitre Ouvert on a computer: two pages side by side, the settings unfolded at the bottom left above the controls, the line of my voice to the right of the controls" loading="lazy" />
+            <figcaption>
+              On a computer or a tablet, the pages take the full height. At the bottom left, the phone’s controls (play, tempo, My voice),
+              with the settings unfolded above them; on the right, the line of my voice. The help is the button <span class="ctl icon-only" role="img" aria-label="Help"><svg class="ic" aria-hidden="true"><use href="#i-help" /></svg></span> at the
+              top right of the pages, above the zoom slider.
+            </figcaption>
+          </figure>
+          <p class="tip">
+            Phone turned on its side: the bottom bar offers <b>Line</b>, <b>Page</b> or <b>Both</b>, to show the line of my voice alone, the
+            page alone, or the two side by side.
+          </p>
+        </section>
+
+        <!-- ===== Reference: every function, by topic ===== -->
+        <div id="features" class="ref-head">
+          <h2>All the features</h2>
+          <p class="intro">By topic, to find quickly what you are looking for.</p>
+        </div>
+
+        <section id="moving" class="block ref">
+          <h3>Moving around the score</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li><b>A bar on the page</b>: touching it starts the music from that bar.</li>
+              <li><b>Turning pages</b>: swipe the page, or <span class="ctl icon-only" role="img" aria-label="Previous page"><svg class="ic" aria-hidden="true"><use href="#i-chevron-left" /></svg></span> <span class="ctl icon-only" role="img" aria-label="Next page"><svg class="ic" aria-hidden="true"><use href="#i-chevron-right" /></svg></span> in the navigator. While the music plays, the page follows by itself.</li>
+              <li><b>Going to a bar</b>: touch the middle of the navigator (“p. 1 · bar 6”), then type a <b>page</b> number (that of the paper score) or a <b>bar</b> number. The music goes there without stopping.</li>
+              <li><span class="ctl icon-only" role="img" aria-label="Start of the movement"><svg class="ic" aria-hidden="true"><use href="#i-mv-prev" /></svg></span> goes back to the start of the movement (already at the start: to the previous movement); <span class="ctl icon-only" role="img" aria-label="Next movement"><svg class="ic" aria-hidden="true"><use href="#i-mv-next" /></svg></span> goes to the next movement.</li>
+              <li><b>Zooming</b>: pinch the page with two fingers, then move it with one. On a computer: the slider to the right of the pages, or Ctrl + wheel where the mouse points; the enlarged page moves by dragging. “Whole page” returns to the normal size.</li>
+              <li><b>Entry of your voice</b>: during a long rest, the header of the line announces “Entry at bar 17 (in 3 bars)”. Touching it takes the music one bar before.</li>
+            </ul>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/en/goto.webp" width="360" height="250" alt="The “Go to” window: a Page field, a Bar field" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="my-voice" class="block ref">
+          <h3>My voice: the four modes</h3>
+          <div class="ref-body single">
+            <table class="table">
+              <thead>
+                <tr><th scope="col">Mode</th><th scope="col">What you hear</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker" /></svg>Hear</span></th><td>The whole choir, your voice in front.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-speaker-off" /></svg>Mute</span></th><td>Everything, except your voice.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-solo" /></svg>Alone</span></th><td>Your voice only.</td></tr>
+                <tr><th scope="row"><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-support" /></svg>Support</span></th><td>Each note of your voice, from its second half only.</td></tr>
+              </tbody>
+            </table>
+            <p class="tip">On a phone, only the icons are shown.</p>
+          </div>
+        </section>
+
+        <section id="settings" class="block ref">
+          <h3>Advanced settings: each voice, the sounds, the display</h3>
+          <div class="ref-body">
+            <div>
+              <p>
+                On a phone, the button <span class="ctl icon-only" role="img" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg></span> (bottom right) opens them. On a computer, they are unfolded at the bottom
+                left, above the controls; <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Settings</span> folds them away. One row per voice, and one for the piano:
+              </p>
+              <ul class="facts">
+                <li><span class="ctl icon-only" role="img" aria-label="The eye"><svg class="ic" aria-hidden="true"><use href="#i-eye" /></svg></span> chooses the voice followed, the one of the bottom line. The piano can be followed too.</li>
+                <li><span class="ctl">S</span> (solo): hear only this voice. Several solos are possible: your voice + the piano, your voice + the alto…</li>
+                <li><span class="ctl">M</span> (mute): silence this voice.</li>
+                <li><b>The slider</b> sets the volume; a light comes on when the voice sings. On a computer, <b>Volume</b>, next to <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Settings</span>, sets the whole.</li>
+                <li><b>The instrument</b> of each voice (see below).</li>
+                <li><b>Hear all</b> removes the solos and mutes; <b>Default settings</b> also resets the instruments, the volumes, the tempo and the display.</li>
+                <li><b>A A A</b>: the size of the bottom line. <b>Lyrics</b>: which text to show, when the work has several.</li>
+                <li><b>Français / English</b>: the language of the app.</li>
+                <li>On a phone, this is also where the <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-help" /></svg>Help</span> is.</li>
+              </ul>
+            </div>
+            <figure class="shot phone-shot">
+              <img src="./src/aide/img/en/tracks.webp" width="360" height="780" alt="The settings open: Soprano followed (eye), Alto, Tenor, Bass, each with S, M, volume and instrument" loading="lazy" />
+            </figure>
+          </div>
+          <h4 id="instruments">The instruments</h4>
+          <dl class="instruments">
+            <div><dt>Clarinet</dt><dd>Clear and round, it stands out from the choir: the voice followed, by default.</dd></div>
+            <div><dt>Choir “ah”</dt><dd>Voices on “ah”: the other voices, by default.</dd></div>
+            <div><dt>Note names</dt><dd>A voice sings the name of each note (do, re, mi…) at its pitch.</dd></div>
+            <div><dt>Marimba</dt><dd>Each note struck, then fading: you hear exactly where it starts.</dd></div>
+            <div><dt>Strings</dt><dd>A soft, sustained sound.</dd></div>
+            <div><dt>Piano</dt><dd>The accompaniment, by default; possible for a voice too.</dd></div>
+          </dl>
+          <p class="tip">The settings are kept per voice and per device. Following another voice turns it into a clarinet and puts the others back on “ah”.</p>
+        </section>
+
+        <section id="tempo" class="block ref">
+          <h3>Slower or faster</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li>The tempo in the bottom bar <span class="ctl">♩ = 120</span> is that of the place being played. It takes a colour when it is no longer the score’s.</li>
+              <li>Touch it: <span class="ctl">−</span> and <span class="ctl">+</span> by metronome steps, from 40% to 200% of the written tempo.</li>
+              <li>“Back to the score’s tempo” cancels the change. If the score changes tempo, the chosen difference is kept.</li>
+              <li><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg>Hear again</span>: plays again from the start of the previous bar with your voice alone, then the music goes on as usual.</li>
+            </ul>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/en/tempo.webp" width="360" height="310" alt="The tempo setting" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="metronome" class="block ref">
+          <h3>Metronome and end of the movement</h3>
+          <div class="ref-body">
+            <ul class="facts">
+              <li><span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-metronome" /></svg>Metronome</span> (at the top): the button turns it on or off. The arrow <span class="ctl icon-only" role="img" aria-label="Arrow"><svg class="ic" aria-hidden="true"><use href="#i-chevron" /></svg></span> chooses what it beats: the beats of the bar, the first beat only, half notes, quarter notes or eighth notes.</li>
+              <li><b>At the end of the movement</b>: <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-stop" /></svg>Stop</span>, <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-loop" /></svg>Loop</span> (play it again from the start) or <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-end-next" /></svg>Go on</span> (move to the next one). On a phone, these are the three icons; a bubble confirms the choice.</li>
+            </ul>
+            <figure class="shot">
+              <img class="crop" src="./src/aide/img/en/metro.webp" width="526" height="315" alt="The metronome’s menu open, next to the buttons Stop, Loop, Go on" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="text" class="block ref">
+          <h3>The text: the work notes and “Learn the text”</h3>
+          <p>
+            The button <span class="ctl icon-only" role="img" aria-label="Work notes"><svg class="ic" aria-hidden="true"><use href="#i-book" /></svg></span>, to the left of the movements, opens the <b>work notes</b>: for each movement, the tempo,
+            the key, the sung text and its translation. The music goes on meanwhile. “Play this movement” opens it and plays it.
+          </p>
+          <figure class="shot wide">
+            <img src="./src/aide/img/en/memo.webp" width="1366" height="820" alt="“Learn the text”: the text with gaps, the current line highlighted with its translation" loading="lazy" />
+            <figcaption>“Learn the text”: the words already typed in black, those still to come in grey.</figcaption>
+          </figure>
+          <p><b>Learn the text</b> (at the top of the work notes) has you recall the text from memory, on the keyboard, in order:</p>
+          <ul class="facts">
+            <li><b>Initials</b>: type the first letter of each word. <b>Words</b>: type the whole word.</li>
+            <li><b>Learn</b>: a level of help per movement, from “text visible” to “none”. It decreases when you succeed and comes back when you stumble.</li>
+            <li><b>Test</b>: everything is hidden; a score (accuracy, mistakes, time) and the words to go over again.</li>
+            <li>Accents, capitals and punctuation do not count. Enter or “?” shows the word that escapes you.</li>
+            <li>Touching the title of a movement resumes there; <span class="ctl icon-only" role="img" aria-label="Start again"><svg class="ic" aria-hidden="true"><use href="#i-replay" /></svg></span> starts again from the beginning.</li>
+          </ul>
+        </section>
+
+        <section id="record" class="block ref">
+          <h3>Record my voice</h3>
+          <p class="note">
+            <b>Experimental feature.</b> Depending on the phone, the microphone and the headphones, the recorded sound may be of poor quality,
+            or slightly out of step with the music.
+          </p>
+          <div class="ref-body">
+            <div>
+              <p>
+                To hear yourself sing with the music. Turn it on in the <span class="ctl"><svg class="ic" aria-hidden="true"><use href="#i-mixer" /></svg>Settings</span>: “Record my voice”. While it is off, the
+                microphone is never asked for.
+              </p>
+              <ul class="facts">
+                <li><span class="ctl icon-only" role="img" aria-label="Record"><span class="rec-dot" aria-hidden="true"></span></span> starts the music and records. Anything that stops or moves the music stops the recording and keeps it.</li>
+                <li>One take per movement: the new one replaces the old. It stays on the device.</li>
+                <li>“My recorded voice” is heard again with the music, like one more voice, in every mode.</li>
+                <li>At the same tempo only: at another tempo it is silent (touching it restores the tempo of the recording).</li>
+                <li>The menu <span class="ctl icon-only" role="img" aria-label="More"><svg class="ic" aria-hidden="true"><use href="#i-more" /></svg></span>: volume, choice of microphone, offset (if your voice is behind the music), export or import a .wav file, delete.</li>
+              </ul>
+            </div>
+            <figure class="shot phone-crop-fig">
+              <img class="crop phone-crop" src="./src/aide/img/en/rec.webp" width="360" height="205" alt="The “Record my voice” panel under the play bar: the round red button, “No recording”" loading="lazy" />
+            </figure>
+          </div>
+        </section>
+
+        <section id="headphones" class="block ref">
+          <h3>Headphones, locked screen, notification</h3>
+          <ul class="facts">
+            <li>The <b>play / pause</b> button of the headphones (wired or Bluetooth) stops and restarts Pupitre Ouvert, like a music app.</li>
+            <li>“Next” and “previous” (often a double or triple press): next movement, start of the movement.</li>
+            <li>The notification and the locked screen show the movement and a progress bar; dragging it moves the music.</li>
+            <li>The screen stays on during the rehearsal.</li>
+            <li>On an iPhone, Pupitre Ouvert sounds even when the switch is on “silent”.</li>
+          </ul>
+        </section>
+
+        <section id="computer" class="block ref">
+          <h3>On a computer: the keyboard</h3>
+          <table class="table keys">
+            <tbody>
+              <tr><th scope="row"><kbd>Space</kbd></th><td>Play / pause</td></tr>
+              <tr><th scope="row"><kbd>←</kbd> <kbd>→</kbd></th><td>Previous / next bar</td></tr>
+              <tr><th scope="row"><kbd>Page Up</kbd> <kbd>Page Down</kbd></th><td>Turn the pages</td></tr>
+              <tr><th scope="row"><kbd>Home</kbd></th><td>Start of the movement</td></tr>
+              <tr><th scope="row"><kbd>R</kbd></th><td>Hear again</td></tr>
+              <tr><th scope="row"><kbd>Esc</kbd></th><td>Close the work notes or a window</td></tr>
+            </tbody>
+          </table>
+          <p class="tip">In “Learn the text”: <kbd>Alt</kbd>+<kbd>1</kbd> Initials, <kbd>Alt</kbd>+<kbd>2</kbd> Words, <kbd>Alt</kbd>+<kbd>3</kbd> Learn or Test, <kbd>Alt</kbd>+<kbd>↑</kbd> <kbd>↓</kbd> previous or next line, <kbd>Alt</kbd>+<kbd>R</kbd> start again.</p>
+        </section>
+
+        <section id="offline" class="block ref">
+          <h3>Offline and updates</h3>
+          <ul class="facts">
+            <li><b>Without a network</b>: once opened, Pupitre Ouvert works offline. An instrument is kept after it has been heard once: try them once while you have a network.</li>
+            <li><b>Updates</b>: they arrive by themselves, at the next launch. The installed version is written at the bottom of the Settings.</li>
+            <li>To install it on the home screen: <a href="#install">step 6 of “The essentials”</a>.</li>
+          </ul>
+        </section>
+
+        <section id="questions" class="block ref">
+          <h3>Frequent questions</h3>
+          <details>
+            <summary>I hear nothing.</summary>
+            <p>
+              Check the phone’s volume, then in the Settings that no voice is muted or soloed by mistake: <b>Hear all</b> brings everyone
+              back. At the very first launch, the sounds take a few seconds to load.
+            </p>
+          </details>
+          <details>
+            <summary>With my Bluetooth headphones, the sound is late.</summary>
+            <p>
+              Bluetooth always adds a delay. The display takes into account the one the phone reports: the note lit up follows what you
+              hear. To sing along with the music, wired headphones or the phone’s speaker give the least delay. For a recording, the
+              “Offset” setting of the menu <span class="ctl icon-only" role="img" aria-label="More"><svg class="ic" aria-hidden="true"><use href="#i-more" /></svg></span> realigns your voice.
+            </p>
+          </details>
+          <details>
+            <summary>How do I follow another voice, or the piano?</summary>
+            <p>Touch the name of the voice followed at the top of the bottom line, or the <span class="ctl icon-only" role="img" aria-label="The eye"><svg class="ic" aria-hidden="true"><use href="#i-eye" /></svg></span> of another voice, in the Settings.</p>
+          </details>
+          <details>
+            <summary>I have changed too many settings.</summary>
+            <p>At the bottom of the Settings, <b>Default settings</b> (confirm with a second touch) puts everything back as on the first day, except the voice followed.</p>
+          </details>
+          <details>
+            <summary>Do I have the latest version?</summary>
+            <p>
+              The version is written at the bottom of the Settings, with its date. Pupitre Ouvert updates itself: close it and open it again
+              to get the most recent one.
+            </p>
+          </details>
+          <details>
+            <summary>How do I work on my own score?</summary>
+            <p>
+              By adding it as a .zip archive: see <a href="#scores">Your scores</a>. The pictures of this help show the example work, two
+              Bach chorales, in the public domain.
+            </p>
+          </details>
+          <details>
+            <summary>A note played does not match my score.</summary>
+            <p>
+              The music comes from the transcription held in the archive, and a mistake may have slipped in: the paper score is right. Note
+              the movement, the bar and the voice, and have the archive corrected by whoever, or whichever AI, made it; the new archive
+              replaces the old one (<a href="#scores">Your scores</a>).
+            </p>
+          </details>
+          <details>
+            <summary>I have found a bug.</summary>
+            <p>Please report it (<a href="#contact">Write to us</a>); a screenshot and the version number, at the bottom of the Settings, help a lot.</p>
+          </details>
+        </section>
+
+        <!-- ===== About: copyright, data, licences, contact ===== -->
+        <section id="copyright" class="block ref">
+          <h3>Copyright</h3>
+          <p>
+            An old work is free, but its edition (the engraving of the pages, the piano reduction, a translation) is often protected.
+            Pupitre Ouvert is made so that this stays simple:
+          </p>
+          <ul class="facts">
+            <li>Your scores <b>stay on your device</b>: the archive you add is sent to no one, neither to this site nor anywhere else.</li>
+            <li>An archive holds the images of your score: it is made for <b>your personal use</b>, to rehearse your part. Do not pass it around if the edition is protected.</li>
+            <li>The example work and the pictures of this help are in the public domain (Bach chorales, pages engraved for the occasion).</li>
+          </ul>
+        </section>
+
+        <section id="data" class="block ref">
+          <h3>Your data</h3>
+          <ul class="facts">
+            <li><b>No account, no advertising, no audience measurement.</b> Pupitre Ouvert collects nothing about you.</li>
+            <li>
+              <b>What is downloaded</b>: only from the site of Pupitre Ouvert (hosted by GitHub Pages): the app, the example work, the
+              sounds of the instruments. No other site is contacted. As with any site, the host sees these downloads (your IP address).
+            </li>
+            <li>
+              <b>What stays on the device</b>: your settings, the scores you have added, your progress in “Learn the text” and your
+              recordings. None of it is sent. Clearing the site’s data in the browser, or removing the app, deletes them.
+            </li>
+            <li><b>The microphone</b> is used only for “Record my voice”, if you turn it on, and only during a recording.</li>
+            <li><b>Nothing is installed from elsewhere</b>: installing on the home screen is a feature of the browser, and the updates come from the same site.</li>
+          </ul>
+        </section>
+
+        <section id="licences" class="block ref">
+          <h3>Author and licences</h3>
+          <p>
+            Pupitre Ouvert was created by Alexis Michenaud-Rague. It was developed with Claude, Anthropic’s artificial intelligence, and its
+            agents: they wrote the code of the app and the scripts that transcribe the scores, ran the checks and the tests, and followed the
+            development. The app itself calls on no artificial intelligence: everything happens on your device.
+          </p>
+          <p>
+            Pupitre Ouvert is free of charge and non-commercial. It is the open version of Pupitre, the app of one choir: the same app, where
+            everyone brings their own scores. Its code and its tools are public, under the MIT licence:
+            <a href="https://github.com/Bolevo/pupitre-ouvert">github.com/Bolevo/pupitre-ouvert</a>.
+          </p>
+          <h4>How it is made</h4>
+          <p>
+            Each work brings together two things: the scanned pages of the paper score, shown as they are, and their transcription in
+            MusicXML format (the notes, the rhythms and the text of each voice). Pupitre Ouvert plays the transcription, draws the line of
+            your voice from it and ties it, bar by bar, to the pages. The whole makes one file per work: the .zip archive
+            (<a href="./create.html">how to make it</a>).
+          </p>
+          <p>
+            For the rest, Pupitre Ouvert relies on free software libraries and on sounds and fonts under free licences. These are files
+            delivered with the app and used on your device, not online services:
+          </p>
+          <table class="table credits">
+            <thead>
+              <tr><th scope="col">Library or file</th><th scope="col">Used for</th><th scope="col">Licence</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Verovio</th><td>Drawing the line of my voice</td><td>LGPL 3.0 or later</td></tr>
+              <tr><th scope="row">Preact, Preact Signals</th><td>The interface</td><td>MIT</td></tr>
+              <tr><th scope="row">fflate</th><td>Opening .zip files</td><td>MIT</td></tr>
+              <tr><th scope="row">idb-keyval</th><td>Keeping the data on the device</td><td>Apache 2.0</td></tr>
+              <tr><th scope="row">Workbox (vite-plugin-pwa)</th><td>Working offline</td><td>MIT</td></tr>
+              <tr><th scope="row">Atkinson Hyperlegible, Tinos</th><td>The typefaces</td><td>SIL OFL 1.1</td></tr>
+              <tr><th scope="row">Salamander Grand Piano V3 (Alexander Holm)</th><td>The piano</td><td>CC BY 3.0</td></tr>
+              <tr><th scope="row">MuseScore General (S. Christian Collins, after FluidR3 by Frank Wen)</th><td>The choir “ah”, the strings</td><td>MIT</td></tr>
+              <tr><th scope="row">MBROLA voices fr1 (Faculté polytechnique de Mons) and fr4 (Babel Technologies)</th><td>The note names (sounds made with MBROLA and the WORLD vocoder)</td><td>Non-commercial use</td></tr>
+              <tr><th scope="row">music21 corpus</th><td>The Bach chorales of this help</td><td>Public domain</td></tr>
+            </tbody>
+          </table>
+          <p class="tip">The site is hosted by GitHub Pages (GitHub, Inc.).</p>
+        </section>
+
+        <section id="contact" class="block ref">
+          <h3>Write to us</h3>
+          <p>A bug, an idea for a feature, a question: write to</p>
+          <p class="mail-line"><a href="mailto:bolevo.contact@gmail.com">bolevo.contact@gmail.com</a></p>
+          <p class="tip">
+            For a bug: what happened, a screenshot, and the version of Pupitre Ouvert (at the bottom of the Settings). The code is public:
+            a defect can also be reported, or fixed, on
+            <a href="https://github.com/Bolevo/pupitre-ouvert/issues">GitHub</a>.
+          </p>
+        </section>
+
+        <footer class="end">
+          <a class="open-app big" href="./?lang=en">Open Pupitre Ouvert</a>
+          <a href="#title">Back to the top</a>
+        </footer>
+      </main>
+    </div>
+
+    <script type="module" src="./src/aide/aide.ts"></script>
+  </body>
+</html>

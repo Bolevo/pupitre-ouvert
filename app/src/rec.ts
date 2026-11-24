@@ -16,6 +16,7 @@ import { del, get, keys, set } from './pack/db';
 import { capture, inputLatency, listMics, MicError, openMic, stop as stopStream } from './audio/recorder';
 import { encodeWav, MIN_TAKE_MS, safeFileName, takeFromFloat, takeFromWav, takeKey, TakeBuilder, type Take, type TakeMeta } from './audio/take';
 import { BASE, clampOffset, engine, hasEngine, movement, myPart, onEngine, onMove, parked, pause, play, playing, position, prefs, setPrefs, work } from './state';
+import { tt, ttKey } from './i18n';
 
 /** The current movement's take (without its samples), or null. */
 export interface TakeInfo extends TakeMeta {
@@ -92,16 +93,16 @@ function teardown(s: Session, keepCapture = false) {
 function watch(s: Session, stream: MediaStream) {
   const track = stream.getAudioTracks()[0];
   const id = track?.getSettings().deviceId;
-  const ended = () => session === s && endRecording('Le micro s’est arrêté : enregistrement gardé.');
+  const ended = () => session === s && endRecording(tt('Le micro s’est arrêté : enregistrement gardé.'));
   track?.addEventListener('ended', ended);
   s.off.push(() => track?.removeEventListener('ended', ended));
   const devices = () =>
     void listMics().then((l) => {
-      if (session === s && id && l.length && !l.some((m) => m.deviceId === id)) endRecording('Le micro a disparu : enregistrement gardé.');
+      if (session === s && id && l.length && !l.some((m) => m.deviceId === id)) endRecording(tt('Le micro a disparu : enregistrement gardé.'));
     });
   navigator.mediaDevices?.addEventListener?.('devicechange', devices);
   s.off.push(() => navigator.mediaDevices?.removeEventListener?.('devicechange', devices));
-  const hidden = () => session === s && document.visibilityState === 'hidden' && endRecording('Enregistrement arrêté (Pupitre Ouvert n’était plus à l’écran) : gardé.');
+  const hidden = () => session === s && document.visibilityState === 'hidden' && endRecording(tt('Enregistrement arrêté (Pupitre Ouvert n’était plus à l’écran) : gardé.'));
   document.addEventListener('visibilitychange', hidden);
   window.addEventListener('pagehide', hidden);
   s.off.push(() => {
@@ -123,12 +124,12 @@ async function wakeLock(s: Session) {
 }
 
 const MIC_ERRORS: Record<MicError['kind'], string> = {
-  denied: 'Micro refusé : autorisez le micro pour ce site dans le navigateur, puis réessayez.',
-  none: 'Aucun micro trouvé.',
-  busy: 'Le micro est occupé par une autre application.',
-  unsupported: 'Ce navigateur ne permet pas d’enregistrer ici (il faut une page https).',
-  silent: 'Le micro ne donne aucun son. Essayez un autre micro (menu ⋯).',
-  other: 'Impossible d’ouvrir le micro.',
+  denied: ttKey('Micro refusé : autorisez le micro pour ce site dans le navigateur, puis réessayez.'),
+  none: ttKey('Aucun micro trouvé.'),
+  busy: ttKey('Le micro est occupé par une autre application.'),
+  unsupported: ttKey('Ce navigateur ne permet pas d’enregistrer ici (il faut une page https).'),
+  silent: ttKey('Le micro ne donne aucun son. Essayez un autre micro (menu ⋯).'),
+  other: ttKey('Impossible d’ouvrir le micro.'),
 };
 
 /** ●: opens the microphone, then plays from where the music is parked (or is) and records. */
@@ -176,7 +177,7 @@ export async function startRecording() {
     session = null;
     teardown(s);
     applyTake();
-    say(err instanceof MicError ? MIC_ERRORS[err.kind] : `Enregistrement impossible : ${err instanceof Error ? err.message : err}`, 10000);
+    say(err instanceof MicError ? tt(MIC_ERRORS[err.kind]) : tt('Enregistrement impossible : {why}', { why: err instanceof Error ? err.message : String(err) }), 10000);
   } finally {
     if (recBusy.value === 'starting') recBusy.value = null;
   }
@@ -229,13 +230,13 @@ function endRecording(msg?: string) {
       await cap?.stop(); // the last samples, then the microphone is closed
       const t = b.finish(capSt, Date.now(), s.part);
       if (!t || t.durMs < MIN_TAKE_MS) {
-        say('Moins d’une seconde : enregistrement ignoré.');
+        say(tt('Moins d’une seconde : enregistrement ignoré.'));
         return;
       }
       await store(s.workId, s.mvId, t);
       if (msg) say(msg);
     } catch (err) {
-      say(`Enregistrement non sauvegardé : ${err instanceof Error ? err.message : err}`, 10000);
+      say(tt('Enregistrement non sauvegardé : {why}', { why: err instanceof Error ? err.message : String(err) }), 10000);
     } finally {
       recBusy.value = null;
       applyTake();
@@ -305,7 +306,7 @@ export async function deleteTake() {
     take.value = null;
     applyTake();
   }
-  say('Enregistrement supprimé.', 3000);
+  say(tt('Enregistrement supprimé.'), 3000);
 }
 
 // ---------- export / import ----------
@@ -351,14 +352,14 @@ export async function importTake(file: File) {
     let note = '';
     if (ours) {
       t = ours.take;
-      if (ours.tag.workId !== w.pack.id || ours.tag.mvId !== mv.id) note = ' Il venait d’un autre mouvement : placé tel quel.';
+      if (ours.tag.workId !== w.pack.id || ours.tag.mvId !== mv.id) note = ` ${tt('Il venait d’un autre mouvement : placé tel quel.')}`;
     } else {
       const ctx = engine().ctx;
       let audio: AudioBuffer;
       try {
         audio = await ctx.decodeAudioData(bytes.slice(0));
       } catch {
-        say('Fichier audio illisible.');
+        say(tt('Fichier audio illisible.'));
         return;
       }
       const rate = prefs.value.rate;
@@ -378,7 +379,7 @@ export async function importTake(file: File) {
     // never longer than the movement
     const room = Math.floor(((mv.durationMs - t.startSt) / 1000 / t.rate) * t.sr);
     if (room <= 0 || t.startSt < 0) {
-      say('Cet enregistrement est en dehors de ce mouvement.');
+      say(tt('Cet enregistrement est en dehors de ce mouvement.'));
       return;
     }
     if (t.pcm.length > room) {
@@ -386,13 +387,13 @@ export async function importTake(file: File) {
       t.durMs = (room / t.sr) * 1000;
     }
     if (t.durMs < MIN_TAKE_MS) {
-      say('Fichier trop court (moins d’une seconde).');
+      say(tt('Fichier trop court (moins d’une seconde).'));
       return;
     }
     await store(w.pack.id, mv.id, t);
-    say(`Enregistrement importé.${note}`, note ? 9000 : 3000);
+    say(`${tt('Enregistrement importé.')}${note}`, note ? 9000 : 3000);
   } catch (err) {
-    say(`Import impossible : ${err instanceof Error ? err.message : err}`, 10000);
+    say(tt('Import impossible : {why}', { why: err instanceof Error ? err.message : String(err) }), 10000);
   } finally {
     recBusy.value = null;
     applied = null;

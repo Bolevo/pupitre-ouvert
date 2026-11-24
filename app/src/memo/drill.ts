@@ -5,6 +5,7 @@
 // different exercises): 0 every word shown (type over it), 1 every other word, 2 the first word of
 // each line, 3 none. A movement typed with 95 % of its words right or more goes up one level,
 // below 80 % down one. Light spacing: a level not practised for a while drops by one (GAP_DAYS).
+import { ttKey } from '../i18n';
 import { norm, type Word } from './text';
 
 export const MAX_LEVEL = 3;
@@ -44,7 +45,8 @@ export function cueShown(lvl: number, i: number, first: boolean): boolean {
 }
 
 /** The help at a level, in words. */
-export const HELP = ['texte visible', 'un mot sur deux', 'premier mot', 'aucune'];
+/** The levels of help, by their French names (shown through `tt`). */
+export const HELP = [ttKey('texte visible'), ttKey('un mot sur deux'), ttKey('premier mot'), ttKey('aucune')];
 
 export type Mode = 'initials' | 'words';
 /** Word states in a run. */

@@ -6,6 +6,7 @@ import { RATE_MAX, RATE_MIN, stepTempo, tempoAt } from '../score/info';
 import { beatWords, NoteGlyph } from './Glyph';
 import { now } from './now';
 import { useDismiss } from './popover';
+import { tt } from '../i18n';
 
 const EPS = 1e-4;
 
@@ -32,8 +33,8 @@ export function TempoControl() {
         class={`tempo-btn ${changed ? 'changed' : ''}`}
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label={`Tempo : ${words} = ${shown}${changed ? ` (partition : ${Math.round(base)})` : ''}. Changer le tempo`}
-        title="Tempo (toucher pour le changer)"
+        aria-label={changed ? tt('Tempo : {note} = {n} (partition : {base}). Changer le tempo', { note: words, n: shown, base: Math.round(base) }) : tt('Tempo : {note} = {n}. Changer le tempo', { note: words, n: shown })}
+        title={tt('Tempo (toucher pour le changer)')}
         onClick={() => setOpen(!open)}
       >
         <NoteGlyph beat={sc.beat} px={19} />
@@ -41,32 +42,33 @@ export function TempoControl() {
         <span class="tempo-num">{shown}</span>
       </button>
       {open && (
-        <div class="pop tempo-pop" role="dialog" aria-label="Tempo">
-          <div class="pop-title">Tempo</div>
+        <div class="pop tempo-pop" role="dialog" aria-label={tt('Tempo')}>
+          <div class="pop-title">{tt('Tempo')}</div>
           <div class="tp-row">
-            <button class="tp-step" aria-label="Plus lent" title="Plus lent" disabled={atMin} onClick={() => step(-1)}>
+            <button class="tp-step" aria-label={tt('Plus lent')} title={tt('Plus lent')} disabled={atMin} onClick={() => step(-1)}>
               −
             </button>
             <output class={`tp-val ${changed ? 'changed' : ''}`} aria-live="polite">
               <NoteGlyph beat={sc.beat} px={20} />
               <span>= {shown}</span>
             </output>
-            <button class="tp-step" aria-label="Plus vite" title="Plus vite" disabled={atMax} onClick={() => step(1)}>
+            <button class="tp-step" aria-label={tt('Plus vite')} title={tt('Plus vite')} disabled={atMax} onClick={() => step(1)}>
               +
             </button>
           </div>
           <p class="tp-ref">
-            Tempo de la partition : <NoteGlyph beat={sc.beat} px={18} />
+            {tt('Tempo de la partition :')} <NoteGlyph beat={sc.beat} px={18} />
             {' '}= {Math.round(base)}
             {sc.text ? <i> · {sc.text}</i> : null}
           </p>
           {changed && (
             <p class="tp-pct">
-              {Math.round(rate * 100)} % du tempo de la partition{atMin ? ' (le plus lent possible)' : atMax ? ' (le plus rapide possible)' : ''}
+              {tt('{n} % du tempo de la partition', { n: Math.round(rate * 100) })}
+              {atMin ? ` ${tt('(le plus lent possible)')}` : atMax ? ` ${tt('(le plus rapide possible)')}` : ''}
             </p>
           )}
           <button class="pop-action" disabled={!changed} onClick={() => setRate(1)}>
-            Revenir au tempo de la partition
+            {tt('Revenir au tempo de la partition')}
           </button>
         </div>
       )}

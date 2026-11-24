@@ -2,6 +2,7 @@
 // as the line of my voice, on every device.
 import type { Clef } from '../pack/types';
 import { GLYPHS, type GlyphName } from './glyphs';
+import { tt, ttKey } from '../i18n';
 
 function clefGlyph(c: Clef): GlyphName {
   if (c.sign === 'F') return c.octave === -1 ? 'fClef8vb' : 'fClef';
@@ -56,8 +57,8 @@ export function NoteGlyph({ beat, px = 15 }: { beat: number; px?: number }) {
 /** A metronome note value in words (titles, screen readers). */
 export function beatWords(beat: number): string {
   const { name, dot } = beatGlyph(beat);
-  const w = { whole: 'ronde', half: 'blanche', quarter: 'noire', eighth: 'croche' }[name as 'whole' | 'half' | 'quarter' | 'eighth'] ?? 'noire';
-  return dot ? `${w} pointée` : w;
+  const w = tt({ whole: ttKey('ronde'), half: ttKey('blanche'), quarter: ttKey('noire'), eighth: ttKey('croche') }[name as 'whole' | 'half' | 'quarter' | 'eighth'] ?? ttKey('noire'));
+  return dot ? tt('{note} pointée', { note: w }) : w;
 }
 
 /** A key signature, compact: « 2♯ », « 1♭ », « ♮ » (no accidental), the signs drawn. */
