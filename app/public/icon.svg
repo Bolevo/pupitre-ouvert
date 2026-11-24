@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="96" fill="#f5f3ee"/>
-<ellipse cx="360" cy="212.5" rx="54" ry="34" transform="rotate(-2.5 360 212.5)" fill="#e8b44a"/>
-<ellipse cx="360" cy="212.5" rx="33" ry="18" transform="rotate(17.5 360 212.5)" fill="#f5f3ee"/>
-<path fill="#1f2a44" d="M64 167h20c150 0 150-104 358-104v26c-208 0-208 96-358 96H64z
-M64 207h20c150 0 150-54 358-54v26c-208 0-208 46-358 46H64z
-M64 247h20c150 0 150-4 358-4v26c-208 0-208-4-358-4H64z
-M64 287h20c150 0 150 46 358 46v26c-208 0-208-54-358-54H64z
-M64 327h20c150 0 150 96 358 96v26c-208 0-208-104-358-104H64z"/>
+<rect width="512" height="512" rx="96" fill="#1f2a44"/>
+<path d="M80 196h352M80 236h352M80 276h352M80 316h352M80 356h352" stroke="#f5f3ee" stroke-width="10" opacity=".55"/>
+<path d="M138 56h176l74 74v312a14 14 0 0 1-14 14H138a14 14 0 0 1-14-14V70a14 14 0 0 1 14-14z" fill="#f5f3ee"/>
+<path d="M314 56v60a14 14 0 0 0 14 14h60z" fill="#b5b7bb"/>
+<path d="M124 196h264M124 236h264M124 276h264M124 316h264M124 356h264" stroke="#1f2a44" stroke-width="10" opacity=".55"/>
+<ellipse cx="230" cy="336" rx="52" ry="38" transform="rotate(-20 230 336)" fill="#1f2a44"/>
+<path d="M276 320V150" stroke="#1f2a44" stroke-width="16" stroke-linecap="round"/>
+<path d="M276 150c40 18 62 46 52 92" stroke="#e8b44a" stroke-width="20" fill="none" stroke-linecap="round"/>
 </svg>
